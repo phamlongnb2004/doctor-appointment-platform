@@ -12,7 +12,7 @@ function LoginPage({ onLogin }) {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
   const navigate = useNavigate();
-  const flowerContainerRef = useFallingFlowers(20);
+  const flowerContainerRef = useFallingFlowers({ maxPetals: 50 });
 
   const onFinishLogin = async (values) => {
     setLoading(true);
@@ -57,14 +57,18 @@ function LoginPage({ onLogin }) {
   };
 
   return (
-    <div ref={flowerContainerRef} className="login-page" style={{ 
+    <div style={{ 
       minHeight: '100vh', 
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center',
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-      padding: '20px'
+      padding: '20px',
+      position: 'relative'
     }}>
+      {/* Flower Animation Container */}
+      <div ref={flowerContainerRef} id="hoamaitet" />
+      
       <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
         <div style={{ 
           position: 'absolute', top: '20%', left: '10%', width: 400, height: 400, 

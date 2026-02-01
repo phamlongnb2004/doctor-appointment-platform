@@ -16,12 +16,15 @@ function DoctorListPage() {
   const [selectedSpecialization, setSelectedSpecialization] = useState(null);
   const [specializations, setSpecializations] = useState([]);
   const navigate = useNavigate();
-  const flowerContainerRef = useFallingFlowers(5);
+  const flowerContainerRef = useFallingFlowers({ numberOfFlowers: 5 });
 
   useEffect(() => {
     fetchDoctors();
-    fetchSpecializations();
   }, [selectedSpecialization]);
+
+  useEffect(() => {
+    fetchSpecializations();
+  }, []);
 
   const fetchDoctors = async () => {
     setLoading(true);

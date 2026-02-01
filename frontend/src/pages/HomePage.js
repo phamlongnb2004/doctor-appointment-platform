@@ -12,7 +12,7 @@ function HomePage() {
   const [topDoctors, setTopDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const flowerContainerRef = useFallingFlowers(20);
+  const flowerContainerRef = useFallingFlowers({ maxPetals: 50 });
 
   useEffect(() => {
     fetchTopDoctors();
@@ -50,7 +50,10 @@ function HomePage() {
   ];
 
   return (
-    <div ref={flowerContainerRef} className="home-page">
+    <div style={{ position: 'relative', minHeight: '100vh' }}>
+      {/* Flower Animation Container */}
+      <div ref={flowerContainerRef} id="hoamaitet" />
+      
       {/* Hero Section */}
       <div className="gradient-hero" style={{ 
         minHeight: '80vh', 

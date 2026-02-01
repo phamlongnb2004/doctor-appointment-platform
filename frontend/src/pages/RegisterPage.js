@@ -12,7 +12,7 @@ function RegisterPage() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const flowerContainerRef = useFallingFlowers(10);
+  const flowerContainerRef = useFallingFlowers({ maxPetals: 50 });
 
   const handleRegister = async (values) => {
     setLoading(true);
@@ -33,15 +33,19 @@ function RegisterPage() {
   };
 
   return (
-    <div ref={flowerContainerRef} className="login-page" style={{ 
+    <div style={{ 
       minHeight: '100vh', 
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '40px 20px'
+      padding: '40px 20px',
+      position: 'relative'
     }}>
-      <div style={{ maxWidth: 500, width: '100%' }}>
+      {/* Flower Animation Container */}
+      <div ref={flowerContainerRef} id="hoamaitet" />
+      
+      <div style={{ maxWidth: 500, width: '100%', position: 'relative', zIndex: 1 }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <MedicineBoxOutlined style={{ fontSize: 64, color: '#fff' }} />
