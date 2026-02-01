@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: doctor-appointment-platform
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/doctor_appointment_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  web:
+    cors:
+      allowed-origins: "http://localhost:3000"
+      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+      allowed-headers: "*"
+      allow-credentials: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+app:
+  upload:
+    path: D:/DoAn/doctor-appointment-platform/uploads
+  base-url: http://localhost:8080
+
+logging:
+  level:
+    root: INFO
+    com.doctorappointment: DEBUG

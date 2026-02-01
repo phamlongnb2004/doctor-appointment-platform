@@ -1,0 +1,142 @@
+/* Layout Styles */
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+}
+
+.layout > .ant-layout-content {
+  flex: 1;
+}
+
+.container {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 0 var(--layout-padding);
+}
+
+/* Page sections with consistent spacing */
+.page-section {
+  padding: var(--section-padding);
+}
+
+.page-section--white {
+  background: #fff;
+}
+
+.page-section--alt {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+}
+
+/* Hero section */
+.hero-section {
+  min-height: 80vh;
+  position: relative;
+  padding: var(--section-padding);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+}
+
+.hero-section__content {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+/* Grid layouts */
+.grid-cards {
+  display: grid;
+  gap: var(--gutter-md);
+}
+
+.grid-cards--2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cards--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cards--4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 1200px) {
+  .grid-cards--4 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .grid-cards--3,
+  .grid-cards--4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-cards--2,
+  .grid-cards--3,
+  .grid-cards--4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Flex utilities */
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.gap-sm {
+  gap: var(--spacing-sm);
+}
+
+.gap-md {
+  gap: var(--spacing-md);
+}
+
+.gap-lg {
+  gap: var(--spacing-lg);
+}
+
+/* Text utilities */
+.text-center {
+  text-align: center;
+}
+
+.text-secondary {
+  color: #666;
+}
+
+.text-muted {
+  color: #999;
+}
+
+/* Spacing for Ant Design Row/Col */
+.ant-row {
+  margin-bottom: 0 !important;
+}
+
+.ant-row + .ant-row {
+  margin-top: var(--spacing-lg);
+}

@@ -1,0 +1,33 @@
+/* CSS Variables - Theme Colors & Spacing */
+:root {
+  --primary-color: #667eea;
+  --primary-color-2: #764ba2;
+  --success-color: #52c41a;
+  --error-color: #ff4d4f;
+  --warning-color: #faad14;
+  
+  --layout-padding: 40px;
+  --section-padding: 60px 50px;
+  --content-max-width: 1400px;
+  
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --card-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --header-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  
+  --transition-default: all 0.3s ease;
+  --border-radius: 16px;
+  --border-radius-sm: 12px;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  
+  /* Gutter */
+  --gutter-sm: 16px;
+  --gutter-md: 24px;
+  --gutter-lg: 32px;
+}
