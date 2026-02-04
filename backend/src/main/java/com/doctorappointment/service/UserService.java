@@ -40,15 +40,17 @@ public class UserService {
             return;
         }
         
-        Doctor doctor = Doctor.builder()
-                .user(user)
-                .specialization("Chưa cập nhật")
-                .consultationFee(0)
-                .experienceYears(0)
-                .ratingScore(0.0)
-                .reviewCount(0)
-                .active(true)
-                .build();
+        Doctor doctor = new Doctor();
+        doctor.setUser(user);
+        doctor.setSpecialization("Chưa cập nhật");
+        doctor.setLicenseNumber("Chưa cập nhật");
+        doctor.setBiography("Chưa cập nhật");
+        doctor.setConsultationFee(0);
+        doctor.setExperienceYears(0);
+        doctor.setRatingScore(0.0);
+        doctor.setReviewCount(0);
+        doctor.setActive(true);
+        
         doctorRepository.save(doctor);
     }
 
@@ -71,6 +73,9 @@ public class UserService {
             user.setPhone(userDetails.getPhone());
             user.setProfileImage(userDetails.getProfileImage());
             user.setCoverImage(userDetails.getCoverImage());
+            if (userDetails.getRole() != null) {
+                user.setRole(userDetails.getRole());
+            }
             return userRepository.save(user);
         }).orElseThrow(() -> new RuntimeException("User not found"));
     }

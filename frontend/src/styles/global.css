@@ -416,3 +416,9 @@ code {
 .ant-spin-dot-item {
   background-color: #667eea !important;
 }
+
+/* ========================================
+   SWITCH - Removed all CSS overrides
+   Switch styling is now handled by ConfigProvider theme
+   ======================================== */
+

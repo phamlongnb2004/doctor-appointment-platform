@@ -1,56 +1,161 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Card, Row, Col, Typography, Table, Tag, Button, Statistic, Space, Spin, Modal, Form, Select, Input, message, Avatar, Dropdown, Badge } from 'antd';
-import { DashboardOutlined, UserOutlined, TeamOutlined, CalendarOutlined, LogoutOutlined, SettingOutlined, MedicineBoxOutlined, EditOutlined, BellOutlined } from '@ant-design/icons';
+import { Layout, Menu, Card, Row, Col, Typography, Table, Tag, Button, Statistic, Space, Spin, Modal, Form, Select, Input, message, Avatar, Dropdown, Badge, Progress, List, Typography as AntTypography, Drawer } from 'antd';
+import { DashboardOutlined, UserOutlined, TeamOutlined, CalendarOutlined, LogoutOutlined, SettingOutlined, MedicineBoxOutlined, EditOutlined, BellOutlined, PlusOutlined, SearchOutlined, FilterOutlined, ArrowUpOutlined, ArrowDownOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, WifiOutlined, MenuOutlined, CloseOutlined, MailOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { userAPI, doctorAPI, appointmentAPI } from '../services/api';
+import webSocketService from '../services/websocket';
+import '../styles/admin.css';
 
 const { Header, Content, Sider } = Layout;
 const { Title, Text } = Typography;
+const { Paragraph } = AntTypography;
 
 function AdminDashboard({ user, onLogout }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [selectedKey, setSelectedKey] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalDoctors: 0,
     totalAppointments: 0,
-    pendingAppointments: 0
+    pendingAppointments: 0,
+    onlineUsers: 0
   });
   const [users, setUsers] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [newsletterSubscribers, setNewsletterSubscribers] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState(new Set());
+  const [onlineUsersList, setOnlineUsersList] = useState([]);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [userAvatar, setUserAvatar] = useState(null);
   const [editForm] = Form.useForm();
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchDashboardData();
+    fetchOnlineUsers();
+    fetchUserAvatar();
+
+    // Subscribe to WebSocket status updates
+    const handleStatusChange = (status) => {
+      console.log('Status change received:', status);
+      if (status.type === 'USER_LOGIN' || status.type === 'USER_LOGOUT' || status.type === 'USER_DISCONNECT') {
+        fetchOnlineUsers();
+        fetchDashboardData();
+      }
+    };
+
+    // Set up WebSocket subscription if not already connected
+    if (!webSocketService.isConnected()) {
+      const userId = parseInt(localStorage.getItem('userId'));
+      const sessionId = localStorage.getItem('sessionId');
+      if (userId && sessionId) {
+        webSocketService.connect(userId, sessionId, handleStatusChange);
+      }
+    }
+
+    // Set up polling for online users (every 30 seconds)
+    const pollingInterval = setInterval(() => {
+      fetchOnlineUsers();
+    }, 30000);
+
+    return () => {
+      clearInterval(pollingInterval);
+    };
   }, []);
+
+  // Handle window resize for mobile detection
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const fetchOnlineUsers = async () => {
+    try {
+      const response = await userAPI.getOnlineUsers();
+      const onlineList = response.data || [];
+      setOnlineUsersList(onlineList);
+      const onlineIds = new Set(onlineList.map(u => u.userId));
+      setOnlineUsers(onlineIds);
+
+      // Update stats with online count
+      setStats(prev => ({
+        ...prev,
+        onlineUsers: onlineList.length
+      }));
+    } catch (error) {
+      console.error('Error fetching online users:', error);
+    }
+  };
+
+  const fetchUserAvatar = async () => {
+    try {
+      const userId = localStorage.getItem('userId');
+      console.log('AdminDashboard - Fetching avatar for userId:', userId);
+      if (userId) {
+        const response = await userAPI.getUserById(userId);
+        console.log('AdminDashboard - User data:', response.data);
+        console.log('AdminDashboard - Profile image:', response.data.profileImage);
+        if (response.data.profileImage) {
+          // profileImage already contains full URL or relative path
+          const avatarUrl = response.data.profileImage.startsWith('http') 
+            ? response.data.profileImage 
+            : `http://localhost:8080${response.data.profileImage}`;
+          console.log('AdminDashboard - Setting avatar URL:', avatarUrl);
+          setUserAvatar(avatarUrl);
+        } else {
+          console.log('AdminDashboard - No profile image found');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user avatar:', error);
+    }
+  };
 
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const [usersRes, doctorsRes, appointmentsRes] = await Promise.all([
+      const [usersRes, doctorsRes, appointmentsRes, onlineUsersRes, newsletterRes] = await Promise.all([
         userAPI.getAllUsers(),
         doctorAPI.getAllDoctors(),
-        appointmentAPI.getAllAppointments()
+        appointmentAPI.getAllAppointments(),
+        userAPI.getOnlineUsers(),
+        fetch('http://localhost:8080/api/api/newsletter/subscribers', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }).then(res => res.json()).catch(() => [])
       ]);
 
       const allUsers = usersRes.data || [];
       const allDoctors = doctorsRes.data || [];
       const allAppointments = appointmentsRes.data || [];
+      const onlineList = onlineUsersRes.data || [];
+      const allSubscribers = Array.isArray(newsletterRes) ? newsletterRes : [];
 
       setUsers(allUsers);
       setDoctors(allDoctors);
       setAppointments(allAppointments);
+      setOnlineUsersList(onlineList);
+      setNewsletterSubscribers(allSubscribers);
+      
+      const onlineIds = new Set(onlineList.map(u => u.userId));
+      setOnlineUsers(onlineIds);
 
       setStats({
         totalUsers: allUsers.length,
         totalDoctors: allDoctors.length,
         totalAppointments: allAppointments.length,
-        pendingAppointments: allAppointments.filter(a => a.status === 'PENDING').length
+        pendingAppointments: allAppointments.filter(a => a.status === 'PENDING').length,
+        onlineUsers: onlineList.length
       });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -61,9 +166,12 @@ function AdminDashboard({ user, onLogout }) {
 
   const handleMenuClick = ({ key }) => {
     setSelectedKey(key);
+    setMobileMenuVisible(false); // Close mobile menu after selection
     if (key === 'logout') {
       onLogout();
       navigate('/');
+    } else if (key === 'cms') {
+      navigate('/admin/cms');
     }
   };
 
@@ -95,17 +203,51 @@ function AdminDashboard({ user, onLogout }) {
 
   const handlePromoteToDoctor = async (userId) => {
     try {
-      await doctorAPI.createDoctor({
-        user: { id: userId },
-        specialization: 'Chưa cập nhật',
-        consultationFee: 0,
-        experienceYears: 0
+      // Sử dụng secret endpoint để promote user lên DOCTOR
+      const response = await fetch(`http://localhost:8080/api/users/${userId}/promote?secret=mySuperSecretAdminKey2026&role=DOCTOR`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
       });
 
-      message.success('Đã phong bác sĩ!');
-      fetchDashboardData();
+      if (response.ok) {
+        const result = await response.json();
+        message.success('Đã phong bác sĩ thành công!');
+        fetchDashboardData(); // Reload data to show updated role
+      } else {
+        const error = await response.json();
+        message.error('Thất bại: ' + (error.error || 'Unknown error'));
+      }
     } catch (error) {
-      message.error('Thất bại: ' + (error.response?.data?.message || error.message));
+      console.error('Error promoting to doctor:', error);
+      message.error('Thất bại: ' + error.message);
+    }
+  };
+
+  const handlePromoteToConsultant = async (userId) => {
+    try {
+      // Sử dụng secret endpoint để promote user lên CONSULTANT
+      const response = await fetch(`http://localhost:8080/api/users/${userId}/promote?secret=mySuperSecretAdminKey2026&role=CONSULTANT`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        message.success('Đã phong tư vấn viên thành công!');
+        fetchDashboardData(); // Reload data to show updated role
+      } else {
+        const error = await response.json();
+        message.error('Thất bại: ' + (error.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error promoting to consultant:', error);
+      message.error('Thất bại: ' + error.message);
     }
   };
 
@@ -114,6 +256,8 @@ function AdminDashboard({ user, onLogout }) {
     { key: 'users', icon: <TeamOutlined />, label: 'Quản lý người dùng' },
     { key: 'doctors', icon: <MedicineBoxOutlined />, label: 'Quản lý bác sĩ' },
     { key: 'appointments', icon: <CalendarOutlined />, label: 'Lịch hẹn' },
+    { key: 'newsletter', icon: <MailOutlined />, label: 'Thành viên Newsletter' },
+    { key: 'cms', icon: <EditOutlined />, label: 'Quản lý nội dung' },
     { key: 'settings', icon: <SettingOutlined />, label: 'Cài đặt' },
     { type: 'divider' },
     { key: 'logout', icon: <LogoutOutlined />, label: 'Đăng xuất', danger: true },
@@ -121,10 +265,11 @@ function AdminDashboard({ user, onLogout }) {
 
   const getRoleTagColor = (role) => {
     switch (role) {
-      case 'ADMIN': return 'red';
-      case 'DOCTOR': return 'blue';
-      case 'PATIENT': return 'green';
-      default: return 'default';
+      case 'ADMIN': return '#f50';
+      case 'DOCTOR': return '#2f54eb';
+      case 'CONSULTANT': return '#52c41a';
+      case 'PATIENT': return '#1890ff';
+      default: return '#d9d9d9';
     }
   };
 
@@ -132,6 +277,7 @@ function AdminDashboard({ user, onLogout }) {
     switch (role) {
       case 'ADMIN': return 'Quản trị';
       case 'DOCTOR': return 'Bác sĩ';
+      case 'CONSULTANT': return 'Tư vấn';
       case 'PATIENT': return 'Bệnh nhân';
       default: return role;
     }
@@ -139,11 +285,11 @@ function AdminDashboard({ user, onLogout }) {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'COMPLETED': return 'green';
-      case 'PENDING': return 'orange';
-      case 'CONFIRMED': return 'cyan';
-      case 'CANCELLED': return 'red';
-      default: return 'default';
+      case 'COMPLETED': return '#52c41a';
+      case 'PENDING': return '#faad14';
+      case 'CONFIRMED': return '#13c2c2';
+      case 'CANCELLED': return '#ff4d4f';
+      default: return '#d9d9d9';
     }
   };
 
@@ -157,6 +303,16 @@ function AdminDashboard({ user, onLogout }) {
     }
   };
 
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'COMPLETED': return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
+      case 'PENDING': return <ClockCircleOutlined style={{ color: '#faad14' }} />;
+      case 'CONFIRMED': return <CheckCircleOutlined style={{ color: '#13c2c2' }} />;
+      case 'CANCELLED': return <CloseCircleOutlined style={{ color: '#ff4d4f' }} />;
+      default: return null;
+    }
+  };
+
   // Transform data for tables
   const userTableData = users.map((u, index) => ({
     key: index,
@@ -167,7 +323,8 @@ function AdminDashboard({ user, onLogout }) {
     email: u.email || '',
     phone: u.phone || '',
     role: u.role || 'PATIENT',
-    status: u.active !== false ? 'Hoạt động' : 'Khóa'
+    status: u.active !== false ? 'Hoạt động' : 'Khóa',
+    onlineStatus: onlineUsers.has(u.id) ? 'online' : 'offline'
   }));
 
   const doctorTableData = doctors.map((d, index) => ({
@@ -198,89 +355,196 @@ function AdminDashboard({ user, onLogout }) {
 
   const userColumns = [
     {
-      title: 'Họ tên',
+      title: 'Người dùng',
       dataIndex: 'name',
       key: 'name',
-      render: (text) => <Text strong>{text}</Text>
+      width: 200,
+      render: (text, record) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Avatar
+            size={40}
+            style={{
+              backgroundColor: getRoleTagColor(record.role),
+              fontWeight: 600
+            }}
+          >
+            {record.firstName?.charAt(0)}{record.lastName?.charAt(0)}
+          </Avatar>
+          <div>
+            <Text strong style={{ display: 'block', fontSize: 14 }}>{text}</Text>
+            <Text type="secondary" style={{ fontSize: 12 }}>{record.email}</Text>
+          </div>
+        </div>
+      )
     },
-    { title: 'Email', dataIndex: 'email', key: 'email' },
-    { title: 'Số điện thoại', dataIndex: 'phone', key: 'phone' },
+    { title: 'Số điện thoại', dataIndex: 'phone', key: 'phone', width: 130 },
     {
       title: 'Vai trò',
       dataIndex: 'role',
       key: 'role',
-      render: (role) => <Tag color={getRoleTagColor(role)}>{getRoleDisplay(role)}</Tag>
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status) => (
-        <Badge status={status === 'Hoạt động' ? 'success' : 'error'} text={status} />
+      width: 120,
+      render: (role) => (
+        <Tag
+          style={{
+            borderRadius: 20,
+            padding: '2px 12px',
+            border: 'none',
+            background: `${getRoleTagColor(role)}15`,
+            color: getRoleTagColor(role),
+            fontWeight: 500
+          }}
+        >
+          {getRoleDisplay(role)}
+        </Tag>
       )
     },
     {
-      title: 'Hành động',
+      title: 'Trạng thái hoạt động',
+      dataIndex: 'onlineStatus',
+      key: 'onlineStatus',
+      width: 140,
+      render: (status) => {
+        const isOnline = status === 'online';
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Badge
+              status={isOnline ? 'success' : 'default'}
+              style={{ width: 8, height: 8 }}
+            />
+            <Text style={{
+              color: isOnline ? '#52c41a' : '#8c8c8c',
+              fontSize: 13,
+              fontWeight: 500
+            }}>
+              {isOnline ? 'Đang hoạt động' : 'Offline'}
+            </Text>
+          </div>
+        );
+      }
+    },
+    {
+      title: 'Trạng thái tài khoản',
+      dataIndex: 'status',
+      key: 'status',
+      width: 120,
+      render: (status) => (
+        <Badge
+          status={status === 'Hoạt động' ? 'success' : 'error'}
+          text={<Text style={{ color: status === 'Hoạt động' ? '#52c41a' : '#ff4d4f' }}>{status}</Text>}
+        />
+      )
+    },
+    {
+      title: 'Thao tác',
       key: 'action',
+      width: 200,
+      fixed: 'right',
       render: (_, record) => (
-        <Space size="small">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Button
-            type="primary"
+            type="text"
             icon={<EditOutlined />}
             size="small"
             onClick={() => handleEditUser(record)}
-            style={{ borderRadius: '8px' }}
+            style={{
+              borderRadius: 8,
+              color: '#667eea',
+              background: '#667eea15'
+            }}
           >
             Sửa
           </Button>
           {record.role === 'PATIENT' && (
-            <Button
-              type="default"
-              size="small"
-              onClick={() => handlePromoteToDoctor(record.id)}
-              style={{ borderRadius: '8px' }}
-            >
-              Phong BS
-            </Button>
+            <>
+              <Button
+                type="text"
+                size="small"
+                onClick={() => handlePromoteToDoctor(record.id)}
+                style={{
+                  borderRadius: 8,
+                  color: '#2f54eb',
+                  background: '#2f54eb15'
+                }}
+              >
+                Phong BS
+              </Button>
+              <Button
+                type="text"
+                size="small"
+                onClick={() => handlePromoteToConsultant(record.id)}
+                style={{
+                  borderRadius: 8,
+                  color: '#52c41a',
+                  background: '#52c41a15',
+                  marginLeft: 4
+                }}
+              >
+                Phong TV
+              </Button>
+            </>
           )}
-        </Space>
+        </div>
       ),
     },
   ];
 
   const doctorColumns = [
     {
-      title: 'Họ tên',
+      title: 'Bác sĩ',
       dataIndex: 'name',
       key: 'name',
-      render: (text) => <Text strong>{text}</Text>
+      width: 200,
+      render: (text, record) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Avatar
+            size={40}
+            style={{ backgroundColor: '#2f54eb' }}
+          >
+            {record.name.split(' ').map(n => n.charAt(0)).join('').slice(0, 2)}
+          </Avatar>
+          <div>
+            <Text strong style={{ display: 'block', fontSize: 14 }}>{text}</Text>
+            <Text type="secondary" style={{ fontSize: 12 }}>{record.email}</Text>
+          </div>
+        </div>
+      )
     },
-    { title: 'Email', dataIndex: 'email', key: 'email' },
-    { title: 'Chuyên khoa', dataIndex: 'specialization', key: 'specialization' },
+    { title: 'Chuyên khoa', dataIndex: 'specialization', key: 'specialization', width: 150 },
     {
       title: 'Kinh nghiệm',
       dataIndex: 'experienceYears',
       key: 'experienceYears',
-      render: (years) => `${years} năm`
+      width: 100,
+      render: (years) => <Text>{years} năm</Text>
     },
     {
       title: 'Phí khám',
       dataIndex: 'consultationFee',
       key: 'consultationFee',
-      render: (fee) => fee?.toLocaleString() + ' VNĐ'
+      width: 120,
+      render: (fee) => <Text strong style={{ color: '#667eea' }}>{fee?.toLocaleString()} VNĐ</Text>
     },
     {
       title: 'Đánh giá',
       dataIndex: 'ratingScore',
       key: 'ratingScore',
-      render: (score) => score?.toFixed(1) || '0.0'
+      width: 100,
+      render: (score) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ color: '#faad14', fontWeight: 600 }}>{score?.toFixed(1) || '0.0'}</span>
+        </div>
+      )
     },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
+      width: 120,
       render: (status) => (
-        <Badge status={status === 'Hoạt động' ? 'success' : 'error'} text={status} />
+        <Badge
+          status={status === 'Hoạt động' ? 'success' : 'error'}
+          text={<Text style={{ color: status === 'Hoạt động' ? '#52c41a' : '#ff4d4f' }}>{status}</Text>}
+        />
       )
     },
   ];
@@ -290,44 +554,82 @@ function AdminDashboard({ user, onLogout }) {
       title: 'Bệnh nhân',
       dataIndex: 'patient',
       key: 'patient',
-      render: (text) => <Text strong>{text}</Text>
+      width: 180,
+      render: (text, record) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Avatar size={36} style={{ backgroundColor: '#52c41a' }}>
+            {text.split(' ').map(n => n.charAt(0)).join('').slice(0, 2)}
+          </Avatar>
+          <div>
+            <Text strong style={{ display: 'block', fontSize: 14 }}>{text}</Text>
+            <Text type="secondary" style={{ fontSize: 12 }}>{record.patientPhone}</Text>
+          </div>
+        </div>
+      )
     },
-    { title: 'SĐT', dataIndex: 'patientPhone', key: 'patientPhone' },
     {
       title: 'Bác sĩ',
       dataIndex: 'doctor',
       key: 'doctor',
+      width: 160,
       render: (text, record) => (
         <div>
-          <Text>{text}</Text>
+          <Text strong style={{ fontSize: 14 }}>{text}</Text>
           <br />
           <Text type="secondary" style={{ fontSize: 12 }}>{record.specialization}</Text>
         </div>
       )
     },
     {
-      title: 'Ngày/giờ',
+      title: 'Thời gian',
       key: 'datetime',
+      width: 140,
       render: (_, record) => (
         <div>
-          <Text>{record.date}</Text>
+          <Text style={{ fontSize: 14 }}>{record.date}</Text>
           <br />
           <Text type="secondary" style={{ fontSize: 12 }}>{record.time}</Text>
         </div>
       )
     },
     {
-      title: 'Ghi chú',
-      dataIndex: 'notes',
-      key: 'notes',
-      ellipsis: true
-    },
-    {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
+      width: 140,
       render: (status) => (
-        <Tag color={getStatusColor(status)}>{getStatusDisplay(status)}</Tag>
+        <Tag
+          style={{
+            borderRadius: 20,
+            padding: '4px 12px',
+            border: 'none',
+            background: `${getStatusColor(status)}15`,
+            color: getStatusColor(status),
+            fontWeight: 500,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6
+          }}
+        >
+          {getStatusIcon(status)}
+          {getStatusDisplay(status)}
+        </Tag>
+      )
+    },
+    {
+      title: 'Ghi chú',
+      dataIndex: 'notes',
+      key: 'notes',
+      width: 180,
+      ellipsis: true,
+      render: (text) => (
+        <Paragraph
+          type="secondary"
+          ellipsis={{ rows: 1 }}
+          style={{ margin: 0, fontSize: 13 }}
+        >
+          {text || '-'}
+        </Paragraph>
       )
     },
   ];
@@ -343,15 +645,23 @@ function AdminDashboard({ user, onLogout }) {
     if (key === 'logout') {
       onLogout();
       navigate('/');
+    } else if (key === 'profile') {
+      navigate('/profile');
+    } else if (key === 'settings') {
+      // Navigate to settings or show settings modal
+      message.info('Chức năng cài đặt đang được phát triển');
     }
   };
 
   const renderContent = () => {
     if (loading) {
       return (
-        <div style={{ textAlign: 'center', padding: 100 }}>
-          <Spin size="large" />
-          <p style={{ marginTop: 16, color: '#666' }}>Đang tải dữ liệu...</p>
+        <div className="admin-loading">
+          <div className="admin-loading-spinner">
+            <div className="spinner-ring"></div>
+            <MedicineBoxOutlined style={{ fontSize: 48, color: '#667eea' }} />
+          </div>
+          <Text className="loading-text">�ang tải dữ liệu...</Text>
         </div>
       );
     }
@@ -359,161 +669,383 @@ function AdminDashboard({ user, onLogout }) {
     switch (selectedKey) {
       case 'users':
         return (
-          <Card
-            title={<Text strong style={{ fontSize: 18 }}>Danh sách người dùng</Text>}
-            className="card-spacious"
-            style={{ borderRadius: '16px' }}
-          >
-            <Table
-              dataSource={userTableData}
-              columns={userColumns}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showTotal: (total) => `Tổng ${total} người dùng`
-              }}
-              rowKey="key"
-              size="middle"
-            />
-          </Card>
+          <div className="admin-section">
+            <div className="admin-section-header">
+              <div className="admin-section-title">
+                <TeamOutlined />
+                <Title level={3}>Quản lý người dùng</Title>
+              </div>
+              <div className="admin-section-actions">
+                <Input
+                  placeholder="Tìm kiếm người dùng..."
+                  prefix={<SearchOutlined style={{ color: '#999' }} />}
+                  className="admin-search-input"
+                />
+                <Button type="primary" icon={<PlusOutlined />} className="admin-btn-primary">
+                  Thêm người dùng
+                </Button>
+              </div>
+            </div>
+            <Card className="admin-card" style={{ borderRadius: 24 }}>
+              <Table
+                dataSource={userTableData}
+                columns={userColumns}
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  showTotal: (total) => `Tổng ${total} người dùng`
+                }}
+                rowKey="key"
+                className="admin-table"
+                scroll={{ x: 920 }}
+              />
+            </Card>
+          </div>
         );
       case 'doctors':
         return (
-          <Card
-            title={<Text strong style={{ fontSize: 18 }}>Danh sách bác sĩ</Text>}
-            className="card-spacious"
-            style={{ borderRadius: '16px' }}
-          >
-            <Table
-              dataSource={doctorTableData}
-              columns={doctorColumns}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showTotal: (total) => `Tổng ${total} bác sĩ`
-              }}
-              rowKey="key"
-              size="middle"
-            />
-          </Card>
+          <div className="admin-section">
+            <div className="admin-section-header">
+              <div className="admin-section-title">
+                <MedicineBoxOutlined />
+                <Title level={3}>Quản lý bác sĩ</Title>
+              </div>
+              <div className="admin-section-actions">
+                <Input
+                  placeholder="Tìm kiếm bác sĩ..."
+                  prefix={<SearchOutlined style={{ color: '#999' }} />}
+                  className="admin-search-input"
+                />
+                <Button type="primary" icon={<PlusOutlined />} className="admin-btn-primary">
+                  Thêm bác sĩ
+                </Button>
+              </div>
+            </div>
+            <Card className="admin-card" style={{ borderRadius: 24 }}>
+              <Table
+                dataSource={doctorTableData}
+                columns={doctorColumns}
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  showTotal: (total) => `Tổng ${total} bác sĩ`
+                }}
+                rowKey="key"
+                className="admin-table"
+                scroll={{ x: 1030 }}
+              />
+            </Card>
+          </div>
         );
       case 'appointments':
         return (
-          <Card
-            title={<Text strong style={{ fontSize: 18 }}>Danh sách lịch hẹn</Text>}
-            className="card-spacious"
-            style={{ borderRadius: '16px' }}
-          >
-            <Table
-              dataSource={appointmentTableData}
-              columns={appointmentColumns}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showTotal: (total) => `Tổng ${total} lịch hẹn`
-              }}
-              rowKey="key"
-              size="middle"
-            />
-          </Card>
+          <div className="admin-section">
+            <div className="admin-section-header">
+              <div className="admin-section-title">
+                <CalendarOutlined />
+                <Title level={3}>Quản lý lịch hẹn</Title>
+              </div>
+              <div className="admin-section-actions">
+                <Input
+                  placeholder="Tìm kiếm lịch hẹn..."
+                  prefix={<SearchOutlined style={{ color: '#999' }} />}
+                  className="admin-search-input"
+                />
+                <Button icon={<FilterOutlined />} className="admin-btn-secondary">
+                  Lọc
+                </Button>
+              </div>
+            </div>
+            <Card className="admin-card" style={{ borderRadius: 24 }}>
+              <Table
+                dataSource={appointmentTableData}
+                columns={appointmentColumns}
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  showTotal: (total) => `Tổng ${total} lịch hẹn`
+                }}
+                rowKey="key"
+                className="admin-table"
+                scroll={{ x: 920 }}
+              />
+            </Card>
+          </div>
+        );
+      case 'newsletter':
+        return (
+          <div className="admin-section">
+            <div className="admin-section-header">
+              <div className="admin-section-title">
+                <MailOutlined />
+                <Title level={3}>Quản lý thành viên Newsletter</Title>
+              </div>
+              <div className="admin-section-actions">
+                <Input
+                  placeholder="Tìm kiếm email..."
+                  prefix={<SearchOutlined style={{ color: '#999' }} />}
+                  className="admin-search-input"
+                />
+              </div>
+            </div>
+            <Card className="admin-card" style={{ borderRadius: 24 }}>
+              <Table
+                dataSource={newsletterSubscribers.map((sub, index) => ({
+                  key: index,
+                  id: sub.id,
+                  email: sub.email,
+                  name: sub.name || '-',
+                  phone: sub.phone || '-',
+                  isVerified: sub.isVerified,
+                  isActive: sub.isActive,
+                  createdAt: sub.createdAt ? new Date(sub.createdAt).toLocaleString('vi-VN') : '-',
+                  verifiedAt: sub.verifiedAt ? new Date(sub.verifiedAt).toLocaleString('vi-VN') : '-'
+                }))}
+                columns={[
+                  {
+                    title: 'Email',
+                    dataIndex: 'email',
+                    key: 'email',
+                    width: 220,
+                    render: (text) => <Text strong>{text}</Text>
+                  },
+                  {
+                    title: 'Tên',
+                    dataIndex: 'name',
+                    key: 'name',
+                    width: 150
+                  },
+                  {
+                    title: 'Số điện thoại',
+                    dataIndex: 'phone',
+                    key: 'phone',
+                    width: 130
+                  },
+                  {
+                    title: 'Xác nhận',
+                    dataIndex: 'isVerified',
+                    key: 'isVerified',
+                    width: 100,
+                    render: (verified) => (
+                      <Tag color={verified ? 'success' : 'warning'}>
+                        {verified ? 'Đã xác nhận' : 'Chưa xác nhận'}
+                      </Tag>
+                    )
+                  },
+                  {
+                    title: 'Trạng thái',
+                    dataIndex: 'isActive',
+                    key: 'isActive',
+                    width: 100,
+                    render: (active, record) => (
+                      <Button
+                        type="text"
+                        size="small"
+                        onClick={async () => {
+                          try {
+                            await fetch(`http://localhost:8080/api/api/newsletter/subscribers/${record.id}/toggle`, {
+                              method: 'PUT',
+                              headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                              }
+                            });
+                            message.success('Đã cập nhật trạng thái!');
+                            fetchDashboardData();
+                          } catch (error) {
+                            message.error('Có lỗi xảy ra!');
+                          }
+                        }}
+                      >
+                        <Tag color={active ? 'success' : 'default'}>
+                          {active ? 'Hoạt động' : 'Tạm dừng'}
+                        </Tag>
+                      </Button>
+                    )
+                  },
+                  {
+                    title: 'Ngày đăng ký',
+                    dataIndex: 'createdAt',
+                    key: 'createdAt',
+                    width: 160
+                  },
+                  {
+                    title: 'Ngày xác nhận',
+                    dataIndex: 'verifiedAt',
+                    key: 'verifiedAt',
+                    width: 160
+                  },
+                  {
+                    title: 'Thao tác',
+                    key: 'action',
+                    width: 100,
+                    fixed: 'right',
+                    render: (_, record) => (
+                      <Button
+                        type="text"
+                        danger
+                        icon={<DeleteOutlined />}
+                        size="small"
+                        onClick={async () => {
+                          Modal.confirm({
+                            title: 'Xác nhận xóa',
+                            content: `Bạn có chắc muốn xóa thành viên ${record.email}?`,
+                            okText: 'Xóa',
+                            cancelText: 'Hủy',
+                            okButtonProps: { danger: true },
+                            onOk: async () => {
+                              try {
+                                await fetch(`http://localhost:8080/api/api/newsletter/subscribers/${record.id}`, {
+                                  method: 'DELETE',
+                                  headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                  }
+                                });
+                                message.success('Đã xóa thành viên!');
+                                fetchDashboardData();
+                              } catch (error) {
+                                message.error('Có lỗi xảy ra!');
+                              }
+                            }
+                          });
+                        }}
+                      >
+                        Xóa
+                      </Button>
+                    )
+                  }
+                ]}
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  showTotal: (total) => `Tổng ${total} thành viên`
+                }}
+                rowKey="key"
+                className="admin-table"
+                scroll={{ x: 1200 }}
+              />
+            </Card>
+          </div>
         );
       case 'settings':
         return (
-          <Card
-            title={<Text strong style={{ fontSize: 18 }}>Cài đặt hệ thống</Text>}
-            className="card-spacious"
-            style={{ borderRadius: '16px' }}
-          >
-            <Text type="secondary">Trang cài đặt đang được phát triển...</Text>
-          </Card>
+          <div className="admin-section">
+            <div className="admin-section-header">
+              <div className="admin-section-title">
+                <SettingOutlined />
+                <Title level={3}>Cài đặt hệ thống</Title>
+              </div>
+            </div>
+            <Card className="admin-card" style={{ borderRadius: 24 }}>
+              <div className="admin-settings-placeholder">
+                <SettingOutlined style={{ fontSize: 64, color: '#d9d9d9', marginBottom: 16 }} />
+                <Text type="secondary" style={{ fontSize: 16 }}>Trang cài đặt đang được phát triển...</Text>
+              </div>
+            </Card>
+          </div>
         );
       default:
         return (
-          <>
+          <div className="admin-dashboard">
+            {/* Welcome Banner */}
+            <div className="admin-welcome-banner">
+              <div className="admin-welcome-content">
+                <Title level={2}>Xin chào, {user?.firstName} {user?.lastName}! 👋</Title>
+                <Text className="admin-welcome-subtitle">Chào mừng bạn trở lại bảng điều khiển quản trị</Text>
+              </div>
+              <div className="admin-welcome-actions">
+                <Button type="primary" icon={<PlusOutlined />} className="admin-btn-primary admin-btn-lg">
+                  Tạo mới
+                </Button>
+              </div>
+            </div>
+
             {/* Stats Cards */}
-            <Row gutter={[24, 24]}>
+            <Row gutter={[24, 24]} className="admin-stats-row">
               <Col xs={24} sm={12} lg={6}>
-                <Card
-                  className="card-spacious"
-                  style={{
-                    borderRadius: '16px',
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    color: '#fff'
-                  }}
-                  styles={{ body: { padding: '24px' } }}
-                >
-                  <Statistic
-                    title={<Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 14 }}>Tổng người dùng</Text>}
-                    value={stats.totalUsers}
-                    valueStyle={{ color: '#fff', fontSize: 32, fontWeight: 700 }}
-                    suffix="người"
-                  />
-                </Card>
+                <div className="admin-stat-card admin-stat-card--users">
+                  <div className="admin-stat-icon">
+                    <TeamOutlined />
+                  </div>
+                  <div className="admin-stat-content">
+                    <Text className="admin-stat-label">Tổng người dùng</Text>
+                    <Title level={2} className="admin-stat-value">{stats.totalUsers}</Title>
+                    <div className="admin-stat-trend admin-trend-up">
+                      <ArrowUpOutlined /> +12% so với tháng trước
+                    </div>
+                  </div>
+                </div>
               </Col>
               <Col xs={24} sm={12} lg={6}>
-                <Card
-                  className="card-spacious"
-                  style={{
-                    borderRadius: '16px',
-                    background: 'linear-gradient(135deg, #52c41a 0%, #389e0d 100%)',
-                    color: '#fff'
-                  }}
-                  styles={{ body: { padding: '24px' } }}
-                >
-                  <Statistic
-                    title={<Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 14 }}>Bác sĩ</Text>}
-                    value={stats.totalDoctors}
-                    valueStyle={{ color: '#fff', fontSize: 32, fontWeight: 700 }}
-                    suffix="người"
-                  />
-                </Card>
+                <div className="admin-stat-card admin-stat-card--doctors">
+                  <div className="admin-stat-icon">
+                    <MedicineBoxOutlined />
+                  </div>
+                  <div className="admin-stat-content">
+                    <Text className="admin-stat-label">Bác sĩ</Text>
+                    <Title level={2} className="admin-stat-value">{stats.totalDoctors}</Title>
+                    <div className="admin-stat-trend admin-trend-up">
+                      <ArrowUpOutlined /> +8% so với tháng trước
+                    </div>
+                  </div>
+                </div>
               </Col>
               <Col xs={24} sm={12} lg={6}>
-                <Card
-                  className="card-spacious"
-                  style={{
-                    borderRadius: '16px',
-                    background: 'linear-gradient(135deg, #fa8c16 0%, #d46b08 100%)',
-                    color: '#fff'
-                  }}
-                  styles={{ body: { padding: '24px' } }}
-                >
-                  <Statistic
-                    title={<Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 14 }}>Tổng lịch hẹn</Text>}
-                    value={stats.totalAppointments}
-                    valueStyle={{ color: '#fff', fontSize: 32, fontWeight: 700 }}
-                    suffix="lịch"
-                  />
-                </Card>
+                <div className="admin-stat-card admin-stat-card--appointments">
+                  <div className="admin-stat-icon">
+                    <CalendarOutlined />
+                  </div>
+                  <div className="admin-stat-content">
+                    <Text className="admin-stat-label">Tổng lịch hẹn</Text>
+                    <Title level={2} className="admin-stat-value">{stats.totalAppointments}</Title>
+                    <div className="admin-stat-trend admin-trend-up">
+                      <ArrowUpOutlined /> +23% so với tháng trước
+                    </div>
+                  </div>
+                </div>
               </Col>
               <Col xs={24} sm={12} lg={6}>
-                <Card
-                  className="card-spacious"
-                  style={{
-                    borderRadius: '16px',
-                    background: 'linear-gradient(135deg, #f5222d 0%, #cf1322 100%)',
-                    color: '#fff'
-                  }}
-                  styles={{ body: { padding: '24px' } }}
-                >
-                  <Statistic
-                    title={<Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 14 }}>Chờ xác nhận</Text>}
-                    value={stats.pendingAppointments}
-                    valueStyle={{ color: '#fff', fontSize: 32, fontWeight: 700 }}
-                    suffix="lịch"
-                  />
-                </Card>
+                <div className="admin-stat-card admin-stat-card--online">
+                  <div className="admin-stat-icon" style={{ background: '#52c41a20' }}>
+                    <WifiOutlined style={{ color: '#52c41a' }} />
+                  </div>
+                  <div className="admin-stat-content">
+                    <Text className="admin-stat-label">Đang hoạt động</Text>
+                    <Title level={2} className="admin-stat-value" style={{ color: '#52c41a' }}>{stats.onlineUsers}</Title>
+                    <div className="admin-stat-trend admin-trend-up">
+                      <WifiOutlined /> Cập nhật real-time
+                    </div>
+                  </div>
+                </div>
+              </Col>
+              <Col xs={24} sm={12} lg={6}>
+                <div className="admin-stat-card admin-stat-card--pending">
+                  <div className="admin-stat-icon">
+                    <ClockCircleOutlined />
+                  </div>
+                  <div className="admin-stat-content">
+                    <Text className="admin-stat-label">Chờ xác nhận</Text>
+                    <Title level={2} className="admin-stat-value">{stats.pendingAppointments}</Title>
+                    <div className="admin-stat-trend admin-trend-down">
+                      <ArrowDownOutlined /> -5% so với tháng trước
+                    </div>
+                  </div>
+                </div>
               </Col>
             </Row>
 
             {/* Recent Data Tables */}
-            <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
-              <Col xs={24} lg={12}>
+            <div className="admin-tables-container">
+              <Col xs={24}>
                 <Card
-                  title={<Text strong style={{ fontSize: 16 }}>Người dùng gần đây</Text>}
-                  className="card-spacious"
-                  style={{ borderRadius: '16px' }}
-                  styles={{ body: { padding: '16px 24px' } }}
+                  className="admin-card admin-card--recent"
+                  style={{ borderRadius: 24 }}
+                  title={
+                    <div className="admin-card-header">
+                      <TeamOutlined />
+                      <Text strong style={{ fontSize: 16 }}>Người dùng gần đây</Text>
+                    </div>
+                  }
+                  extra={<Button type="link" onClick={() => setSelectedKey('users')}>Xem tất cả</Button>}
                 >
                   <Table
                     dataSource={userTableData.slice(0, 5)}
@@ -521,16 +1053,22 @@ function AdminDashboard({ user, onLogout }) {
                     pagination={false}
                     size="middle"
                     rowKey="key"
-                    scroll={{ x: true }}
+                    className="admin-table admin-table--compact"
+                    scroll={{ x: 900 }}
                   />
                 </Card>
               </Col>
-              <Col xs={24} lg={12}>
+              <Col xs={24}>
                 <Card
-                  title={<Text strong style={{ fontSize: 16 }}>Lịch hẹn gần đây</Text>}
-                  className="card-spacious"
-                  style={{ borderRadius: '16px' }}
-                  styles={{ body: { padding: '16px 24px' } }}
+                  className="admin-card admin-card--recent"
+                  style={{ borderRadius: 24 }}
+                  title={
+                    <div className="admin-card-header">
+                      <CalendarOutlined />
+                      <Text strong style={{ fontSize: 16 }}>Lịch hẹn gần đây</Text>
+                    </div>
+                  }
+                  extra={<Button type="link" onClick={() => setSelectedKey('appointments')}>Xem tất cả</Button>}
                 >
                   <Table
                     dataSource={appointmentTableData.slice(0, 5)}
@@ -538,43 +1076,166 @@ function AdminDashboard({ user, onLogout }) {
                     pagination={false}
                     size="middle"
                     rowKey="key"
-                    scroll={{ x: true }}
+                    className="admin-table admin-table--compact"
+                    scroll={{ x: 800 }}
                   />
                 </Card>
               </Col>
+            </div>
+
+            {/* Quick Actions & Activity */}
+            <Row gutter={[24, 24]} className="admin-activity-row">
+              <Col xs={24} lg={8}>
+                <Card className="admin-card" style={{ borderRadius: 24 }} title={
+                  <div className="admin-card-header">
+                    <WifiOutlined style={{ color: '#52c41a' }} />
+                    <Text strong style={{ fontSize: 16 }}>Người dùng đang online</Text>
+                  </div>
+                }>
+                  <List
+                    itemLayout="horizontal"
+                    dataSource={onlineUsersList.slice(0, 5)}
+                    locale={{ emptyText: 'Không có người dùng online' }}
+                    renderItem={(onlineUser) => (
+                      <List.Item className="admin-doctor-item">
+                        <List.Item.Meta
+                          avatar={
+                            <Badge status="success" offset={[-5, 35]}>
+                              <Avatar size={44} style={{ backgroundColor: '#52c41a' }}>
+                                {onlineUser.userName?.split(' ').map(n => n.charAt(0)).join('').slice(0, 2)}
+                              </Avatar>
+                            </Badge>
+                          }
+                          title={
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <Text strong>{onlineUser.userName}</Text>
+                              <Badge status="success" text="" />
+                            </div>
+                          }
+                          description={
+                            <div>
+                              <Text type="secondary" style={{ fontSize: 12 }}>{onlineUser.userEmail}</Text>
+                              <div style={{ marginTop: 4 }}>
+                                <Text type="secondary" style={{ fontSize: 11 }}>
+                                  {onlineUser.ipAddress && `IP: ${onlineUser.ipAddress}`}
+                                </Text>
+                              </div>
+                            </div>
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                </Card>
+              </Col>
+              <Col xs={24} lg={8}>
+                <Card className="admin-card" style={{ borderRadius: 24 }} title={
+                  <div className="admin-card-header">
+                    <MedicineBoxOutlined />
+                    <Text strong style={{ fontSize: 16 }}>Bác sĩ hoạt động</Text>
+                  </div>
+                }>
+                  <List
+                    itemLayout="horizontal"
+                    dataSource={doctors.slice(0, 4)}
+                    renderItem={(doctor) => (
+                      <List.Item className="admin-doctor-item">
+                        <List.Item.Meta
+                          avatar={
+                            <Avatar size={44} style={{ backgroundColor: '#2f54eb' }}>
+                              {doctor.user?.firstName?.charAt(0)}{doctor.user?.lastName?.charAt(0)}
+                            </Avatar>
+                          }
+                          title={
+                            <Text strong>{doctor.user?.firstName} {doctor.user?.lastName}</Text>
+                          }
+                          description={
+                            <div>
+                              <Tag style={{ borderRadius: 12, padding: '0 8px', fontSize: 11 }}>{doctor.specialization}</Tag>
+                              <div style={{ marginTop: 4 }}>
+                                <Progress percent={doctor.ratingScore * 20} size="small" showInfo={false} strokeColor="#faad14" />
+                              </div>
+                            </div>
+                          }
+                        />
+                        <div className="admin-doctor-rating">
+                          <span style={{ color: '#faad14', fontWeight: 600 }}>{doctor.ratingScore?.toFixed(1)}</span>
+                        </div>
+                      </List.Item>
+                    )}
+                  />
+                </Card>
+              </Col>
+              <Col xs={24} lg={16}>
+                <Card className="admin-card" style={{ borderRadius: 24 }} title={
+                  <div className="admin-card-header">
+                    <CheckCircleOutlined />
+                    <Text strong style={{ fontSize: 16 }}>Hoạt động gần đây</Text>
+                  </div>
+                }>
+                  <div className="admin-activity-list">
+                    {appointments.slice(0, 5).map((apt, index) => (
+                      <div key={index} className="admin-activity-item">
+                        <div className="admin-activity-icon" style={{ background: `${getStatusColor(apt.status)}20` }}>
+                          {getStatusIcon(apt.status)}
+                        </div>
+                        <div className="admin-activity-content">
+                          <Text strong>{apt.patient?.firstName} {apt.patient?.lastName}</Text>
+                          <Text type="secondary"> đặt lịch hẹn với </Text>
+                          <Text strong>{apt.doctor?.user?.firstName} {apt.doctor?.user?.lastName}</Text>
+                        </div>
+                        <div className="admin-activity-time">
+                          <Text type="secondary" style={{ fontSize: 12 }}>{apt.appointmentDate} {apt.timeSlot}</Text>
+                        </div>
+                      </div>
+                    ))}
+                    {appointments.length === 0 && (
+                      <div className="admin-empty-state">
+                        <Text type="secondary">Chưa có hoạt động nào</Text>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              </Col>
             </Row>
-          </>
+          </div>
         );
     }
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+    <Layout className="admin-layout">
+      {!isMobile && (
       <Sider
+        breakpoint="md"
+        collapsedWidth="0"
         collapsible
         collapsed={collapsed}
         onCollapse={setCollapsed}
-        style={{
-          background: '#fff',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.05)'
+        onBreakpoint={(broken) => {
+          setCollapsed(broken);
         }}
-        width={250}
+        className="admin-sider"
+        width={280}
+        theme="light"
+        style={{
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          overflow: 'auto',
+          height: '100vh'
+        }}
       >
-        <div style={{
-          padding: collapsed ? '20px 0' : '20px',
-          textAlign: 'center',
-          borderBottom: '1px solid #f0f0f0',
-          minHeight: '64px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <MedicineBoxOutlined style={{ fontSize: 32, color: '#667eea' }} />
+        <div className="admin-logo">
+          <div className="admin-logo-icon">
+            <MedicineBoxOutlined />
+          </div>
           {!collapsed && (
-            <Title level={4} style={{ margin: '12px 0 0', color: '#667eea', whiteSpace: 'nowrap' }}>
-              DoctorCare
-            </Title>
+            <div className="admin-logo-text">
+              <Title level={4} className="admin-logo-title">DoctorCare</Title>
+              <Text type="secondary" className="admin-logo-subtitle">Quản trị viên</Text>
+            </div>
           )}
         </div>
         <Menu
@@ -582,70 +1243,161 @@ function AdminDashboard({ user, onLogout }) {
           selectedKeys={[selectedKey]}
           items={menuItems}
           onClick={handleMenuClick}
-          style={{ border: 'none', padding: '8px 12px' }}
-          inlineIndent={12}
+          className="admin-menu"
         />
       </Sider>
-      <Layout style={{ background: '#f5f5f5' }}>
-        <Header style={{
+      )}
+      <Layout className="admin-main-layout" style={{ marginLeft: isMobile ? 0 : (collapsed ? 80 : 280) }}>
+        <Header className="admin-header" style={{ 
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          left: isMobile ? 0 : (collapsed ? 80 : 280),
+          zIndex: 100,
           background: '#fff',
-          padding: '0 32px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-          height: '64px',
-          marginLeft: 0
+          borderBottom: '1px solid #f0f0f0'
         }}>
-          <Title level={4} style={{ margin: 0, color: '#333' }}>
-            {selectedKey === 'overview' && 'Tổng quan'}
-            {selectedKey === 'users' && 'Quản lý người dùng'}
-            {selectedKey === 'doctors' && 'Quản lý bác sĩ'}
-            {selectedKey === 'appointments' && 'Quản lý lịch hẹn'}
-            {selectedKey === 'settings' && 'Cài đặt'}
-          </Title>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div className="admin-header-left">
+            {isMobile && (
+              <Button
+                type="text"
+                icon={<MenuOutlined style={{ fontSize: 20 }} />}
+                onClick={() => setMobileMenuVisible(true)}
+                style={{ marginRight: 16 }}
+              />
+            )}
             <Button
-              type="text"
-              icon={<BellOutlined style={{ fontSize: 20 }} />}
-              style={{ borderRadius: '50%', width: 40, height: 40 }}
-            />
-            <Dropdown menu={{ items: userMenuItems, onClick: handleUserMenuClick }} trigger={['click']}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                cursor: 'pointer',
-                padding: '8px 12px',
-                borderRadius: '12px',
-                transition: 'all 0.3s ease'
-              }}>
+              type="link"
+              icon={<DashboardOutlined />}
+              onClick={() => navigate('/')}
+              style={{ marginRight: 16 }}
+            >
+              {!isMobile && 'Về trang chủ'}
+            </Button>
+            <Badge count={3} size="small">
+              <Button type="text" icon={<BellOutlined style={{ fontSize: 20 }} />} className="admin-notification-btn" />
+            </Badge>
+          </div>
+          <div className="admin-header-right">
+            <Dropdown menu={{ items: userMenuItems, onClick: handleUserMenuClick }} trigger={['click']} placement="bottomRight">
+              <div className="admin-user-dropdown">
                 <Avatar
-                  size={40}
-                  src={user?.profileImage}
-                  icon={!user?.profileImage && <UserOutlined />}
-                  style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+                  size={42}
+                  src={userAvatar}
+                  icon={<UserOutlined />}
+                  className="admin-user-avatar"
                 />
-                <div style={{ lineHeight: 1.3 }}>
-                  <Text strong style={{ display: 'block' }}>{user?.firstName} {user?.lastName}</Text>
+                <div className="admin-user-info">
+                  <Text strong style={{ display: 'block' }}>{user?.firstName || localStorage.getItem('userFirstName')} {user?.lastName || localStorage.getItem('userLastName')}</Text>
                   <Text type="secondary" style={{ fontSize: 12 }}>Quản trị viên</Text>
                 </div>
               </div>
             </Dropdown>
           </div>
         </Header>
-        <Content style={{
-          margin: '32px 32px',
-          padding: '24px',
-          minHeight: 'calc(100vh - 64px - 128px)',
-          background: '#f5f5f5'
-        }}>
+        <Content className="admin-content" style={{ marginTop: 64 }}>
           {renderContent()}
         </Content>
       </Layout>
 
+      {/* Mobile Menu Drawer */}
+      <Drawer
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{
+              width: 40,
+              height: 40,
+              background: '#10b981',
+              borderRadius: 12,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <MedicineBoxOutlined style={{ fontSize: 20, color: 'white' }} />
+            </div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 16, color: '#10b981' }}>DoctorCare</div>
+              <div style={{ fontSize: 11, color: '#8c8c8c', textTransform: 'uppercase', letterSpacing: 1 }}>
+                Quản trị viên
+              </div>
+            </div>
+          </div>
+        }
+        placement="left"
+        onClose={() => setMobileMenuVisible(false)}
+        open={mobileMenuVisible}
+        width={280}
+        closeIcon={<CloseOutlined style={{ fontSize: 18 }} />}
+        styles={{
+          header: {
+            borderBottom: '1px solid #f0f0f0',
+            padding: '20px 24px'
+          },
+          body: {
+            padding: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%'
+          }
+        }}
+      >
+        {/* User Info */}
+        <div style={{
+          padding: '20px 24px',
+          borderBottom: '1px solid #f0f0f0',
+          background: '#f8fafb'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Avatar
+              size={48}
+              src={userAvatar}
+              icon={<UserOutlined />}
+              style={{ background: '#10b981' }}
+            />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600, fontSize: 14, color: '#1e293b' }}>
+                {user?.firstName || localStorage.getItem('userFirstName')} {user?.lastName || localStorage.getItem('userLastName')}
+              </div>
+              <div style={{ fontSize: 12, color: '#64748b' }}>
+                Quản trị viên
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Menu Items */}
+        <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 100 }}>
+          <Menu
+            mode="inline"
+            selectedKeys={[selectedKey]}
+            items={menuItems}
+            onClick={handleMenuClick}
+            style={{
+              border: 'none',
+              padding: '12px 16px'
+            }}
+          />
+        </div>
+
+        {/* Footer Actions */}
+        <div style={{
+          borderTop: '1px solid #f0f0f0',
+          background: '#fff',
+          padding: '16px 24px'
+        }}>
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 11, color: '#8c8c8c', marginBottom: 4 }}>Đường dây nóng</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <BellOutlined style={{ color: '#10b981', fontSize: 16 }} />
+              <span style={{ fontWeight: 600, fontSize: 15, color: '#1e293b' }}>19005656</span>
+            </div>
+          </div>
+        </div>
+      </Drawer>
+
       {/* Edit User Modal */}
       <Modal
+        className="admin-modal"
         title={<Text strong style={{ fontSize: 18 }}>Chỉnh sửa người dùng</Text>}
         open={editModalVisible}
         onOk={handleSaveUser}
@@ -661,20 +1413,20 @@ function AdminDashboard({ user, onLogout }) {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="firstName" label="Họ">
-                <Input disabled style={{ borderRadius: '8px' }} />
+                <Input disabled style={{ borderRadius: 12 }} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item name="lastName" label="Tên">
-                <Input disabled style={{ borderRadius: '8px' }} />
+                <Input disabled style={{ borderRadius: 12 }} />
               </Form.Item>
             </Col>
           </Row>
           <Form.Item name="email" label="Email">
-            <Input disabled style={{ borderRadius: '8px' }} />
+            <Input disabled style={{ borderRadius: 12 }} />
           </Form.Item>
           <Form.Item name="role" label="Vai trò" rules={[{ required: true }]}>
-            <Select placeholder="Chọn vai trò" style={{ borderRadius: '8px' }}>
+            <Select placeholder="Chọn vai trò" style={{ borderRadius: 12 }}>
               <Select.Option value="PATIENT">Bệnh nhân</Select.Option>
               <Select.Option value="DOCTOR">Bác sĩ</Select.Option>
               <Select.Option value="ADMIN">Quản trị</Select.Option>

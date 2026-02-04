@@ -1,0 +1,267 @@
+/* Certification Slider Styles */
+
+.certification-slider-wrapper {
+  max-width: 1200px;
+  margin: 0 auto 80px;
+  padding: 40px 20px;
+}
+
+/* Remove all borders and underlines from carousel */
+.certification-slider-wrapper .slick-slider,
+.certification-slider-wrapper .slick-slider *,
+.certification-slider-wrapper .ant-carousel,
+.certification-slider-wrapper .ant-carousel * {
+  border: none !important;
+  border-bottom: none !important;
+  border-top: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.certification-slider-wrapper .slick-slider {
+  position: relative;
+  border-bottom: none !important;
+}
+
+.certification-slider-wrapper .slick-list {
+  overflow: hidden;
+  border: none !important;
+  border-bottom: none !important;
+}
+
+.certification-slider-wrapper .slick-track {
+  display: flex;
+  border: none !important;
+  border-bottom: none !important;
+}
+
+.cert-slide {
+  padding: 20px;
+  border: none !important;
+  border-bottom: none !important;
+}
+
+/* Image Container */
+.cert-image-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cert-image {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: transform 0.3s ease;
+}
+
+.cert-image:hover {
+  transform: scale(1.02);
+}
+
+/* Content */
+.cert-content {
+  text-align: left;
+  padding: 20px;
+}
+
+.cert-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #262626;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.cert-description {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #666;
+  margin: 0;
+}
+
+/* Custom Dots - Override all Ant Design styles */
+.certification-slider-wrapper .slick-dots {
+  position: relative !important;
+  bottom: 0 !important;
+  margin-top: 0px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  list-style: none !important;
+  padding: 0 !important;
+  z-index: 10 !important;
+  background: transparent !important;
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove any pseudo-elements that might create lines */
+.certification-slider-wrapper .slick-dots::before,
+.certification-slider-wrapper .slick-dots::after {
+  content: none !important;
+  display: none !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.certification-slider-wrapper .slick-dots li {
+  margin: 0 6px !important;
+  width: auto !important;
+  height: auto !important;
+  display: inline-block !important;
+  position: relative !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Remove any pseudo-elements from list items */
+.certification-slider-wrapper .slick-dots li::before,
+.certification-slider-wrapper .slick-dots li::after {
+  content: none !important;
+  display: none !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.certification-slider-wrapper .slick-dots li * {
+  box-sizing: border-box !important;
+}
+
+.certification-slider-wrapper .slick-dots li button {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background: #8c8c8c !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+  position: relative !important;
+  text-indent: -9999px !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.certification-slider-wrapper .slick-dots li button::before,
+.certification-slider-wrapper .slick-dots li button::after {
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  background: transparent !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.certification-slider-wrapper .slick-dots li button:hover {
+  background: #595959 !important;
+}
+
+.certification-slider-wrapper .slick-dots li button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.certification-slider-wrapper .slick-dots li.slick-active button {
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  background: #0050b3 !important;
+}
+
+.certification-slider-wrapper .slick-dots li.slick-active button::before,
+.certification-slider-wrapper .slick-dots li.slick-active button::after {
+  content: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  background: transparent !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Old dots class for backward compatibility */
+.certification-dots {
+  bottom: -50px !important;
+}
+
+.certification-dots li {
+  margin: 0 6px;
+}
+
+.certification-dots li button {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d9d9d9;
+  transition: all 0.3s ease;
+}
+
+.certification-dots li.slick-active button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #0050b3;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .certification-slider-wrapper {
+    padding: 20px 10px;
+    margin-bottom: 60px;
+  }
+
+  .cert-slide {
+    padding: 10px;
+  }
+
+  .cert-content {
+    text-align: center;
+    padding: 20px 10px;
+  }
+
+  .cert-title {
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+
+  .cert-description {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .cert-image {
+    max-width: 100%;
+  }
+
+  .certification-dots {
+    bottom: -40px !important;
+  }
+}
+
+/* Animation */
+.cert-slide {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -707,3 +707,290 @@
   color: #666;
   margin-bottom: var(--spacing-xl);
 }
+
+/* ========================================
+   NEWS DETAIL PAGE - Fix image overflow
+   ======================================== */
+.news-article-content {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.news-article-content img {
+  max-width: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  display: block !important;
+  margin: 16px auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  object-fit: contain !important;
+}
+
+.news-article-content * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Override inline styles on images */
+.news-article-content img[style] {
+  max-width: 100% !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+/* Handle figure and picture elements */
+.news-article-content figure,
+.news-article-content picture {
+  max-width: 100% !important;
+  overflow: hidden !important;
+  margin: 16px 0;
+}
+
+.news-article-content figure img,
+.news-article-content picture img {
+  max-width: 100% !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+/* Styling for other content elements */
+.news-article-content p {
+  margin-bottom: 16px;
+  line-height: 1.8;
+}
+
+.news-article-content h1,
+.news-article-content h2,
+.news-article-content h3,
+.news-article-content h4,
+.news-article-content h5,
+.news-article-content h6 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.4;
+}
+
+.news-article-content h1 { font-size: 32px; }
+.news-article-content h2 { font-size: 28px; }
+.news-article-content h3 { font-size: 24px; }
+.news-article-content h4 { font-size: 20px; }
+.news-article-content h5 { font-size: 18px; }
+.news-article-content h6 { font-size: 16px; }
+
+.news-article-content ul,
+.news-article-content ol {
+  margin-left: 24px;
+  margin-bottom: 16px;
+  line-height: 1.8;
+}
+
+.news-article-content li {
+  margin-bottom: 8px;
+}
+
+.news-article-content a {
+  color: #667eea;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.news-article-content a:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+.news-article-content blockquote {
+  border-left: 4px solid #667eea;
+  padding-left: 16px;
+  margin: 20px 0;
+  color: #64748b;
+  font-style: italic;
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 4px;
+}
+
+.news-article-content code {
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  color: #e91e63;
+}
+
+.news-article-content pre {
+  background: #1e293b;
+  color: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 20px 0;
+}
+
+.news-article-content pre code {
+  background: transparent;
+  padding: 0;
+  color: #fff;
+}
+
+.news-article-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  overflow-x: auto;
+  display: block;
+}
+
+.news-article-content table th,
+.news-article-content table td {
+  border: 1px solid #e2e8f0;
+  padding: 12px;
+  text-align: left;
+}
+
+.news-article-content table th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.news-article-content table tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+.news-article-content hr {
+  border: none;
+  border-top: 2px solid #e2e8f0;
+  margin: 32px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .news-article-content {
+    font-size: 15px;
+  }
+  
+  .news-article-content h1 { font-size: 26px; }
+  .news-article-content h2 { font-size: 24px; }
+  .news-article-content h3 { font-size: 20px; }
+  .news-article-content h4 { font-size: 18px; }
+  .news-article-content h5 { font-size: 16px; }
+  .news-article-content h6 { font-size: 15px; }
+  
+  .news-article-content img {
+    margin: 12px auto;
+  }
+  
+  .news-article-content table {
+    font-size: 14px;
+  }
+}
+
+/* Specialties Grid - 6 columns responsive */
+.specialties-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0;
+}
+
+.specialty-card {
+  background: #fafafa;
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #e8e8e8;
+  border-right: none;
+  border-bottom: none;
+  position: relative;
+  min-height: 120px;
+}
+
+.specialty-card:hover {
+  background: #f0f9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24,144,255,0.1);
+  z-index: 1;
+}
+
+.specialty-name {
+  color: #262626;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.specialty-hot-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #1890ff;
+  color: #fff;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* Responsive breakpoints for specialties grid */
+@media (max-width: 1200px) {
+  .specialties-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .specialty-card {
+    padding: 28px 16px;
+    min-height: 110px;
+  }
+}
+
+@media (max-width: 768px) {
+  .specialties-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .specialty-card {
+    padding: 24px 12px;
+    min-height: 100px;
+  }
+  
+  .specialty-card img {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .specialty-name {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .specialties-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .specialty-card {
+    padding: 20px 10px;
+    min-height: 90px;
+  }
+  
+  .specialty-card img {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  
+  .specialty-name {
+    font-size: 12px;
+  }
+  
+  .specialty-hot-badge {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+}

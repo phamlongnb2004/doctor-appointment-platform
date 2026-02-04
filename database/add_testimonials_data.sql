@@ -1,0 +1,5 @@
+-- Add sample testimonials data
+INSERT INTO testimonials (customer_name, customer_title, customer_image, testimonial_text, rating, is_featured, is_active, display_order, created_at, updated_at) VALUES
+('Chị Nguyễn Thị Lan', 'Bệnh nhân tim mạch', 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100', 'Dịch vụ tại MEDLATEC rất chuyên nghiệp. Các bác sĩ tận tâm, chu đáo. Tôi đã khám và điều trị ở đây được 3 năm, rất hài lòng với chất lượng dịch vụ.', 5, true, true, 1, NOW(), NOW()),
+('Anh Trần Văn Minh', 'Khám sức khỏe định kỳ', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100', 'Hệ thống đặt lịch online rất tiện lợi. Không phải chờ đợi lâu, quy trình khám nhanh gọn. Tôi sẽ giới thiệu cho bạn bè và đồng nghiệp.', 5, true, true, 2, NOW(), NOW()),
+('Cô Phạm Thị Hoa', 'Khám phụ khoa', 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100', 'Cơ sở vật chất hiện đại, sạch sẽ. Đội ngũ y tế chuyên nghiệp, thái độ phục vụ tốt. Tôi cảm thấy an tâm khi khám chữa bệnh tại đây.', 5, true, true, 3, NOW(), NOW());

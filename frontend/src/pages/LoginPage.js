@@ -3,6 +3,7 @@ import { Form, Input, Button, Card, Typography, Space, Tabs, Divider, message } 
 import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, GoogleOutlined, FacebookOutlined, MedicineBoxOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../services/api';
+import webSocketService from '../services/websocket';
 import useFallingFlowers from '../hooks/useFallingFlowers';
 import '../styles/animations.css';
 
@@ -23,7 +24,24 @@ function LoginPage({ onLogin }) {
       // Save token to localStorage
       if (userData.token) {
         localStorage.setItem('token', userData.token);
+        localStorage.setItem('userId', userData.id);
+        localStorage.setItem('sessionId', userData.sessionId);
+        localStorage.setItem('userEmail', userData.email);
+        localStorage.setItem('userFirstName', userData.firstName);
+        localStorage.setItem('userLastName', userData.lastName);
+        localStorage.setItem('userRole', userData.role);
+        if (userData.profileImage) {
+          localStorage.setItem('profileImageUrl', userData.profileImage);
+        }
         console.log('Token saved to localStorage');
+      }
+
+      // Connect to WebSocket for real-time status
+      if (userData.sessionId) {
+        webSocketService.connect(userData.id, userData.sessionId, (status) => {
+          console.log('WebSocket status update:', status);
+        });
+        console.log('WebSocket connected for user:', userData.id);
       }
 
       onLogin(userData);

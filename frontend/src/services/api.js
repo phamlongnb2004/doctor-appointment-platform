@@ -57,6 +57,13 @@ export const userAPI = {
   getUserStats: () => api.get('/users/stats'),
   getAllDoctors: () => api.get('/users/doctors'),
   getAllPatients: () => api.get('/users/patients'),
+
+  // Online status endpoints
+  getOnlineUsersCount: () => api.get('/users/online/count'),
+  getOnlineUsers: () => api.get('/users/online'),
+  getUsersOnlineStatus: (userIds) => api.post('/users/online/status', { userIds }),
+  isUserOnline: (userId) => api.get(`/users/${userId}/online`),
+  logout: (userId) => api.post('/users/logout', { userId }),
 };
 
 // Doctor API

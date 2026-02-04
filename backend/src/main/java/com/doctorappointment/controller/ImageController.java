@@ -68,6 +68,26 @@ public class ImageController {
     }
 
     /**
+     * Upload article image - for article content and featured images
+     */
+    @PostMapping("/articles")
+    public ResponseEntity<?> uploadArticleImage(
+            @RequestParam("image") MultipartFile file) {
+        try {
+            // Use a generic "articles" folder instead of user-specific
+            String imageUrl = imageService.uploadArticleImage(file);
+            return ResponseEntity.ok(Map.of(
+                "message", "Article image uploaded successfully",
+                "imageUrl", imageUrl,
+                "url", imageUrl  // For Quill editor compatibility
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
      * Get profile image - simplified version
      */
     @GetMapping("/profiles/{userId}/**")
@@ -133,6 +153,49 @@ public class ImageController {
                 
                 return ResponseEntity.ok()
                     .contentType(MediaType.IMAGE_JPEG)
+                    .body(imageBytes);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Get article image
+     */
+    @GetMapping("/articles/**")
+    public ResponseEntity<?> getArticleImage(HttpServletRequest request) {
+        String fullPath = request.getRequestURI();
+        String fileName = fullPath.substring(fullPath.lastIndexOf("/articles/") + "/articles/".length());
+        
+        try {
+            System.out.println("=== getArticleImage called ===");
+            System.out.println("fileName: " + fileName);
+            
+            // Direct file path
+            String filePath = "D:/DoAn/doctor-appointment-platform/uploads/articles/" + fileName;
+            System.out.println("Looking for file at: " + filePath);
+            
+            java.io.File file = new java.io.File(filePath);
+            System.out.println("File exists: " + file.exists());
+            
+            if (file.exists()) {
+                byte[] imageBytes = java.nio.file.Files.readAllBytes(file.toPath());
+                System.out.println("File size: " + imageBytes.length + " bytes");
+                
+                // Determine content type from file extension
+                String contentType = MediaType.IMAGE_JPEG_VALUE;
+                if (fileName.toLowerCase().endsWith(".png")) {
+                    contentType = MediaType.IMAGE_PNG_VALUE;
+                } else if (fileName.toLowerCase().endsWith(".gif")) {
+                    contentType = MediaType.IMAGE_GIF_VALUE;
+                }
+                
+                return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
                     .body(imageBytes);
             }
             return ResponseEntity.notFound().build();

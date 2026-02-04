@@ -44,6 +44,15 @@ public class DoctorController {
     public ResponseEntity<List<Doctor>> getActiveDoctors() {
         return ResponseEntity.ok(doctorService.getActiveDoctors());
     }
+    
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getDoctorByUserId(@PathVariable Long userId) {
+        var doctor = doctorService.getDoctorByUserId(userId);
+        if (doctor.isPresent()) {
+            return ResponseEntity.ok(doctor.get());
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Doctor not found for user"));
+    }
 
     @GetMapping("/specialization/{specialization}")
     public ResponseEntity<List<Doctor>> getDoctorsBySpecialization(@PathVariable String specialization) {

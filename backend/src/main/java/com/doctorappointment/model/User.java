@@ -1,10 +1,12 @@
 package com.doctorappointment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -110,6 +112,7 @@ public class User {
     public enum UserRole {
         PATIENT,
         DOCTOR,
-        ADMIN
+        ADMIN,
+        CONSULTANT
     }
 }

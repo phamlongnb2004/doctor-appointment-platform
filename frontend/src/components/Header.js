@@ -1,20 +1,75 @@
-import React from 'react';
-import { Layout, Menu, Button, Dropdown, Avatar } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Layout, Menu, Button, Dropdown, Avatar, message, Input, Drawer } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import { UserOutlined, LogoutOutlined, DashboardOutlined, SettingOutlined, MedicineBoxOutlined } from '@ant-design/icons';
+import { 
+  UserOutlined, 
+  LogoutOutlined, 
+  DashboardOutlined, 
+  SettingOutlined, 
+  MessageOutlined,
+  PhoneOutlined,
+  SearchOutlined,
+  EditOutlined,
+  MenuOutlined,
+  CloseOutlined,
+  RightOutlined
+} from '@ant-design/icons';
+import { userAPI } from '../services/api';
+import webSocketService from '../services/websocket';
+import cmsAPI from '../services/cmsApi';
 
 const { Header } = Layout;
 
 function HeaderComponent({ user, onLogout }) {
   const navigate = useNavigate();
+  const [siteSettings, setSiteSettings] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    onLogout();
-    navigate('/');
+  useEffect(() => {
+    fetchSiteSettings();
+  }, []);
+
+  const fetchSiteSettings = async () => {
+    try {
+      setLoading(true);
+      const response = await cmsAPI.getSiteSettings();
+      setSiteSettings(response.data);
+    } catch (error) {
+      console.error('Error fetching site settings:', error);
+      // Set default values if fetch fails
+      setSiteSettings({
+        siteName: 'MEDLATEC',
+        siteTagline: 'Chăm sóc sức khỏe',
+        logoUrl: null,
+        hotline: '19005656'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const userId = localStorage.getItem('userId');
+      if (userId) {
+        await userAPI.logout(parseInt(userId));
+      }
+      webSocketService.disconnect();
+    } catch (error) {
+      console.error('Error during logout:', error);
+    } finally {
+      onLogout();
+      navigate('/');
+      message.success('Đã đăng xuất!');
+    }
   };
 
   const isAdmin = user?.role === 'ADMIN';
   const isDoctor = user?.role === 'DOCTOR';
+  const isConsultant = user?.role === 'CONSULTANT';
+  const canChat = user && (isAdmin || isDoctor || isConsultant || user?.role === 'PATIENT');
+  const canPostArticle = isAdmin || isDoctor;
 
   const userMenuItems = [
     {
@@ -30,7 +85,6 @@ function HeaderComponent({ user, onLogout }) {
     },
   ];
 
-  // Add admin menu item if user is admin
   if (isAdmin) {
     userMenuItems.push({
       key: 'admin',
@@ -40,7 +94,6 @@ function HeaderComponent({ user, onLogout }) {
     });
   }
 
-  // Add doctor menu item if user is doctor
   if (isDoctor) {
     userMenuItems.push({
       key: 'doctor',
@@ -58,76 +111,414 @@ function HeaderComponent({ user, onLogout }) {
     onClick: handleLogout,
   });
 
+  // Don't render until settings are loaded
+  if (loading || !siteSettings) {
+    return null;
+  }
+
   return (
-    <Header style={{ background: '#fff', padding: '0 40px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '64px' }}>
-        <Link to="/" style={{ fontSize: '22px', fontWeight: '700', color: '#667eea', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <MedicineBoxOutlined style={{ fontSize: 28 }} />
-          <span style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Doctor Appointment</span>
-        </Link>
-        <Menu mode="horizontal" style={{ border: 'none', flex: 1, marginLeft: '40px', background: 'transparent' }}>
-          <Menu.Item key="home" style={{ margin: '0 8px', borderRadius: '8px 8px 0 0', height: '48px', lineHeight: '48px' }}>
-            <Link to="/">Trang chủ</Link>
-          </Menu.Item>
-          <Menu.Item key="doctors" style={{ margin: '0 8px', borderRadius: '8px 8px 0 0', height: '48px', lineHeight: '48px' }}>
-            <Link to="/doctors">Bác sĩ</Link>
-          </Menu.Item>
-          {user && (
-            <Menu.Item key="appointments" style={{ margin: '0 8px', borderRadius: '8px 8px 0 0', height: '48px', lineHeight: '48px' }}>
-              <Link to="/appointments">Lịch hẹn</Link>
+    <>
+      {/* Main Header */}
+      <Header style={{ 
+        background: '#fff', 
+        padding: '0 24px', 
+        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+        borderBottom: '1px solid #f0f0f0',
+        position: 'sticky',
+        top: 0,
+        zIndex: 999,
+        height: 64,
+        lineHeight: '64px'
+      }}>
+        <div style={{ 
+          maxWidth: 1400, 
+          margin: '0 auto',
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          height: '100%'
+        }}>
+          {/* Logo */}
+          <Link to="/" className="header-logo" style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 10,
+            textDecoration: 'none'
+          }}>
+            {siteSettings.logoUrl ? (
+              <img 
+                src={siteSettings.logoUrl} 
+                alt={siteSettings.siteName}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
+                  objectFit: 'cover',
+                  border: '1px solid #e8e8e8'
+                }}
+              />
+            ) : (
+              <div style={{
+                background: '#1890ff',
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <span style={{ fontSize: 18 }}>🏥</span>
+              </div>
+            )}
+            <div>
+              <div style={{ 
+                fontSize: 18, 
+                fontWeight: 700, 
+                color: '#1890ff',
+                lineHeight: '20px'
+              }}>
+                {siteSettings.siteName}
+              </div>
+              {siteSettings.siteTagline && (
+                <div style={{ 
+                  fontSize: 9, 
+                  color: '#8c8c8c',
+                  lineHeight: '12px'
+                }}>
+                  {siteSettings.siteTagline}
+                </div>
+              )}
+            </div>
+          </Link>
+
+          {/* Search Bar */}
+          <div className="header-search" style={{ flex: 1, maxWidth: 320, margin: '0 20px' }}>
+            <Input
+              placeholder="Tìm kiếm..."
+              prefix={<SearchOutlined />}
+              style={{ 
+                borderRadius: 20,
+                fontSize: 13
+              }}
+            />
+          </div>
+
+          {/* Right Side */}
+          <div className="header-right" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {/* Hotline */}
+            <a href={`tel:${siteSettings.hotline}`} style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 4,
+              padding: '3px 8px',
+              background: '#e6f7ff',
+              borderRadius: 4,
+              textDecoration: 'none',
+              border: '1px solid #91d5ff',
+              height: 26
+            }}>
+              <PhoneOutlined style={{ color: '#1890ff', fontSize: 12 }} />
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#1890ff' }}>{siteSettings.hotline}</span>
+            </a>
+
+            {/* Post Article Button */}
+            {canPostArticle && (
+              <Button
+                size="small"
+                icon={<EditOutlined />}
+                onClick={() => navigate(isDoctor ? '/doctor/articles' : '/admin/cms')}
+                style={{
+                  background: '#722ed1',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 4,
+                  fontSize: 12,
+                  padding: '0 10px',
+                  height: 26
+                }}
+              >
+                Đăng bài
+              </Button>
+            )}
+
+            {/* User Actions */}
+            {user ? (
+              <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
+                <div style={{ 
+                  cursor: 'pointer', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 6, 
+                  padding: '2px 8px', 
+                  borderRadius: 4,
+                  border: '1px solid #d9d9d9',
+                  background: '#fafafa',
+                  height: 26
+                }}>
+                  <Avatar
+                    size={20}
+                    src={user.profileImage}
+                    icon={!user.profileImage && <UserOutlined />}
+                  />
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#262626' }}>
+                    {user.firstName}
+                  </span>
+                  {isAdmin && (
+                    <span style={{ 
+                      fontSize: 8, 
+                      color: '#fff',
+                      background: '#f5222d',
+                      padding: '0px 4px',
+                      borderRadius: 2,
+                      marginLeft: 8,
+                      lineHeight: '14px',
+                      display: 'inline-block'
+                    }}>
+                      Admin
+                    </span>
+                  )}
+                </div>
+              </Dropdown>
+            ) : (
+              <div style={{ display: 'flex', gap: 6 }}>
+                <Button 
+                  size="small"
+                  style={{ 
+                    borderRadius: 4,
+                    fontSize: 12,
+                    height: 26,
+                    padding: '0 12px'
+                  }}
+                  onClick={() => navigate('/register')}
+                >
+                  Đăng ký
+                </Button>
+                <Button 
+                  type="primary"
+                  size="small"
+                  style={{ 
+                    borderRadius: 4,
+                    fontSize: 12,
+                    height: 26,
+                    padding: '0 12px'
+                  }}
+                  onClick={() => navigate('/login')}
+                >
+                  Đăng nhập
+                </Button>
+              </div>
+            )}
+            
+            {/* Mobile Menu Button - Right on mobile */}
+            <Button
+              className="mobile-menu-button"
+              icon={<MenuOutlined />}
+              onClick={() => setMobileMenuOpen(true)}
+              style={{
+                display: 'none',
+                border: 'none',
+                background: 'transparent',
+                fontSize: 20,
+                padding: 0,
+                width: 40,
+                height: 40
+              }}
+            />
+          </div>
+        </div>
+      </Header>
+
+      {/* Navigation Menu */}
+      <div style={{ 
+        background: '#fff',
+        borderBottom: '1px solid #f0f0f0',
+        padding: '0 24px'
+      }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+          <Menu 
+            mode="horizontal" 
+            style={{ 
+              border: 'none',
+              background: 'transparent',
+              fontSize: 15,
+              fontWeight: 500,
+              display: 'flex',
+              justifyContent: 'center'
+            }}
+            selectedKeys={[]}
+          >
+            <Menu.Item key="home" style={{ padding: '14px 24px' }}>
+              <Link to="/" style={{ color: '#262626' }}>Trang chủ</Link>
             </Menu.Item>
-          )}
-        </Menu>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginLeft: '20px' }}>
-          {user ? (
-            <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
-              <span style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 12px', borderRadius: '12px', transition: 'all 0.3s ease' }}>
-                <Avatar
-                  size={40}
-                  src={user.profileImage}
-                  icon={!user.profileImage && <UserOutlined />}
-                  style={{ border: '2px solid #667eea' }}
-                />
-                <span style={{ fontWeight: 500 }}>{user.firstName} {user.lastName}</span>
-                {isAdmin && (
-                  <span style={{
-                    background: 'linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%)',
-                    color: '#fff',
-                    padding: '4px 12px',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    fontWeight: 600
-                  }}>
-                    Admin
-                  </span>
-                )}
-                {isDoctor && !isAdmin && (
-                  <span style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    color: '#fff',
-                    padding: '4px 12px',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    fontWeight: 600
-                  }}>
-                    Bác sĩ
-                  </span>
-                )}
-              </span>
-            </Dropdown>
-          ) : (
-            <>
-              <Button type="primary" size="large" onClick={() => navigate('/login')} style={{ borderRadius: '10px', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', border: 'none', height: '42px', fontWeight: 600 }}>
-                Đăng nhập
-              </Button>
-              <Button size="large" onClick={() => navigate('/register')} style={{ borderRadius: '10px', height: '42px', fontWeight: 600 }}>
-                Đăng ký
-              </Button>
-            </>
-          )}
+            <Menu.Item key="about" style={{ padding: '14px 24px' }}>
+              <Link to="/about" style={{ color: '#262626' }}>Giới thiệu</Link>
+            </Menu.Item>
+            <Menu.Item key="services" style={{ padding: '14px 24px' }}>
+              <span style={{ color: '#262626' }}>Dịch vụ y tế</span>
+            </Menu.Item>
+            <Menu.Item key="booking" style={{ padding: '14px 24px' }}>
+              <Link to="/doctors" style={{ color: '#262626' }}>Đặt lịch khám</Link>
+            </Menu.Item>
+            <Menu.Item key="news" style={{ padding: '14px 24px' }}>
+              <Link to="/news" style={{ color: '#262626' }}>Tin tức</Link>
+            </Menu.Item>
+            {user && canChat && (
+              <Menu.Item key="chat" style={{ padding: '14px 24px' }}>
+                <Link to="/chat" style={{ color: '#262626' }}>Chat tư vấn</Link>
+              </Menu.Item>
+            )}
+            {user && (
+              <Menu.Item key="appointments" style={{ padding: '14px 24px' }}>
+                <Link to="/appointments" style={{ color: '#262626' }}>Lịch hẹn</Link>
+              </Menu.Item>
+            )}
+          </Menu>
         </div>
       </div>
-    </Header>
+
+      {/* Mobile Menu Drawer */}
+      <Drawer
+        placement="right"
+        onClose={() => setMobileMenuOpen(false)}
+        open={mobileMenuOpen}
+        width={300}
+        closeIcon={<CloseOutlined />}
+        styles={{
+          body: { padding: 0 },
+          header: { borderBottom: '1px solid #f0f0f0' }
+        }}
+      >
+        <div style={{ padding: '20px 0' }}>
+          {/* User Section */}
+          {user ? (
+            <div style={{ padding: '0 20px 20px', borderBottom: '1px solid #f0f0f0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 15 }}>
+                <Avatar size={40} src={user.profileImage} icon={!user.profileImage && <UserOutlined />} />
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>{user.firstName} {user.lastName}</div>
+                  {isAdmin && <span style={{ fontSize: 11, color: '#f5222d' }}>Admin</span>}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div style={{ padding: '0 20px 20px', borderBottom: '1px solid #f0f0f0', display: 'flex', gap: 10 }}>
+              <Button type="primary" block onClick={() => { navigate('/login'); setMobileMenuOpen(false); }}>
+                Đăng nhập
+              </Button>
+              <Button block onClick={() => { navigate('/register'); setMobileMenuOpen(false); }}>
+                Đăng ký
+              </Button>
+            </div>
+          )}
+
+          {/* Menu Items */}
+          <div style={{ padding: '10px 0' }}>
+            <div 
+              onClick={() => { navigate('/'); setMobileMenuOpen(false); }}
+              style={{ padding: '15px 20px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
+              <span style={{ fontSize: 15, color: '#262626' }}>Trang chủ</span>
+            </div>
+            
+            <div 
+              onClick={() => { navigate('/about'); setMobileMenuOpen(false); }}
+              style={{ padding: '15px 20px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
+              <span style={{ fontSize: 15, color: '#262626' }}>Giới thiệu</span>
+              <RightOutlined style={{ fontSize: 12, color: '#8c8c8c' }} />
+            </div>
+            
+            <div 
+              style={{ padding: '15px 20px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
+              <span style={{ fontSize: 15, color: '#262626' }}>Dịch vụ y tế</span>
+              <RightOutlined style={{ fontSize: 12, color: '#8c8c8c' }} />
+            </div>
+            
+            <div 
+              onClick={() => { navigate('/doctors'); setMobileMenuOpen(false); }}
+              style={{ padding: '15px 20px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
+              <span style={{ fontSize: 15, color: '#262626' }}>Đặt lịch khám</span>
+            </div>
+            
+            <div 
+              onClick={() => { navigate('/news'); setMobileMenuOpen(false); }}
+              style={{ padding: '15px 20px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
+              <span style={{ fontSize: 15, color: '#262626' }}>Tin tức</span>
+            </div>
+
+            {user && canChat && (
+              <div 
+                onClick={() => { navigate('/chat'); setMobileMenuOpen(false); }}
+                style={{ padding: '15px 20px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
+                <span style={{ fontSize: 15, color: '#262626' }}>Chat tư vấn</span>
+              </div>
+            )}
+
+            {user && (
+              <div 
+                onClick={() => { navigate('/appointments'); setMobileMenuOpen(false); }}
+                style={{ padding: '15px 20px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
+                <span style={{ fontSize: 15, color: '#262626' }}>Lịch hẹn</span>
+              </div>
+            )}
+          </div>
+
+          {/* User Actions */}
+          {user && (
+            <div style={{ padding: '20px', borderTop: '1px solid #f0f0f0' }}>
+              <div 
+                onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
+                style={{ padding: '12px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+              >
+                <UserOutlined />
+                <span>Hồ sơ của tôi</span>
+              </div>
+              
+              {isAdmin && (
+                <div 
+                  onClick={() => { navigate('/admin'); setMobileMenuOpen(false); }}
+                  style={{ padding: '12px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+                >
+                  <DashboardOutlined />
+                  <span>Quản trị</span>
+                </div>
+              )}
+              
+              {isDoctor && (
+                <div 
+                  onClick={() => { navigate('/doctor/dashboard'); setMobileMenuOpen(false); }}
+                  style={{ padding: '12px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+                >
+                  <SettingOutlined />
+                  <span>Quản lý lịch</span>
+                </div>
+              )}
+              
+              <div 
+                onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                style={{ padding: '12px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, color: '#f5222d' }}
+              >
+                <LogoutOutlined />
+                <span>Đăng xuất</span>
+              </div>
+            </div>
+          )}
+
+          {/* Hotline */}
+          <div style={{ padding: '20px', background: '#f5f5f5' }}>
+            <div style={{ fontSize: 12, color: '#8c8c8c', marginBottom: 5 }}>Đường dây nóng</div>
+            <a href={`tel:${siteSettings.hotline}`} style={{ fontSize: 18, fontWeight: 600, color: '#1890ff', textDecoration: 'none' }}>
+              <PhoneOutlined /> {siteSettings.hotline}
+            </a>
+          </div>
+        </div>
+      </Drawer>
+    </>
   );
 }
 

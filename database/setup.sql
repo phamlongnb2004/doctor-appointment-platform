@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     phone VARCHAR(20) NOT NULL,
-    role VARCHAR(20) NOT NULL,
+    role ENUM('ADMIN','DOCTOR','PATIENT','CONSULTANT') NOT NULL,
     profile_image LONGTEXT,
     cover_image LONGTEXT,
     created_at DATETIME NOT NULL,
@@ -80,8 +80,14 @@ INSERT INTO users (email, password, first_name, last_name, phone, role, created_
 VALUES ('patient@doctor.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'Le Thi', 'Patient', '0900123456', 'PATIENT', NOW(), NOW(), TRUE)
 ON DUPLICATE KEY UPDATE first_name = first_name;
 
+-- Tư vấn viên mẫu
+INSERT INTO users (email, password, first_name, last_name, phone, role, created_at, updated_at, active)
+VALUES ('consultant@doctor.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'Nguyen Van', 'Consultant', '0911222333', 'CONSULTANT', NOW(), NOW(), TRUE)
+ON DUPLICATE KEY UPDATE first_name = first_name;
+
 SELECT '=== Setup completed successfully! ===' as status;
 SELECT '=== Default Password: password123 ===' as info;
 SELECT 'Admin: admin@doctor.com / password123' as admin;
 SELECT 'Doctor: doctor@doctor.com / password123' as doctor;
 SELECT 'Patient: patient@doctor.com / password123' as patient;
+SELECT 'Consultant: consultant@doctor.com / password123' as consultant;

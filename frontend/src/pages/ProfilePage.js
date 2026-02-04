@@ -110,7 +110,8 @@ function ProfilePage({ user, onUserUpdate }) {
     switch (role) {
       case 'ADMIN': return 'red';
       case 'DOCTOR': return 'blue';
-      case 'PATIENT': return 'green';
+      case 'CONSULTANT': return 'green';
+      case 'PATIENT': return 'cyan';
       default: return 'default';
     }
   };
@@ -119,6 +120,7 @@ function ProfilePage({ user, onUserUpdate }) {
     switch (role) {
       case 'ADMIN': return 'Quản trị viên';
       case 'DOCTOR': return 'Bác sĩ';
+      case 'CONSULTANT': return 'Tư vấn viên';
       case 'PATIENT': return 'Bệnh nhân';
       default: return role;
     }
@@ -149,7 +151,7 @@ function ProfilePage({ user, onUserUpdate }) {
   const upcomingCount = appointments.filter(a => ['PENDING', 'CONFIRMED'].includes(a.status)).length;
 
   return (
-    <div ref={flowerContainerRef} className="profile-page" style={{ padding: '0 0 50px 0' }}>
+    <div ref={flowerContainerRef} className="profile-page" style={{ padding: '0 24px 50px 24px' }}>
       {/* Cover Image Section */}
       <div className="cover-section" style={{ position: 'relative', height: 280 }}>
         <div style={{ 

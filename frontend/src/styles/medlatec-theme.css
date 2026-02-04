@@ -1,0 +1,634 @@
+/* Medlatec Theme - Professional Medical Design */
+
+/* Color Variables */
+:root {
+  --primary-green: #52c41a;
+  --primary-green-dark: #389e0d;
+  --primary-green-light: #73d13d;
+  --secondary-blue: #1890ff;
+  --accent-red: #f5222d;
+  --text-primary: #262626;
+  --text-secondary: #666666;
+  --background-light: #f8f9fa;
+  --white: #ffffff;
+  --border-light: #f0f0f0;
+  --shadow-light: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-medium: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-heavy: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+/* Global Styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background-color: var(--white);
+}
+
+/* Medical Professional Buttons */
+.btn-medical-primary {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+  border: none;
+  color: white;
+  font-weight: 600;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-medical-primary:hover {
+  background: linear-gradient(135deg, var(--primary-green-dark) 0%, #237804 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(82, 196, 26, 0.4);
+}
+
+.btn-medical-secondary {
+  background: transparent;
+  border: 2px solid var(--primary-green);
+  color: var(--primary-green);
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-medical-secondary:hover {
+  background: var(--primary-green);
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* Medical Cards */
+.medical-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.medical-card:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-4px);
+  border-color: var(--primary-green);
+}
+
+.medical-card-header {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+  color: white;
+  padding: 16px 20px;
+  font-weight: 600;
+}
+
+.medical-card-body {
+  padding: 20px;
+}
+
+/* Professional Stats Cards */
+.stats-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: var(--shadow-light);
+  border-top: 4px solid var(--primary-green);
+  transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+}
+
+.stats-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--primary-green);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stats-label {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Medical Specialty Cards */
+.specialty-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.specialty-card:hover {
+  border-color: var(--primary-green);
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-4px);
+}
+
+.specialty-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.specialty-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.specialty-patients {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+/* Doctor Cards */
+.doctor-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.doctor-card:hover {
+  box-shadow: var(--shadow-heavy);
+  transform: translateY(-6px);
+  border-color: var(--primary-green);
+}
+
+.doctor-avatar {
+  margin-bottom: 16px;
+  border: 3px solid var(--primary-green);
+}
+
+.doctor-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.doctor-specialty {
+  background: var(--primary-green);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.doctor-rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* Service Cards */
+.service-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  height: 100%;
+}
+
+.service-card:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-4px);
+  border-color: var(--primary-green);
+}
+
+.service-icon {
+  margin-bottom: 16px;
+}
+
+.service-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.service-description {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Medical Badges */
+.medical-badge {
+  background: var(--primary-green);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.medical-badge.secondary {
+  background: var(--secondary-blue);
+}
+
+.medical-badge.danger {
+  background: var(--accent-red);
+}
+
+/* Professional Sections */
+.medical-section {
+  padding: 80px 24px;
+}
+
+.medical-section.primary {
+  background: var(--background-light);
+}
+
+.medical-section.white {
+  background: white;
+}
+
+.medical-section.dark {
+  background: linear-gradient(135deg, #262626 0%, #434343 100%);
+  color: white;
+}
+
+/* Medical Typography */
+.medical-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.medical-subtitle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.medical-hero-title {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 24px;
+}
+
+/* Medical Animations */
+@keyframes medical-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(82, 196, 26, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0);
+  }
+}
+
+.medical-pulse {
+  animation: medical-pulse 2s infinite;
+}
+
+@keyframes medical-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.medical-float {
+  animation: medical-float 3s ease-in-out infinite;
+}
+
+/* Medical Gradients */
+.medical-gradient-primary {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+}
+
+.medical-gradient-secondary {
+  background: linear-gradient(135deg, var(--secondary-blue) 0%, #096dd9 100%);
+}
+
+.medical-gradient-text {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Doctor Team Section - Exact Medlatec Style */
+.team-item {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+  color: #132432;
+  width: 25%;
+  min-width: 280px;
+  padding: 20px 30px 0;
+  margin-bottom: 60px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.team-item:hover {
+  transform: translateY(-8px);
+}
+
+.team-item-photo {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #1890ff;
+  background: #f0f9ff;
+}
+
+.team-item-photo img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  z-index: 1;
+}
+
+.team-item-photo .circle {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #52c41a;
+  border: 2px solid #fff;
+  z-index: 2;
+}
+
+.team-item-details h3 {
+  margin-bottom: 8px;
+  color: #132432;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.team-item-details h3 a {
+  color: #132432;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.team-item-details h3 a:hover {
+  color: #1890ff;
+}
+
+.team-item-meta {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 12px;
+  font-weight: 400;
+}
+
+.team-item-review {
+  margin-bottom: 12px;
+}
+
+.team-item-review img {
+  height: 16px;
+}
+
+.team-item-excerpt {
+  color: #666;
+  font-size: 13px;
+  line-height: 20px;
+  margin-bottom: 16px;
+}
+
+.team-item-actions a {
+  display: inline-block;
+  background: #1890ff;
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.team-item-actions a:hover {
+  background: #40a9ff;
+  transform: translateY(-2px);
+  color: #fff;
+}
+
+/* Responsive Design for Team Section */
+@media (max-width: 1200px) {
+  .team-item {
+    width: 33.333%;
+  }
+}
+
+@media (max-width: 768px) {
+  .team-item {
+    width: 50%;
+    padding: 20px 15px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .team-item {
+    width: 100%;
+    padding: 20px 10px 0;
+  }
+  
+  .team-item-photo {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+/* Medical Form Styles */
+.medical-form {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: var(--shadow-medium);
+  border: 1px solid var(--border-light);
+}
+
+.medical-form-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.medical-input {
+  border-radius: 8px;
+  border: 2px solid var(--border-light);
+  padding: 12px 16px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.medical-input:focus {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(82, 196, 26, 0.1);
+}
+
+/* Medical Table Styles */
+.medical-table {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+}
+
+.medical-table th {
+  background: var(--background-light);
+  color: var(--text-primary);
+  font-weight: 600;
+  padding: 16px;
+  border-bottom: 2px solid var(--border-light);
+}
+
+.medical-table td {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.medical-table tr:hover {
+  background: rgba(82, 196, 26, 0.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .medical-hero-title {
+    font-size: 36px;
+  }
+  
+  .medical-title {
+    font-size: 28px;
+  }
+  
+  .medical-section {
+    padding: 60px 16px;
+  }
+  
+  .medical-card-body,
+  .service-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .medical-hero-title {
+    font-size: 28px;
+  }
+  
+  .medical-title {
+    font-size: 24px;
+  }
+  
+  .medical-section {
+    padding: 40px 16px;
+  }
+}
+
+/* Additional Medlatec-specific styles */
+.medlatec-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.medlatec-section {
+  padding: 80px 24px;
+}
+
+.medlatec-section.primary {
+  background: #f8f9fa;
+}
+
+.medlatec-section.white {
+  background: #fff;
+}
+
+.medlatec-section.dark {
+  background: linear-gradient(135deg, #262626 0%, #434343 100%);
+  color: #fff;
+}
+
+/* Medlatec Button Styles */
+.btn-medlatec-primary {
+  background: #1890ff;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-medlatec-primary:hover {
+  background: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+}
+
+.btn-medlatec-outline {
+  background: transparent;
+  border: 2px solid #1890ff;
+  color: #1890ff;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-medlatec-outline:hover {
+  background: #1890ff;
+  color: #fff;
+  transform: translateY(-1px);
+}

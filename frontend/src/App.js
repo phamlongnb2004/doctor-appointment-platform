@@ -1,6 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Layout } from 'antd';
+import './styles/medlatec-theme.css';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -9,9 +10,134 @@ import DoctorDetailPage from './pages/DoctorDetailPage';
 import AppointmentPage from './pages/AppointmentPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminDashboard from './pages/AdminDashboard';
+import ChatPage from './pages/ChatPage';
+import AdminCMSPage from './pages/AdminCMSPage';
+import DoctorArticlesPage from './pages/DoctorArticlesPage';
+import NewsDetailPage from './pages/NewsDetailPage';
+import NewsListPage from './pages/NewsListPage';
+import AboutPage from './pages/AboutPage';
 import Header from './components/Header';
+import Footer from './components/Footer';
+import webSocketService from './services/websocket';
 
-const { Content, Footer } = Layout;
+const { Content } = Layout;
+
+function AppContent({ user, isAuthenticated, handleLogin, handleLogout, handleUserUpdate }) {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  
+  const isAdmin = user?.role === 'ADMIN';
+  const isDoctor = user?.role === 'DOCTOR';
+  const isConsultant = user?.role === 'CONSULTANT';
+  const canChat = isAuthenticated && (isAdmin || isDoctor || isConsultant || user?.role === 'PATIENT');
+
+  return (
+    <Layout className="layout">
+      {!isAdminRoute && <Header user={user} onLogout={handleLogout} />}
+      <Content style={{ padding: '0' }}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/doctors" element={<DoctorListPage />} />
+          <Route path="/doctors/:id" element={<DoctorDetailPage />} />
+          <Route path="/news" element={<NewsListPage />} />
+          <Route path="/news/:slug" element={<NewsDetailPage />} />
+          
+          {/* Protected Routes */}
+          <Route
+            path="/appointments"
+            element={isAuthenticated ? <AppointmentPage user={user} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/profile"
+            element={isAuthenticated ? (
+              <ProfilePage user={user} onUserUpdate={handleUserUpdate} />
+            ) : (
+              <Navigate to="/login" />
+            )}
+          />
+          
+          {/* Chat Route - Available for all authenticated users */}
+          <Route
+            path="/chat"
+            element={canChat ? (
+              <ChatPage user={user} />
+            ) : (
+              <Navigate to="/login" />
+            )}
+          />
+          
+          {/* Doctor Articles Route - For doctors only */}
+          <Route
+            path="/doctor/articles"
+            element={
+              isAuthenticated && isDoctor ? (
+                <DoctorArticlesPage user={user} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          
+          {/* Admin Only Routes */}
+          <Route
+            path="/admin"
+            element={
+              isAuthenticated && isAdmin ? (
+                <AdminDashboard user={user} onLogout={handleLogout} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/admin/cms"
+            element={
+              isAuthenticated && isAdmin ? (
+                <AdminCMSPage />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              isAuthenticated && isAdmin ? (
+                <AdminDashboard user={user} onLogout={handleLogout} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/admin/doctors"
+            element={
+              isAuthenticated && isAdmin ? (
+                <AdminDashboard user={user} onLogout={handleLogout} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/admin/appointments"
+            element={
+              isAuthenticated && isAdmin ? (
+                <AdminDashboard user={user} onLogout={handleLogout} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+        </Routes>
+      </Content>
+      {!isAdminRoute && <Footer />}
+    </Layout>
+  );
+}
 
 function App() {
   // Initialize state from localStorage
@@ -50,6 +176,16 @@ function App() {
           setUser(parsedUser);
           setIsAuthenticated(true);
           console.log('User restored from localStorage');
+
+          // Reconnect to WebSocket if sessionId exists
+          const sessionId = localStorage.getItem('sessionId');
+          const userId = localStorage.getItem('userId');
+          if (sessionId && userId) {
+            console.log('Reconnecting WebSocket for user:', userId);
+            webSocketService.connect(parseInt(userId), sessionId, (status) => {
+              console.log('WebSocket status update:', status);
+            });
+          }
         }
       } catch (error) {
         console.error('Error parsing stored user:', error);
@@ -66,15 +202,34 @@ function App() {
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('auth_time', Date.now().toString());
     console.log('User saved to localStorage');
+
+    // Connect to WebSocket for real-time status if sessionId exists
+    if (userData.sessionId) {
+      localStorage.setItem('sessionId', userData.sessionId);
+      webSocketService.connect(userData.id, userData.sessionId, (status) => {
+        console.log('WebSocket status update:', status);
+      });
+      console.log('WebSocket connected for user:', userData.id);
+    }
   };
 
   const handleLogout = () => {
     console.log('Logging out user');
+
+    // Disconnect WebSocket
+    webSocketService.disconnect();
+
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     localStorage.removeItem('auth_time');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('sessionId');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userFirstName');
+    localStorage.removeItem('userLastName');
+    localStorage.removeItem('userRole');
   };
 
   const handleUserUpdate = (updatedUser) => {
@@ -116,80 +271,18 @@ function App() {
 
   const isAdmin = user?.role === 'ADMIN';
   const isDoctor = user?.role === 'DOCTOR';
+  const isConsultant = user?.role === 'CONSULTANT';
+  const canChat = isAuthenticated && (isAdmin || isDoctor || isConsultant || user?.role === 'PATIENT');
 
   return (
     <Router>
-      <Layout className="layout">
-        <Header user={user} onLogout={handleLogout} />
-        <Content style={{ padding: '50px' }}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/doctors" element={<DoctorListPage />} />
-            <Route path="/doctors/:id" element={<DoctorDetailPage />} />
-            
-            {/* Protected Routes */}
-            <Route
-              path="/appointments"
-              element={isAuthenticated ? <AppointmentPage user={user} /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/profile"
-              element={isAuthenticated ? (
-                <ProfilePage user={user} onUserUpdate={handleUserUpdate} />
-              ) : (
-                <Navigate to="/login" />
-              )}
-            />
-            
-            {/* Admin Only Routes */}
-            <Route
-              path="/admin"
-              element={
-                isAuthenticated && isAdmin ? (
-                  <AdminDashboard user={user} onLogout={handleLogout} />
-                ) : (
-                  <Navigate to="/login" />
-                )
-              }
-            />
-            <Route
-              path="/admin/users"
-              element={
-                isAuthenticated && isAdmin ? (
-                  <AdminDashboard user={user} onLogout={handleLogout} />
-                ) : (
-                  <Navigate to="/login" />
-                )
-              }
-            />
-            <Route
-              path="/admin/doctors"
-              element={
-                isAuthenticated && isAdmin ? (
-                  <AdminDashboard user={user} onLogout={handleLogout} />
-                ) : (
-                  <Navigate to="/login" />
-                )
-              }
-            />
-            <Route
-              path="/admin/appointments"
-              element={
-                isAuthenticated && isAdmin ? (
-                  <AdminDashboard user={user} onLogout={handleLogout} />
-                ) : (
-                  <Navigate to="/login" />
-                )
-              }
-            />
-          </Routes>
-        </Content>
-        <Footer style={{ textAlign: 'center' }}>
-          Doctor Appointment Platform ©2024 Created by Your Company
-        </Footer>
-      </Layout>
+      <AppContent 
+        user={user}
+        isAuthenticated={isAuthenticated}
+        handleLogin={handleLogin}
+        handleLogout={handleLogout}
+        handleUserUpdate={handleUserUpdate}
+      />
     </Router>
   );
 }

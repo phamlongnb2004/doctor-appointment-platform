@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Typography, Button, Tabs, Avatar, Rate, Tag, DatePicker, Select, message, Spin } from 'antd';
-import { UserOutlined, CalendarOutlined, ClockCircleOutlined, EnvironmentOutlined, StarOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Typography, Button, Tabs, Avatar, Rate, Tag, DatePicker, Select, message, Spin, Space } from 'antd';
+import { UserOutlined, CalendarOutlined, ClockCircleOutlined, EnvironmentOutlined, StarOutlined, ArrowLeftOutlined, MessageOutlined } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doctorAPI } from '../services/api';
+import cmsAPI from '../services/cmsApi';
+import ChatButton from '../components/ChatButton';
 import useFallingFlowers from '../hooks/useFallingFlowers';
 import '../styles/animations.css';
 
@@ -16,10 +18,22 @@ function DoctorDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [articles, setArticles] = useState([]);
   const flowerContainerRef = useFallingFlowers(5);
 
   useEffect(() => {
     fetchDoctor();
+    fetchDoctorArticles();
+    // Lấy thông tin user hiện tại từ localStorage
+    const userData = {
+      id: parseInt(localStorage.getItem('userId')),
+      email: localStorage.getItem('userEmail'),
+      firstName: localStorage.getItem('userFirstName'),
+      lastName: localStorage.getItem('userLastName'),
+      role: localStorage.getItem('userRole')
+    };
+    setCurrentUser(userData);
   }, [id]);
 
   const fetchDoctor = async () => {
@@ -32,6 +46,15 @@ function DoctorDetailPage() {
       message.error('Không tìm thấy bác sĩ!');
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const fetchDoctorArticles = async () => {
+    try {
+      const response = await cmsAPI.getArticlesByDoctor(id);
+      setArticles(response.data || []);
+    } catch (error) {
+      console.error('Error fetching articles:', error);
     }
   };
 
@@ -99,6 +122,25 @@ function DoctorDetailPage() {
                   </Text>
                 </div>
               </div>
+
+              {/* Chat Button */}
+              {currentUser && (
+                <div style={{ marginTop: 20 }}>
+                  <ChatButton
+                    currentUser={currentUser}
+                    targetUser={{
+                      id: doctor.user?.id,
+                      email: doctor.user?.email,
+                      firstName: doctor.user?.firstName,
+                      lastName: doctor.user?.lastName,
+                      role: 'DOCTOR'
+                    }}
+                    type="primary"
+                    size="large"
+                    block={true}
+                  />
+                </div>
+              )}
             </Card>
 
             {/* Quick Info */}
@@ -217,6 +259,71 @@ function DoctorDetailPage() {
                           Xác Nhận Đặt Lịch
                         </Button>
                       </>
+                    ),
+                  },
+                  {
+                    key: 'articles',
+                    label: 'Bài viết',
+                    children: (
+                      <div>
+                        {articles.length > 0 ? (
+                          <Row gutter={[16, 16]}>
+                            {articles.map((article) => (
+                              <Col xs={24} key={article.id}>
+                                <Card 
+                                  hoverable
+                                  style={{ borderRadius: 12, cursor: 'pointer' }}
+                                  onClick={() => navigate(`/news/${article.slug}`)}
+                                >
+                                  <Row gutter={16}>
+                                    {article.imageUrl && (
+                                      <Col xs={24} sm={8}>
+                                        <img 
+                                          src={article.imageUrl} 
+                                          alt={article.title}
+                                          style={{ 
+                                            width: '100%', 
+                                            height: 150, 
+                                            objectFit: 'cover',
+                                            borderRadius: 8
+                                          }}
+                                        />
+                                      </Col>
+                                    )}
+                                    <Col xs={24} sm={article.imageUrl ? 16 : 24}>
+                                      <Title level={4} style={{ marginTop: 0 }}>
+                                        {article.title}
+                                      </Title>
+                                      <Paragraph ellipsis={{ rows: 3 }}>
+                                        {article.excerpt}
+                                      </Paragraph>
+                                      <Space>
+                                        <Text type="secondary">
+                                          <CalendarOutlined /> {new Date(article.publishedAt).toLocaleDateString('vi-VN')}
+                                        </Text>
+                                        <Button 
+                                          type="link" 
+                                          size="small"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/news/${article.slug}`);
+                                          }}
+                                        >
+                                          Xem chi tiết →
+                                        </Button>
+                                      </Space>
+                                    </Col>
+                                  </Row>
+                                </Card>
+                              </Col>
+                            ))}
+                          </Row>
+                        ) : (
+                          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                            <Text type="secondary">Bác sĩ chưa có bài viết nào</Text>
+                          </div>
+                        )}
+                      </div>
                     ),
                   },
                 ]}

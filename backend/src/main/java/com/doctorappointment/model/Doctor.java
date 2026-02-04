@@ -1,10 +1,12 @@
 package com.doctorappointment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "doctors")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Doctor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,6 +14,7 @@ public class Doctor {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JsonIgnoreProperties({"password", "appointments", "reviews", "hibernateLazyInitializer", "handler"})
     private User user;
 
     @Column(nullable = false)

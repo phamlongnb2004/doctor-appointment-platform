@@ -347,3 +347,147 @@
   max-width: 400px;
   margin: 0 auto;
 }
+
+/* ========================================
+   ADMIN DASHBOARD TABLE STYLES
+   ======================================== */
+
+/* Fix for Recent Users table - prevent text overflow */
+.admin-table-container .ant-table {
+  min-width: 100%;
+}
+
+.admin-table-container .ant-table-thead > tr > th {
+  white-space: nowrap;
+  padding: 12px 16px;
+}
+
+.admin-table-container .ant-table-tbody > tr > td {
+  white-space: nowrap;
+  padding: 12px 16px;
+}
+
+/* Recent users compact table on dashboard */
+.dashboard-recent-table {
+  width: 100%;
+  overflow: hidden;
+}
+
+.dashboard-recent-table .ant-table-wrapper {
+  overflow-x: auto;
+}
+
+.dashboard-recent-table .ant-table {
+  min-width: 700px !important;
+}
+
+.dashboard-recent-table .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+  font-size: 13px;
+  color: #333;
+  padding: 10px 12px;
+  white-space: nowrap;
+}
+
+.dashboard-recent-table .ant-table-tbody > tr > td {
+  padding: 10px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.dashboard-recent-table .ant-table-cell {
+  min-width: 100px;
+}
+
+.dashboard-recent-table .ant-table-cell:nth-child(1) { min-width: 140px; } /* Họ tên */
+.dashboard-recent-table .ant-table-cell:nth-child(2) { min-width: 180px; } /* Email */
+.dashboard-recent-table .ant-table-cell:nth-child(3) { min-width: 110px; } /* Số điện thoại */
+.dashboard-recent-table .ant-table-cell:nth-child(4) { min-width: 90px; } /* Vai trò */
+.dashboard-recent-table .ant-table-cell:nth-child(5) { min-width: 90px; } /* Trạng thái */
+.dashboard-recent-table .ant-table-cell:nth-child(6) { min-width: 100px; } /* Hành động */
+
+/* ========================================
+   HEADER RESPONSIVE
+   ======================================== */
+
+/* Mobile menu button - hidden by default, show on mobile */
+.mobile-menu-button {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  /* Show mobile menu button on right */
+  .mobile-menu-button {
+    display: inline-flex !important;
+  }
+
+  /* Hide desktop navigation menu */
+  .ant-layout-header + div {
+    display: none !important;
+  }
+
+  /* Adjust header layout for mobile */
+  .ant-layout-header > div > div {
+    gap: 8px !important;
+  }
+
+  /* Logo - left on mobile */
+  .header-logo {
+    flex: 0 0 auto !important;
+  }
+  
+  /* Search bar - center, full width on mobile */
+  .header-search {
+    flex: 1 !important;
+    max-width: none !important;
+    margin: 0 8px !important;
+  }
+
+  /* Hide other right side items (hotline, post, user) on mobile */
+  .header-right > a,
+  .header-right > button:not(.mobile-menu-button),
+  .header-right > div:not(.mobile-menu-button) {
+    display: none !important;
+  }
+  
+  /* Adjust header padding */
+  .ant-layout-header {
+    padding: 0 12px !important;
+  }
+  
+  /* Make logo smaller */
+  .header-logo img,
+  .header-logo > div:first-child {
+    width: 28px !important;
+    height: 28px !important;
+  }
+  
+  /* Hide logo text on mobile, keep only icon */
+  .header-logo > div:last-child {
+    display: none !important;
+  }
+
+  /* Make search input smaller */
+  .header-search input {
+    font-size: 13px !important;
+    height: 36px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Even more compact on very small screens */
+  .ant-layout-header {
+    padding: 0 8px !important;
+  }
+
+  /* Make search input even smaller */
+  .header-search input {
+    font-size: 12px !important;
+    height: 32px !important;
+  }
+  
+  .header-search {
+    margin: 0 6px !important;
+  }
+}

@@ -1,0 +1,567 @@
+/* About Page Styles */
+.about-page {
+  min-height: 100vh;
+  background: #fff;
+}
+
+/* Hero Section */
+.about-hero {
+  position: relative;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease;
+}
+
+.about-hero.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.about-hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+  opacity: 0.3;
+}
+
+.about-hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 24px;
+  max-width: 800px;
+}
+
+.about-hero-title {
+  color: #fff !important;
+  font-size: 64px !important;
+  font-weight: 800 !important;
+  margin-bottom: 16px !important;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  animation: fadeInUp 0.8s ease;
+}
+
+.about-hero-subtitle {
+  color: rgba(255,255,255,0.95) !important;
+  font-size: 20px !important;
+  margin: 0 !important;
+  animation: fadeInUp 0.8s ease 0.2s backwards;
+}
+
+.about-hero-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.about-hero-wave svg {
+  position: relative;
+  display: block;
+  width: calc(100% + 1.3px);
+  height: 80px;
+}
+
+.about-hero-wave path {
+  fill: #fff;
+}
+
+/* Common Section Styles */
+.about-section {
+  padding: 100px 0;
+  position: relative;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.about-section-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.about-label {
+  display: block;
+  color: #1890ff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.about-section-header h2 {
+  font-size: 42px !important;
+  font-weight: 700 !important;
+  color: #262626 !important;
+  margin: 0 !important;
+}
+
+.text-primary {
+  color: #1890ff;
+}
+
+/* Mission Section */
+.about-mission {
+  background: #f8f9fa;
+}
+
+.about-mission-image {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  animation: fadeInLeft 0.8s ease;
+}
+
+.about-mission-image img {
+  width: 100%;
+  height: 500px;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.about-mission-image:hover img {
+  transform: scale(1.05);
+}
+
+.about-mission-badge {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  color: #fff;
+  padding: 20px 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(24,144,255,0.4);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.about-mission-badge .anticon {
+  font-size: 28px;
+}
+
+.about-mission-content {
+  animation: fadeInRight 0.8s ease;
+}
+
+.about-mission-content h2 {
+  margin-bottom: 24px !important;
+}
+
+.about-text {
+  font-size: 16px !important;
+  line-height: 1.8 !important;
+  color: #595959 !important;
+  margin-bottom: 16px !important;
+}
+
+.about-mission-features {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  color: #262626;
+  font-weight: 500;
+}
+
+.feature-item .anticon {
+  color: #52c41a;
+  font-size: 20px;
+}
+
+/* Core Values */
+.about-values {
+  background: #fff;
+}
+
+.value-card {
+  text-align: center;
+  border-radius: 16px !important;
+  border: 1px solid #f0f0f0 !important;
+  transition: all 0.3s ease !important;
+  animation: fadeInUp 0.6s ease backwards;
+  height: 100%;
+}
+
+.value-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12) !important;
+}
+
+.value-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+  display: inline-block;
+  animation: pulse 2s ease infinite;
+}
+
+.value-card h4 {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  margin-bottom: 12px !important;
+  color: #262626 !important;
+}
+
+.value-card p {
+  color: #8c8c8c !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  margin: 0 !important;
+}
+
+/* Achievements */
+.about-achievements {
+  position: relative;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  overflow: hidden;
+}
+
+.about-achievements-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
+  opacity: 0.5;
+}
+
+.achievement-card {
+  text-align: center;
+  padding: 40px 20px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.6s ease backwards;
+}
+
+.achievement-card:hover {
+  transform: translateY(-8px);
+  background: rgba(255,255,255,0.15);
+}
+
+.achievement-icon {
+  font-size: 48px;
+  color: #fff;
+  margin-bottom: 20px;
+  animation: bounce 2s ease infinite;
+}
+
+.achievement-title {
+  display: block;
+  color: rgba(255,255,255,0.9) !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  margin-top: 12px !important;
+}
+
+/* Timeline */
+.about-timeline {
+  background: #f8f9fa;
+}
+
+.timeline-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.timeline-card {
+  border-radius: 16px !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+  transition: all 0.3s ease !important;
+}
+
+.timeline-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+}
+
+.timeline-year {
+  display: inline-block;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.timeline-card h4 {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  margin-bottom: 8px !important;
+  color: #262626 !important;
+}
+
+.timeline-card p {
+  color: #8c8c8c !important;
+  margin: 0 !important;
+}
+
+/* Team */
+.about-team {
+  background: #fff;
+}
+
+.team-card {
+  border-radius: 16px !important;
+  border: 1px solid #f0f0f0 !important;
+  overflow: hidden !important;
+  transition: all 0.3s ease !important;
+  text-align: center;
+}
+
+.team-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12) !important;
+}
+
+.team-avatar-wrapper {
+  padding: 40px 20px 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e8e8e8 100%);
+  display: flex;
+  justify-content: center;
+}
+
+.team-avatar {
+  border: 4px solid #fff !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+  transition: transform 0.3s ease !important;
+}
+
+.team-card:hover .team-avatar {
+  transform: scale(1.1);
+}
+
+.team-name {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  margin-bottom: 8px !important;
+  color: #262626 !important;
+}
+
+.team-position {
+  display: block;
+  color: #1890ff !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+}
+
+.team-specialty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #8c8c8c;
+  font-size: 13px;
+}
+
+.team-specialty .anticon {
+  color: #52c41a;
+}
+
+/* CTA Section */
+.about-cta {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 120px 0 !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.about-cta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2"/></svg>');
+  opacity: 0.5;
+}
+
+.about-cta-content {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.about-cta-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary-large,
+.btn-secondary-large {
+  padding: 16px 40px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-primary-large {
+  background: #fff;
+  color: #667eea;
+}
+
+.btn-primary-large:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.btn-secondary-large {
+  background: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+}
+
+.btn-secondary-large:hover {
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-2px);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .about-hero {
+    height: 400px;
+  }
+
+  .about-hero-title {
+    font-size: 42px !important;
+  }
+
+  .about-hero-subtitle {
+    font-size: 16px !important;
+  }
+
+  .about-section {
+    padding: 60px 0;
+  }
+
+  .about-section-header h2 {
+    font-size: 32px !important;
+  }
+
+  .about-mission-image {
+    margin-bottom: 40px;
+  }
+
+  .about-mission-image img {
+    height: 300px;
+  }
+
+  .about-cta {
+    padding: 80px 0 !important;
+  }
+
+  .about-cta-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-primary-large,
+  .btn-secondary-large {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .about-hero-title {
+    font-size: 36px !important;
+  }
+
+  .about-section-header h2 {
+    font-size: 28px !important;
+  }
+
+  .achievement-card {
+    padding: 30px 15px;
+  }
+}

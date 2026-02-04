@@ -39,6 +39,43 @@ public class ImageService {
     }
 
     /**
+     * Upload article image (for article content and featured images)
+     */
+    public String uploadArticleImage(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+
+        // Validate file type
+        String contentType = file.getContentType();
+        if (contentType == null || !isValidImageType(contentType)) {
+            throw new IllegalArgumentException("Invalid file type. Only images are allowed.");
+        }
+
+        // Validate file size (max 5MB)
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new IllegalArgumentException("File size must be less than 5MB");
+        }
+
+        // Create upload directory for articles
+        String folderPath = "D:/DoAn/doctor-appointment-platform/uploads/articles";
+        Path uploadDir = Paths.get(folderPath).toAbsolutePath().normalize();
+        Files.createDirectories(uploadDir);
+
+        // Generate unique filename
+        String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String fileExtension = getFileExtension(originalFileName);
+        String newFileName = UUID.randomUUID().toString() + fileExtension;
+
+        // Save file
+        Path targetPath = uploadDir.resolve(newFileName);
+        Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+        // Return URL
+        return baseUrl + "/api/images/articles/" + newFileName;
+    }
+
+    /**
      * Generic image upload method
      */
     private String uploadImage(Long userId, MultipartFile file, String type) throws IOException {
