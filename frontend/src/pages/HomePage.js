@@ -13,6 +13,9 @@ import '../styles/homepage.css';
 
 const { Title, Paragraph, Text } = Typography;
 
+// Get API base URL from environment variable
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 function HomePage() {
   const [topDoctors, setTopDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -202,7 +205,7 @@ function HomePage() {
     
     setSubscribing(true);
     try {
-      const response = await axios.post('http://localhost:8080/api/api/newsletter/subscribe', {
+      const response = await axios.post(`${API_BASE_URL}/newsletter/subscribe`, {
         email: newsletterEmail,
         name: newsletterName,
         phone: newsletterPhone
@@ -224,7 +227,7 @@ function HomePage() {
     }
     
     try {
-      const response = await axios.post('http://localhost:8080/api/api/newsletter/verify', {
+      const response = await axios.post(`${API_BASE_URL}/newsletter/verify`, {
         email: newsletterEmail,
         code: verificationCode
       });

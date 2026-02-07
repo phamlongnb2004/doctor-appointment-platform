@@ -58,6 +58,9 @@ const { Option } = Select;
 const { Text } = Typography;
 const { Sider, Content } = Layout;
 
+// Get API base URL from environment variable
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 function AdminCMSPage() {
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -144,7 +147,7 @@ function AdminCMSPage() {
       const userId = localStorage.getItem('userId');
       console.log('Fetching avatar for userId:', userId);
       if (userId) {
-        const response = await axios.get(`http://localhost:8080/api/users/${userId}`, {
+        const response = await axios.get(`${API_BASE_URL}/users/${userId}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -155,7 +158,7 @@ function AdminCMSPage() {
           // profileImage already contains full URL or relative path
           const avatarUrl = response.data.profileImage.startsWith('http') 
             ? response.data.profileImage 
-            : `http://localhost:8080${response.data.profileImage}`;
+            : `${API_BASE_URL.replace('/api', '')}${response.data.profileImage}`;
           console.log('Setting avatar URL:', avatarUrl);
           setUserAvatar(avatarUrl);
         } else {
@@ -206,17 +209,17 @@ function AdminCMSPage() {
         serviceCategoriesRes,
         medicalServicesRes
       ] = await Promise.all([
-        fetchWithFallback('http://localhost:8080/api/cms/admin/homepage-content/all', 'http://localhost:8080/api/cms/homepage-content'),
-        fetchWithFallback('http://localhost:8080/api/cms/admin/services/all', 'http://localhost:8080/api/cms/services'),
+        fetchWithFallback(`${API_BASE_URL}/cms/admin/homepage-content/all`, `${API_BASE_URL}/cms/homepage-content`),
+        fetchWithFallback(`${API_BASE_URL}/cms/admin/services/all`, `${API_BASE_URL}/cms/services`),
         cmsAPI.getLatestNews(100), // Get more for admin
-        fetchWithFallback('http://localhost:8080/api/cms/admin/testimonials/all', 'http://localhost:8080/api/cms/testimonials'),
+        fetchWithFallback(`${API_BASE_URL}/cms/admin/testimonials/all`, `${API_BASE_URL}/cms/testimonials`),
         cmsAPI.getAllArticlesForAdmin(),
-        fetchWithFallback('http://localhost:8080/api/cms/admin/features/all', 'http://localhost:8080/api/cms/features'),
-        fetchWithFallback('http://localhost:8080/api/cms/admin/banners/all', 'http://localhost:8080/api/cms/banners'),
+        fetchWithFallback(`${API_BASE_URL}/cms/admin/features/all`, `${API_BASE_URL}/cms/features`),
+        fetchWithFallback(`${API_BASE_URL}/cms/admin/banners/all`, `${API_BASE_URL}/cms/banners`),
         cmsAPI.getBannersByPage('news'), // Fetch news banners separately
-        fetchWithFallback('http://localhost:8080/api/cms/admin/specialties/all', 'http://localhost:8080/api/cms/specialties'),
-        fetchWithFallback('http://localhost:8080/api/cms/admin/statistics/all', 'http://localhost:8080/api/cms/statistics'),
-        fetchWithFallback('http://localhost:8080/api/cms/admin/certifications/all', 'http://localhost:8080/api/cms/certifications'),
+        fetchWithFallback(`${API_BASE_URL}/cms/admin/specialties/all`, `${API_BASE_URL}/cms/specialties`),
+        fetchWithFallback(`${API_BASE_URL}/cms/admin/statistics/all`, `${API_BASE_URL}/cms/statistics`),
+        fetchWithFallback(`${API_BASE_URL}/cms/admin/certifications/all`, `${API_BASE_URL}/cms/certifications`),
         cmsAPI.getSiteSettings(),
         cmsAPI.getAllNewsCategories(),
         cmsAPI.getAllMembershipBenefits(),
@@ -370,7 +373,7 @@ function AdminCMSPage() {
     setUploading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:8080/api/images/articles', formData, {
+      const response = await axios.post(`${API_BASE_URL}/images/articles`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}`
@@ -422,7 +425,7 @@ function AdminCMSPage() {
         const formData = new FormData();
         formData.append('image', fileItem.originFileObj || fileItem);
         
-        const response = await axios.post('http://localhost:8080/api/images/articles', formData, {
+        const response = await axios.post(`${API_BASE_URL}/images/articles`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${token}`
@@ -549,7 +552,7 @@ function AdminCMSPage() {
       params.append('type', type);
       
       const response = await axios.get(
-        `http://localhost:8080/api/cms/slug/check/${slug}?${params.toString()}`
+        `${API_BASE_URL}/cms/slug/check/${slug}?${params.toString()}`
       );
       
       console.log('Slug check response:', response.data);
@@ -3043,7 +3046,7 @@ function AdminCMSPage() {
       setUploading(true);
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.post('http://localhost:8080/api/images/articles', formData, {
+        const response = await axios.post(`${API_BASE_URL}/images/articles`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${token}`
@@ -3151,7 +3154,7 @@ function AdminCMSPage() {
       setUploading(true);
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.post('http://localhost:8080/api/images/articles', formData, {
+        const response = await axios.post(`${API_BASE_URL}/images/articles`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${token}`
@@ -3645,7 +3648,7 @@ function AdminCMSPage() {
       setUploading(true);
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.post('http://localhost:8080/api/images/articles', formData, {
+        const response = await axios.post(`${API_BASE_URL}/images/articles`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${token}`
@@ -4753,7 +4756,7 @@ function AdminCMSPage() {
                           setUploading(true);
                           const formData = new FormData();
                           formData.append('image', file);
-                          const response = await axios.post('http://localhost:8080/api/images/articles', formData, {
+                          const response = await axios.post(`${API_BASE_URL}/images/articles`, formData, {
                             headers: {
                               'Content-Type': 'multipart/form-data',
                               'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -4842,7 +4845,7 @@ function AdminCMSPage() {
                         setUploading(true);
                         const formData = new FormData();
                         formData.append('image', file);
-                        const response = await axios.post('http://localhost:8080/api/images/articles', formData, {
+                        const response = await axios.post(`${API_BASE_URL}/images/articles`, formData, {
                           headers: {
                             'Content-Type': 'multipart/form-data',
                             'Authorization': `Bearer ${localStorage.getItem('token')}`

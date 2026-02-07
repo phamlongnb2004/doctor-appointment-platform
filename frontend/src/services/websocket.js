@@ -24,8 +24,10 @@ class WebSocketService {
     this.userId = userId;
     this.sessionId = sessionId;
 
-    // Create SockJS connection
-    const socket = new SockJS('http://localhost:8080/api/ws');
+    // Create SockJS connection - use environment variable
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+    const WS_URL = API_BASE_URL.replace('/api', '') + '/api/ws';
+    const socket = new SockJS(WS_URL);
 
     this.client = new Client({
       webSocketFactory: () => socket,

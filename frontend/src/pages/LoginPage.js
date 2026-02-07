@@ -21,20 +21,24 @@ function LoginPage({ onLogin }) {
       const response = await userAPI.login(values.email, values.password);
       const userData = response.data;
 
-      // Save token to localStorage
-      if (userData.token) {
-        localStorage.setItem('token', userData.token);
-        localStorage.setItem('userId', userData.id);
-        localStorage.setItem('sessionId', userData.sessionId);
-        localStorage.setItem('userEmail', userData.email);
-        localStorage.setItem('userFirstName', userData.firstName);
-        localStorage.setItem('userLastName', userData.lastName);
-        localStorage.setItem('userRole', userData.role);
-        if (userData.profileImage) {
-          localStorage.setItem('profileImageUrl', userData.profileImage);
-        }
-        console.log('Token saved to localStorage');
+      // Check if login was successful
+      if (!userData || !userData.token) {
+        message.error('Email hoặc mật khẩu không đúng!');
+        return;
       }
+
+      // Save token to localStorage
+      localStorage.setItem('token', userData.token);
+      localStorage.setItem('userId', userData.id);
+      localStorage.setItem('sessionId', userData.sessionId);
+      localStorage.setItem('userEmail', userData.email);
+      localStorage.setItem('userFirstName', userData.firstName);
+      localStorage.setItem('userLastName', userData.lastName);
+      localStorage.setItem('userRole', userData.role);
+      if (userData.profileImage) {
+        localStorage.setItem('profileImageUrl', userData.profileImage);
+      }
+      console.log('Token saved to localStorage');
 
       // Connect to WebSocket for real-time status
       if (userData.sessionId) {
@@ -48,7 +52,8 @@ function LoginPage({ onLogin }) {
       message.success('Đăng nhập thành công!');
       navigate(userData.role === 'ADMIN' ? '/admin' : '/');
     } catch (error) {
-      message.error('Email hoặc mật khẩu không đúng!');
+      console.error('Login error:', error);
+      message.error(error.response?.data?.error || 'Email hoặc mật khẩu không đúng!');
     } finally {
       setLoading(false);
     }
