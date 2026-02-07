@@ -31,7 +31,7 @@ public class NewsletterController {
             NewsletterSubscription subscription = newsletterService.subscribe(email, name, phone);
             
             return ResponseEntity.ok(Map.of(
-                "message", "Đăng ký thành công! Bạn sẽ nhận được các thông báo ưu đãi qua email.",
+                "message", "Mã xác nhận đã được gửi đến email của bạn!",
                 "email", subscription.getEmail()
             ));
         } catch (RuntimeException e) {
