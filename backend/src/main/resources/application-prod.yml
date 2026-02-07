@@ -52,7 +52,7 @@ server:
 app:
   upload:
     path: /tmp/uploads
-  base-url: ${APP_BASE_URL}
+  base-url: ${APP_BASE_URL:https://doctor-appointment-backend-mq2p.onrender.com}
 
 logging:
   level:

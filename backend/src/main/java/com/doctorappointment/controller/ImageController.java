@@ -3,6 +3,7 @@ package com.doctorappointment.controller;
 import com.doctorappointment.service.ImageService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,9 @@ import java.util.Map;
 public class ImageController {
 
     private final ImageService imageService;
+
+    @Value("${app.upload.path:uploads}")
+    private String uploadPath;
 
     /**
      * Test endpoint to verify ImageController is working
@@ -101,11 +105,11 @@ public class ImageController {
             System.out.println("=== getProfileImage called ===");
             System.out.println("userId: " + userId + ", fileName: " + fileName);
             
-            // Direct file path
-            String filePath = "D:/DoAn/doctor-appointment-platform/uploads/profiles/" + userId + "/" + fileName;
+            // Use configurable path
+            java.nio.file.Path filePath = java.nio.file.Paths.get(uploadPath, "profiles", userId.toString(), fileName);
             System.out.println("Looking for file at: " + filePath);
             
-            java.io.File file = new java.io.File(filePath);
+            java.io.File file = filePath.toFile();
             System.out.println("File exists: " + file.exists());
             System.out.println("File absolute path: " + file.getAbsolutePath());
             
@@ -139,11 +143,11 @@ public class ImageController {
             System.out.println("=== getCoverImage called ===");
             System.out.println("userId: " + userId + ", fileName: " + fileName);
             
-            // Direct file path
-            String filePath = "D:/DoAn/doctor-appointment-platform/uploads/covers/" + userId + "/" + fileName;
+            // Use configurable path
+            java.nio.file.Path filePath = java.nio.file.Paths.get(uploadPath, "covers", userId.toString(), fileName);
             System.out.println("Looking for file at: " + filePath);
             
-            java.io.File file = new java.io.File(filePath);
+            java.io.File file = filePath.toFile();
             System.out.println("File exists: " + file.exists());
             System.out.println("File absolute path: " + file.getAbsolutePath());
             
@@ -175,11 +179,11 @@ public class ImageController {
             System.out.println("=== getArticleImage called ===");
             System.out.println("fileName: " + fileName);
             
-            // Direct file path
-            String filePath = "D:/DoAn/doctor-appointment-platform/uploads/articles/" + fileName;
+            // Use configurable path
+            java.nio.file.Path filePath = java.nio.file.Paths.get(uploadPath, "articles", fileName);
             System.out.println("Looking for file at: " + filePath);
             
-            java.io.File file = new java.io.File(filePath);
+            java.io.File file = filePath.toFile();
             System.out.println("File exists: " + file.exists());
             
             if (file.exists()) {

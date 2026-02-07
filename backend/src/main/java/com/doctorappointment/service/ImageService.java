@@ -57,9 +57,8 @@ public class ImageService {
             throw new IllegalArgumentException("File size must be less than 5MB");
         }
 
-        // Create upload directory for articles
-        String folderPath = "D:/DoAn/doctor-appointment-platform/uploads/articles";
-        Path uploadDir = Paths.get(folderPath).toAbsolutePath().normalize();
+        // Create upload directory for articles - use configurable path
+        Path uploadDir = Paths.get(uploadPath, "articles").toAbsolutePath().normalize();
         Files.createDirectories(uploadDir);
 
         // Generate unique filename
@@ -94,9 +93,8 @@ public class ImageService {
             throw new IllegalArgumentException("File size must be less than 5MB");
         }
 
-        // Create upload directory structure - use absolute path with forward slashes
-        String folderPath = "D:/DoAn/doctor-appointment-platform/uploads/" + type + "s/" + userId;
-        Path uploadDir = Paths.get(folderPath).toAbsolutePath().normalize();
+        // Create upload directory structure - use configurable path
+        Path uploadDir = Paths.get(uploadPath, type + "s", userId.toString()).toAbsolutePath().normalize();
         Files.createDirectories(uploadDir);
 
         // Generate unique filename
@@ -145,9 +143,8 @@ public class ImageService {
 
             String extension = getExtensionFromContentType(contentType);
 
-            // Create upload directory - use hardcoded path with forward slashes
-            String folderPath = "D:/DoAn/doctor-appointment-platform/uploads/" + type + "s/" + userId;
-            Path uploadDir = Paths.get(folderPath).toAbsolutePath().normalize();
+            // Create upload directory - use configurable path
+            Path uploadDir = Paths.get(uploadPath, type + "s", userId.toString()).toAbsolutePath().normalize();
             Files.createDirectories(uploadDir);
 
             // Generate unique filename
@@ -185,10 +182,8 @@ public class ImageService {
 
             String type = parts[parts.length - 3];
             String userId = parts[parts.length - 2];
-            // Use hardcoded path with forward slashes
-            String filePath = "D:/DoAn/doctor-appointment-platform/uploads/" + type + "s/" + userId + "/" + fileName;
-            
-            Path path = Paths.get(filePath).toAbsolutePath().normalize();
+            // Use configurable path
+            Path path = Paths.get(uploadPath, type + "s", userId, fileName).toAbsolutePath().normalize();
             return Files.deleteIfExists(path);
         } catch (Exception e) {
             return false;
@@ -243,11 +238,8 @@ public class ImageService {
             
             System.out.println("getImage: type=" + type + ", userId=" + userId + ", fileName=" + extractedFileName);
             
-            // Construct absolute path
-            // type is "profiles" -> we need "profile" for the folder name
-            String folderType = type.endsWith("s") ? type.substring(0, type.length() - 1) : type;
-            String filePath = "D:/DoAn/doctor-appointment-platform/uploads/" + folderType + "s/" + userId + "/" + extractedFileName;
-            Path path = Paths.get(filePath).toAbsolutePath().normalize();
+            // Construct path using configurable uploadPath
+            Path path = Paths.get(uploadPath, type, userId, extractedFileName).toAbsolutePath().normalize();
             
             System.out.println("getImage: Looking for file at: " + path);
             System.out.println("getImage: File exists: " + Files.exists(path));
