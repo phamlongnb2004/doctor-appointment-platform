@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: doctor-appointment-backend
+    runtime: java
+    region: singapore
+    plan: free
+    rootDir: backend
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -Dspring.profiles.active=prod -jar target/*.jar
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:mysql://gondola.proxy.rlwy.net:43703/railway?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useUnicode=true
+      - key: SPRING_DATASOURCE_USERNAME
+        value: root
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: ibRVktBWedqUAdOKpQBInXvYZjCWHnVN
+      - key: CORS_ORIGINS
+        value: http://localhost:3000
+      - key: PORT
+        value: 8080
+      - key: APP_BASE_URL
+        sync: false
