@@ -1,0 +1,2 @@
+Deployment trigger file - Updated at 2026-02-07 21:30
+This file is used to trigger automatic redeployment on Render.
