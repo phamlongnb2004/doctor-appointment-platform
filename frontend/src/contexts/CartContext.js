@@ -4,6 +4,9 @@ import { message } from 'antd';
 
 const CartContext = createContext();
 
+// Use environment variable for API URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
@@ -48,7 +51,7 @@ export const CartProvider = ({ children }) => {
       const sessionId = getSessionId();
       
       const params = userId ? { userId } : { sessionId };
-      const response = await axios.get('http://localhost:8080/api/cart', { params });
+      const response = await axios.get(`${API_BASE_URL}/cart`, { params });
       
       setCart(response.data);
     } catch (error) {
@@ -67,7 +70,7 @@ export const CartProvider = ({ children }) => {
 
       const params = userId ? { userId } : {};
       await axios.post(
-        'http://localhost:8080/api/cart/add',
+        `${API_BASE_URL}/cart/add`,
         { serviceId, quantity, sessionId },
         { params }
       );
@@ -97,7 +100,7 @@ export const CartProvider = ({ children }) => {
       else params.sessionId = sessionId;
 
       const response = await axios.put(
-        `http://localhost:8080/api/cart/items/${itemId}`,
+        `${API_BASE_URL}/cart/items/${itemId}`,
         null,
         { params }
       );
@@ -126,7 +129,7 @@ export const CartProvider = ({ children }) => {
 
       const params = userId ? { userId } : { sessionId };
       const response = await axios.delete(
-        `http://localhost:8080/api/cart/items/${itemId}`,
+        `${API_BASE_URL}/cart/items/${itemId}`,
         { params }
       );
 
@@ -154,7 +157,7 @@ export const CartProvider = ({ children }) => {
       const sessionId = getSessionId();
 
       const params = userId ? { userId } : { sessionId };
-      await axios.delete('http://localhost:8080/api/cart/clear', { params });
+      await axios.delete(`${API_BASE_URL}/cart/clear`, { params });
 
       setCart({ items: [], totalItems: 0, totalAmount: 0 });
       message.success('Đã xóa toàn bộ giỏ hàng');
