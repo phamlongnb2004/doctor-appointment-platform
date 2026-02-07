@@ -407,6 +407,8 @@ function AdminCMSPage() {
       } else if (currentTab === 'banners' || currentTab === 'news-banners') {
         console.log('🔵 Setting imageUrl for banner =', uploadedUrl);
         form.setFieldsValue({ imageUrl: uploadedUrl });
+        // Force validation to update
+        form.validateFields(['imageUrl']).catch(() => {});
       } else {
         console.log('🔵 Setting icon and imageUrl =', uploadedUrl);
         form.setFieldsValue({ icon: uploadedUrl, imageUrl: uploadedUrl });
@@ -814,6 +816,18 @@ function AdminCMSPage() {
 
   const handleSubmit = async (values) => {
     try {
+      console.log('🟢 === FORM SUBMIT START ===');
+      console.log('🟢 Form values received:', values);
+      console.log('🟢 iconUrl state:', iconUrl);
+      console.log('🟢 Current tab:', currentTab);
+      
+      // Validate imageUrl for banners
+      if ((currentTab === 'banners' || currentTab === 'news-banners') && !values.imageUrl) {
+        console.error('❌ imageUrl is missing!');
+        message.error('Vui lòng upload hình ảnh banner!');
+        return;
+      }
+      
       const data = { ...values };
       
       // Debug log for banners
