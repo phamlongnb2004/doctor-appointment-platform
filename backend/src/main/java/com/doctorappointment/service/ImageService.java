@@ -1,6 +1,7 @@
 package com.doctorappointment.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -16,7 +17,10 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ImageService {
+
+    private final CloudinaryService cloudinaryService;
 
     @Value("${app.upload.path:uploads}")
     private String uploadPath;
@@ -28,20 +32,45 @@ public class ImageService {
      * Upload profile image for user
      */
     public String uploadProfileImage(Long userId, MultipartFile file) throws IOException {
-        return uploadImage(userId, file, "profile");
+        // Try Cloudinary first, fallback to local if not available
+        if (cloudinaryService.isEnabled()) {
+            log.info("📤 Uploading profile image to Cloudinary for user: {}", userId);
+            return cloudinaryService.uploadImage(file, "profiles");
+        } else {
+            log.info("📤 Uploading profile image to local storage for user: {}", userId);
+            return uploadImage(userId, file, "profile");
+        }
     }
 
     /**
      * Upload cover image for user
      */
     public String uploadCoverImage(Long userId, MultipartFile file) throws IOException {
-        return uploadImage(userId, file, "cover");
+        if (cloudinaryService.isEnabled()) {
+            log.info("📤 Uploading cover image to Cloudinary for user: {}", userId);
+            return cloudinaryService.uploadImage(file, "covers");
+        } else {
+            log.info("📤 Uploading cover image to local storage for user: {}", userId);
+            return uploadImage(userId, file, "cover");
+        }
     }
 
     /**
      * Upload article image (for article content and featured images)
      */
     public String uploadArticleImage(MultipartFile file) throws IOException {
+        if (cloudinaryService.isEnabled()) {
+            log.info("📤 Uploading article image to Cloudinary");
+            return cloudinaryService.uploadImage(file, "articles");
+        } else {
+            log.info("📤 Uploading article image to local storage");
+            return uploadArticleImageLocal(file);
+        }
+    }
+    /**
+     * Upload article image to local storage (fallback)
+     */
+    private String uploadArticleImageLocal(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             return null;
         }
@@ -170,6 +199,20 @@ public class ImageService {
             return false;
         }
 
+        // Check if it's a Cloudinary URL
+        if (cloudinaryService.isEnabled() && imageUrl.contains("cloudinary.com")) {
+            log.info("🗑️ Deleting image from Cloudinary: {}", imageUrl);
+            return cloudinaryService.deleteImage(imageUrl);
+        } else {
+            log.info("🗑️ Deleting image from local storage: {}", imageUrl);
+            return deleteImageLocal(imageUrl);
+        }
+    }
+
+    /**
+     * Delete image from local storage (fallback)
+     */
+    private boolean deleteImageLocal(String imageUrl) {
         try {
             // Extract file path from URL
             String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);

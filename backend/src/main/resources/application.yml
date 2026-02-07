@@ -65,6 +65,12 @@ app:
     path: D:/DoAn/doctor-appointment-platform/uploads
   base-url: http://localhost:8080
 
+cloudinary:
+  enabled: false
+  cloud-name: 
+  api-key: 
+  api-secret: 
+
 logging:
   level:
     root: INFO

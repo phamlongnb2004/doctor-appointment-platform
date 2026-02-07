@@ -54,6 +54,12 @@ app:
     path: /tmp/uploads
   base-url: ${APP_BASE_URL:https://doctor-appointment-backend-mq2p.onrender.com}
 
+cloudinary:
+  enabled: ${CLOUDINARY_ENABLED:true}
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:}
+  api-key: ${CLOUDINARY_API_KEY:}
+  api-secret: ${CLOUDINARY_API_SECRET:}
+
 logging:
   level:
     root: INFO
