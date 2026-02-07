@@ -2059,7 +2059,7 @@ function AdminCMSPage() {
       case 'banners':
         return (
           <>
-            <Form.Item name="imageUrl" label="Hình ảnh Banner" rules={[{ required: true, message: 'Vui lòng upload hình ảnh!' }]}>
+            <Form.Item label="Hình ảnh Banner" required>
               <Space direction="vertical" style={{ width: '100%' }}>
                 <Upload
                   beforeUpload={handleUploadIcon}
@@ -2087,6 +2087,10 @@ function AdminCMSPage() {
                   </div>
                 )}
               </Space>
+            </Form.Item>
+            {/* Hidden field to store Cloudinary URL */}
+            <Form.Item name="imageUrl" hidden rules={[{ required: true, message: 'Vui lòng upload hình ảnh!' }]}>
+              <Input />
             </Form.Item>
             <Form.Item name="page" label="Trang hiển thị" rules={[{ required: true }]}>
               <Select placeholder="Chọn trang">
@@ -2106,7 +2110,7 @@ function AdminCMSPage() {
       case 'news-banners':
         return (
           <>
-            <Form.Item name="imageUrl" label="Hình ảnh Banner" rules={[{ required: true, message: 'Vui lòng upload hình ảnh!' }]}>
+            <Form.Item label="Hình ảnh Banner" required>
               <Space direction="vertical" style={{ width: '100%' }}>
                 <Upload
                   beforeUpload={handleUploadIcon}
@@ -2134,6 +2138,10 @@ function AdminCMSPage() {
                   </div>
                 )}
               </Space>
+            </Form.Item>
+            {/* Hidden field to store Cloudinary URL */}
+            <Form.Item name="imageUrl" hidden rules={[{ required: true, message: 'Vui lòng upload hình ảnh!' }]}>
+              <Input />
             </Form.Item>
             <Form.Item name="displayOrder" label="Thứ tự hiển thị" rules={[{ required: true }]}>
               <InputNumber min={0} style={{ width: '100%' }} />
