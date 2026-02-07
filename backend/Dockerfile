@@ -1,4 +1,5 @@
 # Build stage
+# Force rebuild: 2026-02-07 22:00
 FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY pom.xml .
