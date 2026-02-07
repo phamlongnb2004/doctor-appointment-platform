@@ -373,6 +373,8 @@ function AdminCMSPage() {
     setUploading(true);
     try {
       const token = localStorage.getItem('token');
+      console.log('🔵 Uploading image to:', `${API_BASE_URL}/images/articles`);
+      
       const response = await axios.post(`${API_BASE_URL}/images/articles`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -380,26 +382,40 @@ function AdminCMSPage() {
         }
       });
       
+      console.log('🔵 Upload response:', response.data);
+      
       const uploadedUrl = response.data.imageUrl || response.data.url;
+      console.log('🔵 Extracted URL:', uploadedUrl);
+      console.log('🔵 Current tab:', currentTab);
+      
       setIconUrl(uploadedUrl);
       
       // Set appropriate field based on current tab or fieldName
       if (fieldName) {
         // For article-cta with specific field names
+        console.log('🔵 Setting field:', fieldName, '=', uploadedUrl);
         form.setFieldsValue({ [fieldName]: uploadedUrl });
       } else if (currentTab === 'statistics') {
+        console.log('🔵 Setting backgroundImage =', uploadedUrl);
         form.setFieldsValue({ backgroundImage: uploadedUrl });
       } else if (currentTab === 'membership-benefits') {
+        console.log('🔵 Setting image1 =', uploadedUrl);
         form.setFieldsValue({ image1: uploadedUrl });
       } else if (currentTab === 'certifications') {
+        console.log('🔵 Setting imageUrl =', uploadedUrl);
+        form.setFieldsValue({ imageUrl: uploadedUrl });
+      } else if (currentTab === 'banners' || currentTab === 'news-banners') {
+        console.log('🔵 Setting imageUrl for banner =', uploadedUrl);
         form.setFieldsValue({ imageUrl: uploadedUrl });
       } else {
+        console.log('🔵 Setting icon and imageUrl =', uploadedUrl);
         form.setFieldsValue({ icon: uploadedUrl, imageUrl: uploadedUrl });
       }
       
+      console.log('🔵 Form values after upload:', form.getFieldsValue());
       message.success('Upload hình ảnh thành công!');
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('❌ Upload error:', error);
       message.error('Lỗi khi upload: ' + (error.response?.data?.error || error.message));
     } finally {
       setUploading(false);
