@@ -1,0 +1,71 @@
+.service-detail-page {
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.service-image-container {
+  position: relative;
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+}
+
+.discount-badge {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  background: #f5222d;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 18px;
+  z-index: 2;
+}
+
+.service-info {
+  background: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+}
+
+.service-content {
+  color: #262626;
+}
+
+.service-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.service-content h2,
+.service-content h3 {
+  margin-top: 24px;
+  margin-bottom: 12px;
+  color: #1890ff;
+}
+
+.service-content p {
+  margin-bottom: 16px;
+}
+
+.service-content ul,
+.service-content ol {
+  margin-bottom: 16px;
+  padding-left: 24px;
+}
+
+.service-content li {
+  margin-bottom: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .service-info {
+    margin-top: 24px;
+  }
+}

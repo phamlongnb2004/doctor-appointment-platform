@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+// Use environment variable for API URL, fallback to localhost for development
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 const cmsAPI = {
   // Public endpoints
@@ -10,97 +11,8 @@ const cmsAPI = {
   getLatestNews: (limit = 4) => axios.get(`${API_BASE_URL}/cms/news?limit=${limit}`),
   getFeaturedNews: (limit = 3) => axios.get(`${API_BASE_URL}/cms/news/featured?limit=${limit}`),
   getNewsBySlug: (slug) => axios.get(`${API_BASE_URL}/cms/news/${slug}`),
-  getNewsByCategory: (category, limit = 20) => axios.get(`${API_BASE_URL}/cms/news/category/${category}?limit=${limit}`),
-  getNewsCategories: () => axios.get(`${API_BASE_URL}/cms/news-categories`), // Public endpoint - returns NewsCategory objects
-  
-  // News Categories Management (Admin)
-  getAllNewsCategories: () => {
-    const token = localStorage.getItem('token');
-    return axios.get(`${API_BASE_URL}/cms/admin/news-categories`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
-  createNewsCategory: (category) => {
-    const token = localStorage.getItem('token');
-    return axios.post(`${API_BASE_URL}/cms/admin/news-categories`, category, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
-  updateNewsCategory: (id, category) => {
-    const token = localStorage.getItem('token');
-    return axios.put(`${API_BASE_URL}/cms/admin/news-categories/${id}`, category, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
-  deleteNewsCategory: (id) => {
-    const token = localStorage.getItem('token');
-    return axios.delete(`${API_BASE_URL}/cms/admin/news-categories/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
   getTestimonials: () => axios.get(`${API_BASE_URL}/cms/testimonials`),
   getFeaturedTestimonials: (limit = 3) => axios.get(`${API_BASE_URL}/cms/testimonials/featured?limit=${limit}`),
-  
-  // Admin endpoints - Get ALL items (including inactive)
-  getAllServices: () => {
-    const token = localStorage.getItem('token');
-    return axios.get(`${API_BASE_URL}/cms/admin/services/all`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
-  getAllFeatures: () => {
-    const token = localStorage.getItem('token');
-    return axios.get(`${API_BASE_URL}/cms/admin/features/all`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
-  getAllSpecialties: () => {
-    const token = localStorage.getItem('token');
-    return axios.get(`${API_BASE_URL}/cms/admin/specialties/all`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
-  getAllStatistics: () => {
-    const token = localStorage.getItem('token');
-    return axios.get(`${API_BASE_URL}/cms/admin/statistics/all`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
-  getAllCertifications: () => {
-    const token = localStorage.getItem('token');
-    return axios.get(`${API_BASE_URL}/cms/admin/certifications/all`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
-  getAllBanners: () => {
-    const token = localStorage.getItem('token');
-    return axios.get(`${API_BASE_URL}/cms/admin/banners/all`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
-  getAllTestimonials: () => {
-    const token = localStorage.getItem('token');
-    return axios.get(`${API_BASE_URL}/cms/admin/testimonials/all`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
-  getAllHomePageContent: () => {
-    const token = localStorage.getItem('token');
-    return axios.get(`${API_BASE_URL}/cms/admin/homepage-content/all`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
   
   // Bài viết của bác sĩ
   getArticlesByDoctor: (doctorId) => axios.get(`${API_BASE_URL}/cms/news/doctor/${doctorId}`),
@@ -271,32 +183,101 @@ const cmsAPI = {
       headers: { Authorization: `Bearer ${token}` }
     });
   },
-  
+
   // Specialty endpoints
   getSpecialties: () => axios.get(`${API_BASE_URL}/cms/specialties`),
-  
+
   createSpecialty: (data) => {
     const token = localStorage.getItem('token');
     return axios.post(`${API_BASE_URL}/cms/admin/specialties`, data, {
       headers: { Authorization: `Bearer ${token}` }
     });
   },
-  
+
   updateSpecialty: (id, data) => {
     const token = localStorage.getItem('token');
     return axios.put(`${API_BASE_URL}/cms/admin/specialties/${id}`, data, {
       headers: { Authorization: `Bearer ${token}` }
     });
   },
-  
+
   deleteSpecialty: (id) => {
     const token = localStorage.getItem('token');
     return axios.delete(`${API_BASE_URL}/cms/admin/specialties/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
   },
+
+  getAllSpecialtiesForAdmin: () => {
+    const token = localStorage.getItem('token');
+    return axios.get(`${API_BASE_URL}/cms/admin/specialties`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Certification endpoints
+  getCertifications: () => axios.get(`${API_BASE_URL}/cms/certifications`),
+
+  createCertification: (data) => {
+    const token = localStorage.getItem('token');
+    return axios.post(`${API_BASE_URL}/cms/admin/certifications`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  updateCertification: (id, data) => {
+    const token = localStorage.getItem('token');
+    return axios.put(`${API_BASE_URL}/cms/admin/certifications/${id}`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  deleteCertification: (id) => {
+    const token = localStorage.getItem('token');
+    return axios.delete(`${API_BASE_URL}/cms/admin/certifications/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  getAllCertificationsForAdmin: () => {
+    const token = localStorage.getItem('token');
+    return axios.get(`${API_BASE_URL}/cms/admin/certifications`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Banner endpoints
+  getBannersByPage: (page) => axios.get(`${API_BASE_URL}/cms/banners/${page}`),
   
-  // Statistic endpoints
+  getAllBanners: () => {
+    const token = localStorage.getItem('token');
+    return axios.get(`${API_BASE_URL}/cms/admin/banners/all`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+  
+  createBanner: (data) => {
+    const token = localStorage.getItem('token');
+    return axios.post(`${API_BASE_URL}/cms/admin/banners`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+  
+  updateBanner: (id, data) => {
+    const token = localStorage.getItem('token');
+    return axios.put(`${API_BASE_URL}/cms/admin/banners/${id}`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+  
+  deleteBanner: (id) => {
+    const token = localStorage.getItem('token');
+    return axios.delete(`${API_BASE_URL}/cms/admin/banners/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Statistics endpoints
   getStatistics: () => axios.get(`${API_BASE_URL}/cms/statistics`),
   
   createStatistic: (data) => {
@@ -319,66 +300,7 @@ const cmsAPI = {
       headers: { Authorization: `Bearer ${token}` }
     });
   },
-  
-  // Certification endpoints
-  getCertifications: () => axios.get(`${API_BASE_URL}/cms/certifications`),
-  
-  createCertification: (data) => {
-    const token = localStorage.getItem('token');
-    return axios.post(`${API_BASE_URL}/cms/admin/certifications`, data, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
-  updateCertification: (id, data) => {
-    const token = localStorage.getItem('token');
-    return axios.put(`${API_BASE_URL}/cms/admin/certifications/${id}`, data, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
-  deleteCertification: (id) => {
-    const token = localStorage.getItem('token');
-    return axios.delete(`${API_BASE_URL}/cms/admin/certifications/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
-  uploadCertificationImage: (formData) => {
-    const token = localStorage.getItem('token');
-    return axios.post(`${API_BASE_URL}/cms/admin/certifications/upload-image`, formData, {
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-  },
-  
-  // Banner endpoints
-  getBanners: () => axios.get(`${API_BASE_URL}/cms/banners`),
-  getBannersByPage: (page) => axios.get(`${API_BASE_URL}/cms/banners/${page}`),
-  
-  createBanner: (data) => {
-    const token = localStorage.getItem('token');
-    return axios.post(`${API_BASE_URL}/cms/admin/banners`, data, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
-  updateBanner: (id, data) => {
-    const token = localStorage.getItem('token');
-    return axios.put(`${API_BASE_URL}/cms/admin/banners/${id}`, data, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
-  deleteBanner: (id) => {
-    const token = localStorage.getItem('token');
-    return axios.delete(`${API_BASE_URL}/cms/admin/banners/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
-  
+
   // Site Settings endpoints
   getSiteSettings: () => axios.get(`${API_BASE_URL}/cms/site-settings`),
   
@@ -388,7 +310,36 @@ const cmsAPI = {
       headers: { Authorization: `Bearer ${token}` }
     });
   },
+
+  // News Category endpoints
+  getAllNewsCategories: () => {
+    const token = localStorage.getItem('token');
+    return axios.get(`${API_BASE_URL}/cms/admin/news-categories`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
   
+  createNewsCategory: (data) => {
+    const token = localStorage.getItem('token');
+    return axios.post(`${API_BASE_URL}/cms/admin/news-categories`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+  
+  updateNewsCategory: (id, data) => {
+    const token = localStorage.getItem('token');
+    return axios.put(`${API_BASE_URL}/cms/admin/news-categories/${id}`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+  
+  deleteNewsCategory: (id) => {
+    const token = localStorage.getItem('token');
+    return axios.delete(`${API_BASE_URL}/cms/admin/news-categories/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
   // Membership Benefits endpoints
   getMembershipBenefits: () => axios.get(`${API_BASE_URL}/cms/membership-benefits`),
   
@@ -419,20 +370,8 @@ const cmsAPI = {
       headers: { Authorization: `Bearer ${token}` }
     });
   },
-  
-  // ==================== NEWS SECTIONS ====================
-  
-  // Get all active news sections (public)
-  getAllActiveNewsSections: () => {
-    return axios.get(`${API_BASE_URL}/cms/news-sections`);
-  },
-  
-  // Get active news sections by page (home, news, or both)
-  getActiveNewsSectionsByPage: (page) => {
-    return axios.get(`${API_BASE_URL}/cms/news-sections/page/${page}`);
-  },
-  
-  // Get all news sections (admin)
+
+  // News Sections endpoints
   getAllNewsSections: () => {
     const token = localStorage.getItem('token');
     return axios.get(`${API_BASE_URL}/cms/admin/news-sections`, {
@@ -440,20 +379,11 @@ const cmsAPI = {
     });
   },
   
-  // Get news section by ID (admin)
-  getNewsSectionById: (id) => {
-    const token = localStorage.getItem('token');
-    return axios.get(`${API_BASE_URL}/cms/admin/news-sections/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
+  getActiveNewsSectionsByPage: (page) => axios.get(`${API_BASE_URL}/cms/news-sections/page/${page}`),
   
-  // Get news section by name (public)
-  getNewsSectionByName: (name) => {
-    return axios.get(`${API_BASE_URL}/cms/news-sections/${name}`);
-  },
+  getNewsBySectionName: (sectionName, limit = 4) => 
+    axios.get(`${API_BASE_URL}/cms/news-sections/${sectionName}/articles?limit=${limit}`),
   
-  // Create news section (admin)
   createNewsSection: (data) => {
     const token = localStorage.getItem('token');
     return axios.post(`${API_BASE_URL}/cms/admin/news-sections`, data, {
@@ -461,7 +391,6 @@ const cmsAPI = {
     });
   },
   
-  // Update news section (admin)
   updateNewsSection: (id, data) => {
     const token = localStorage.getItem('token');
     return axios.put(`${API_BASE_URL}/cms/admin/news-sections/${id}`, data, {
@@ -469,29 +398,14 @@ const cmsAPI = {
     });
   },
   
-  // Delete news section (admin)
   deleteNewsSection: (id) => {
     const token = localStorage.getItem('token');
     return axios.delete(`${API_BASE_URL}/cms/admin/news-sections/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
   },
-  
-  // Get news articles by section name
-  getNewsBySectionName: (sectionName, limit = 4) => {
-    return axios.get(`${API_BASE_URL}/cms/news-sections/${sectionName}/articles`, {
-      params: { limit }
-    });
-  },
 
-  // ==================== NEWS SIDEBAR WIDGETS ====================
-  
-  // Get active sidebar widgets (public)
-  getNewsSidebarWidgets: () => {
-    return axios.get(`${API_BASE_URL}/cms/news-sidebar-widgets`);
-  },
-  
-  // Get all sidebar widgets (admin)
+  // News Sidebar Widgets endpoints
   getAllNewsSidebarWidgets: () => {
     const token = localStorage.getItem('token');
     return axios.get(`${API_BASE_URL}/cms/admin/news-sidebar-widgets`, {
@@ -499,7 +413,8 @@ const cmsAPI = {
     });
   },
   
-  // Create sidebar widget (admin)
+  getActiveNewsSidebarWidgets: () => axios.get(`${API_BASE_URL}/cms/news-sidebar-widgets`),
+  
   createNewsSidebarWidget: (data) => {
     const token = localStorage.getItem('token');
     return axios.post(`${API_BASE_URL}/cms/admin/news-sidebar-widgets`, data, {
@@ -507,7 +422,6 @@ const cmsAPI = {
     });
   },
   
-  // Update sidebar widget (admin)
   updateNewsSidebarWidget: (id, data) => {
     const token = localStorage.getItem('token');
     return axios.put(`${API_BASE_URL}/cms/admin/news-sidebar-widgets/${id}`, data, {
@@ -515,7 +429,6 @@ const cmsAPI = {
     });
   },
   
-  // Delete sidebar widget (admin)
   deleteNewsSidebarWidget: (id) => {
     const token = localStorage.getItem('token');
     return axios.delete(`${API_BASE_URL}/cms/admin/news-sidebar-widgets/${id}`, {
@@ -523,14 +436,9 @@ const cmsAPI = {
     });
   },
 
-  // ==================== ARTICLE CTA SECTION ====================
+  // Article CTA Section endpoints
+  getArticleCtaSection: () => axios.get(`${API_BASE_URL}/cms/article-cta-section`),
   
-  // Get article CTA section (public)
-  getArticleCtaSection: () => {
-    return axios.get(`${API_BASE_URL}/cms/article-cta-section`);
-  },
-  
-  // Update article CTA section (admin)
   updateArticleCtaSection: (id, data) => {
     const token = localStorage.getItem('token');
     return axios.put(`${API_BASE_URL}/cms/admin/article-cta-section/${id}`, data, {
@@ -538,39 +446,96 @@ const cmsAPI = {
     });
   },
 
-  // ==================== SLUG UTILITIES ====================
-  
-  // Generate slug from title
-  generateSlug: (title) => {
-    return axios.get(`${API_BASE_URL}/cms/slug/generate`, {
-      params: { title }
+  // About Page endpoints
+  getAllAboutSections: () => {
+    const token = localStorage.getItem('token');
+    return axios.get(`${API_BASE_URL}/cms/about`, {
+      headers: { Authorization: `Bearer ${token}` }
     });
   },
   
-  // Check if slug exists
-  checkSlug: (slug, articleId = null) => {
-    const params = { slug };
-    if (articleId) {
-      params.articleId = articleId;
-    }
-    return axios.get(`${API_BASE_URL}/cms/slug/check`, { params });
+  getAboutSection: (sectionKey) => axios.get(`${API_BASE_URL}/cms/about/${sectionKey}`),
+  
+  updateAboutSection: (sectionKey, data) => {
+    const token = localStorage.getItem('token');
+    return axios.put(`${API_BASE_URL}/cms/admin/about/${sectionKey}`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
   },
 
-  // ==================== ABOUT PAGE ====================
+  // Slug utilities
+  generateSlug: (title) => axios.get(`${API_BASE_URL}/cms/slug/generate`, { params: { title } }),
   
-  // Get specific about section
-  getAboutSection: (sectionKey) => {
-    return axios.get(`${API_BASE_URL}/cms/about/${sectionKey}`);
+  checkSlug: (slug, articleId = null) => {
+    const params = articleId ? `?articleId=${articleId}` : '';
+    return axios.get(`${API_BASE_URL}/cms/slug/check/${slug}${params}`);
   },
-  
-  // Save about section
-  saveAboutSection: (sectionKey, data) => {
-    return axios.post(`${API_BASE_URL}/cms/about/${sectionKey}`, data);
+
+  // Service Category endpoints
+  getServiceCategories: () => axios.get(`${API_BASE_URL}/cms/service-categories`),
+
+  getAllServiceCategories: () => {
+    const token = localStorage.getItem('token');
+    return axios.get(`${API_BASE_URL}/cms/admin/service-categories`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
   },
-  
-  // Get all about sections
-  getAllAboutSections: () => {
-    return axios.get(`${API_BASE_URL}/cms/about`);
+
+  createServiceCategory: (data) => {
+    const token = localStorage.getItem('token');
+    return axios.post(`${API_BASE_URL}/cms/admin/service-categories`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  updateServiceCategory: (id, data) => {
+    const token = localStorage.getItem('token');
+    return axios.put(`${API_BASE_URL}/cms/admin/service-categories/${id}`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  deleteServiceCategory: (id) => {
+    const token = localStorage.getItem('token');
+    return axios.delete(`${API_BASE_URL}/cms/admin/service-categories/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Medical Service endpoints
+  getMedicalServices: () => axios.get(`${API_BASE_URL}/cms/medical-services`),
+
+  getMedicalServiceBySlug: (slug) => axios.get(`${API_BASE_URL}/cms/medical-services/${slug}`),
+
+  getMedicalServicesByCategory: (categoryId) => 
+    axios.get(`${API_BASE_URL}/cms/medical-services/category/${categoryId}`),
+
+  getAllMedicalServices: () => {
+    const token = localStorage.getItem('token');
+    return axios.get(`${API_BASE_URL}/cms/admin/medical-services`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  createMedicalService: (data) => {
+    const token = localStorage.getItem('token');
+    return axios.post(`${API_BASE_URL}/cms/admin/medical-services`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  updateMedicalService: (id, data) => {
+    const token = localStorage.getItem('token');
+    return axios.put(`${API_BASE_URL}/cms/admin/medical-services/${id}`, data, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  deleteMedicalService: (id) => {
+    const token = localStorage.getItem('token');
+    return axios.delete(`${API_BASE_URL}/cms/admin/medical-services/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
   }
 };
 

@@ -16,8 +16,17 @@ import DoctorArticlesPage from './pages/DoctorArticlesPage';
 import NewsDetailPage from './pages/NewsDetailPage';
 import NewsListPage from './pages/NewsListPage';
 import AboutPage from './pages/AboutPage';
+import ServicesPage from './pages/ServicesPage';
+import ServiceDetailPage from './pages/ServiceDetailPage';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import OrderSuccessPage from './pages/OrderSuccessPage';
+import MyOrdersPage from './pages/MyOrdersPage';
+import PaymentTestPage from './pages/PaymentTestPage';
+import NotFoundPage from './pages/NotFoundPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import { CartProvider } from './contexts/CartContext';
 import webSocketService from './services/websocket';
 
 const { Content } = Layout;
@@ -38,6 +47,16 @@ function AppContent({ user, isAuthenticated, handleLogin, handleLogout, handleUs
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/services" element={<ServicesPage />} />
+          <Route path="/services/:slug" element={<ServiceDetailPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/order-success/:orderNumber" element={<OrderSuccessPage />} />
+          <Route 
+            path="/my-orders" 
+            element={isAuthenticated ? <MyOrdersPage /> : <Navigate to="/login" />} 
+          />
+          <Route path="/payment-test" element={<PaymentTestPage />} />
           <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/doctors" element={<DoctorListPage />} />
@@ -132,6 +151,9 @@ function AppContent({ user, isAuthenticated, handleLogin, handleLogout, handleUs
               )
             }
           />
+          
+          {/* 404 - Catch all unmatched routes */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Content>
       {!isAdminRoute && <Footer />}
@@ -230,6 +252,7 @@ function App() {
     localStorage.removeItem('userFirstName');
     localStorage.removeItem('userLastName');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('cart_session_id'); // Clear cart session
   };
 
   const handleUserUpdate = (updatedUser) => {
@@ -276,13 +299,15 @@ function App() {
 
   return (
     <Router>
-      <AppContent 
-        user={user}
-        isAuthenticated={isAuthenticated}
-        handleLogin={handleLogin}
-        handleLogout={handleLogout}
-        handleUserUpdate={handleUserUpdate}
-      />
+      <CartProvider>
+        <AppContent 
+          user={user}
+          isAuthenticated={isAuthenticated}
+          handleLogin={handleLogin}
+          handleLogout={handleLogout}
+          handleUserUpdate={handleUserUpdate}
+        />
+      </CartProvider>
     </Router>
   );
 }

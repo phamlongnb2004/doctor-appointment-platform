@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button, Card, Row, Col, Typography, Avatar, Input, Form, Select, Modal, message } from 'antd';
 import { CheckOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +17,9 @@ function HomePage() {
   const [topDoctors, setTopDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  
+  // Animation refs
+  const sectionsRef = useRef([]);
   
   // CMS Data States
   const [services, setServices] = useState([]);
@@ -43,6 +46,56 @@ function HomePage() {
   useEffect(() => {
     fetchAllData();
   }, []);
+
+  // Separate effect for animations - runs after data is loaded
+  useEffect(() => {
+    if (loading) return; // Don't run animations while loading
+    
+    // Reset all sections animation state
+    sectionsRef.current.forEach(section => {
+      if (section) {
+        section.classList.remove('animate-in');
+      }
+    });
+    
+    // Scroll animation observer
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in');
+        }
+      });
+    }, observerOptions);
+    
+    // Small delay to ensure DOM is ready
+    const timeoutId = setTimeout(() => {
+      sectionsRef.current.forEach(section => {
+        if (section) {
+          // Check if section is already in viewport
+          const rect = section.getBoundingClientRect();
+          const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
+          
+          if (isInViewport) {
+            // Already visible, show immediately
+            section.classList.add('animate-in');
+          } else {
+            // Not visible yet, observe for animation
+            observer.observe(section);
+          }
+        }
+      });
+    }, 100);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      observer.disconnect();
+    };
+  }, [loading]); // Run when loading changes
 
   const fetchAllData = async () => {
     setLoading(true);
@@ -210,10 +263,14 @@ function HomePage() {
 
       {/* Quick Utilities Section - TIỆN ÍCH CHO KHÁCH HÀNG */}
       {services.length > 0 && (
-      <div style={{ 
-        background: '#f8f9fa',
-        padding: '80px 24px'
-      }}>
+      <div 
+        ref={el => sectionsRef.current[0] = el}
+        className="animate-section"
+        style={{ 
+          background: '#f8f9fa',
+          padding: '80px 24px'
+        }}
+      >
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <Title level={2} style={{ color: '#262626', marginBottom: 16, fontSize: 32 }}>
@@ -418,7 +475,10 @@ function HomePage() {
 
       {/* Why Choose Us Section */}
       {features.length > 0 && (
-      <div style={{ 
+      <div 
+        ref={el => sectionsRef.current[1] = el}
+        className="animate-section"
+        style={{ 
         background: '#fff',
         padding: '80px 24px 60px'
       }}>
@@ -488,7 +548,10 @@ function HomePage() {
 
       {/* Doctors Section - ĐỘI NGŨ CHUYÊN GIA Y TẾ */}
       {topDoctors.length > 0 && (
-      <div style={{ 
+      <div 
+        ref={el => sectionsRef.current[2] = el}
+        className="animate-section"
+        style={{ 
         background: '#f8f9fa',
         padding: '80px 24px'
       }}>
@@ -701,7 +764,10 @@ function HomePage() {
 
       {/* Specialties Section - CÁC CHUYÊN KHOA Y TẾ TẠI MEDLATEC */}
       {specialties.length > 0 && (
-      <div style={{ 
+      <div 
+        ref={el => sectionsRef.current[3] = el}
+        className="animate-section"
+        style={{ 
         background: '#fff',
         padding: '80px 24px'
       }}>
@@ -760,7 +826,10 @@ function HomePage() {
 
       {/* Statistics Section - New Design with Background Image */}
       {statistics.length > 0 && siteSettings?.statisticsBackgroundImage && (
-      <div style={{ 
+      <div 
+        ref={el => sectionsRef.current[4] = el}
+        className="animate-section"
+        style={{ 
         backgroundImage: `url(${siteSettings.statisticsBackgroundImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -931,7 +1000,10 @@ function HomePage() {
 
       {/* Membership Benefits Section - Ưu đãi thành viên */}
       {membershipBenefits.length > 0 && membershipBenefits[0] && (
-      <div style={{ 
+      <div 
+        ref={el => sectionsRef.current[5] = el}
+        className="animate-section"
+        style={{ 
         background: '#f0f9ff',
         padding: '80px 24px'
       }}>
@@ -1082,7 +1154,10 @@ function HomePage() {
 
       {/* Testimonials Section */}
       {testimonials.length > 0 && (
-      <div style={{ 
+      <div 
+        ref={el => sectionsRef.current[6] = el}
+        className="animate-section"
+        style={{ 
         background: '#f8f9fa',
         padding: '80px 24px'
       }}>

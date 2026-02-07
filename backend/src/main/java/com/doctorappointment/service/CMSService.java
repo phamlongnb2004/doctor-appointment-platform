@@ -2,6 +2,7 @@ package com.doctorappointment.service;
 
 import com.doctorappointment.model.*;
 import com.doctorappointment.repository.*;
+import com.doctorappointment.util.SlugUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,12 @@ public class CMSService {
     
     @Autowired
     private NewsCategoryRepository newsCategoryRepository;
+    
+    @Autowired
+    private ServiceCategoryRepository serviceCategoryRepository;
+    
+    @Autowired
+    private MedicalServiceRepository medicalServiceRepository;
     
     @Autowired
     private MembershipBenefitRepository membershipBenefitRepository;
@@ -556,6 +563,91 @@ public class CMSService {
     
     public List<AboutPageContent> getAllAboutSections() {
         return aboutPageContentRepository.findAll();
+    }
+    
+    // ==================== SERVICE CATEGORIES ====================
+    
+    public List<ServiceCategory> getActiveServiceCategories() {
+        return serviceCategoryRepository.findByIsActiveTrueOrderByDisplayOrderAsc();
+    }
+    
+    public List<ServiceCategory> getAllServiceCategories() {
+        return serviceCategoryRepository.findAllByOrderByDisplayOrderAsc();
+    }
+    
+    public Optional<ServiceCategory> getServiceCategoryBySlug(String slug) {
+        return serviceCategoryRepository.findBySlug(slug);
+    }
+    
+    public ServiceCategory saveServiceCategory(ServiceCategory category) {
+        return serviceCategoryRepository.save(category);
+    }
+    
+    public void deleteServiceCategory(Long id) {
+        serviceCategoryRepository.deleteById(id);
+    }
+    
+    // ==================== MEDICAL SERVICES ====================
+    
+    public List<MedicalService> getActiveMedicalServices() {
+        return medicalServiceRepository.findByIsActiveTrueOrderByDisplayOrderAsc();
+    }
+    
+    public List<MedicalService> getAllMedicalServices() {
+        return medicalServiceRepository.findAllByOrderByDisplayOrderAsc();
+    }
+    
+    public List<MedicalService> getMedicalServicesByCategory(Long categoryId) {
+        return medicalServiceRepository.findByCategoryIdAndIsActiveTrueOrderByDisplayOrderAsc(categoryId);
+    }
+    
+    public List<MedicalService> getFeaturedMedicalServices() {
+        return medicalServiceRepository.findByIsFeaturedTrueAndIsActiveTrueOrderByDisplayOrderAsc();
+    }
+    
+    public Optional<MedicalService> getMedicalServiceBySlug(String slug) {
+        return medicalServiceRepository.findBySlug(slug);
+    }
+    
+    public MedicalService saveMedicalService(MedicalService service) {
+        // Auto-generate slug if not provided or empty
+        if (service.getSlug() == null || service.getSlug().trim().isEmpty()) {
+            String baseSlug = SlugUtils.toSlug(service.getTitle());
+            String uniqueSlug = generateUniqueSlug(baseSlug, service.getId());
+            service.setSlug(uniqueSlug);
+        } else {
+            // If slug is provided, ensure it's unique
+            String providedSlug = SlugUtils.toSlug(service.getSlug());
+            String uniqueSlug = generateUniqueSlug(providedSlug, service.getId());
+            service.setSlug(uniqueSlug);
+        }
+        
+        return medicalServiceRepository.save(service);
+    }
+    
+    private String generateUniqueSlug(String baseSlug, Long serviceId) {
+        String slug = baseSlug;
+        int counter = 1;
+        
+        // Check if slug exists (excluding current service if updating)
+        while (true) {
+            Optional<MedicalService> existing = medicalServiceRepository.findBySlug(slug);
+            
+            // If no existing service found, or it's the same service being updated
+            if (!existing.isPresent() || (serviceId != null && existing.get().getId().equals(serviceId))) {
+                break;
+            }
+            
+            // Slug exists, append counter
+            slug = baseSlug + "-" + counter;
+            counter++;
+        }
+        
+        return slug;
+    }
+    
+    public void deleteMedicalService(Long id) {
+        medicalServiceRepository.deleteById(id);
     }
 }
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Card, Row, Col, Typography, Table, Tag, Button, Statistic, Space, Spin, Modal, Form, Select, Input, message, Avatar, Dropdown, Badge, Progress, List, Typography as AntTypography, Drawer } from 'antd';
-import { DashboardOutlined, UserOutlined, TeamOutlined, CalendarOutlined, LogoutOutlined, SettingOutlined, MedicineBoxOutlined, EditOutlined, BellOutlined, PlusOutlined, SearchOutlined, FilterOutlined, ArrowUpOutlined, ArrowDownOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, WifiOutlined, MenuOutlined, CloseOutlined, MailOutlined, DeleteOutlined } from '@ant-design/icons';
+import { DashboardOutlined, UserOutlined, TeamOutlined, CalendarOutlined, LogoutOutlined, SettingOutlined, MedicineBoxOutlined, EditOutlined, BellOutlined, PlusOutlined, SearchOutlined, FilterOutlined, ArrowUpOutlined, ArrowDownOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, WifiOutlined, MenuOutlined, CloseOutlined, MailOutlined, DeleteOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { userAPI, doctorAPI, appointmentAPI } from '../services/api';
 import webSocketService from '../services/websocket';
@@ -27,6 +27,7 @@ function AdminDashboard({ user, onLogout }) {
   const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [newsletterSubscribers, setNewsletterSubscribers] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState(new Set());
   const [onlineUsersList, setOnlineUsersList] = useState([]);
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -123,12 +124,17 @@ function AdminDashboard({ user, onLogout }) {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const [usersRes, doctorsRes, appointmentsRes, onlineUsersRes, newsletterRes] = await Promise.all([
+      const [usersRes, doctorsRes, appointmentsRes, onlineUsersRes, newsletterRes, ordersRes] = await Promise.all([
         userAPI.getAllUsers(),
         doctorAPI.getAllDoctors(),
         appointmentAPI.getAllAppointments(),
         userAPI.getOnlineUsers(),
         fetch('http://localhost:8080/api/api/newsletter/subscribers', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }).then(res => res.json()).catch(() => []),
+        fetch('http://localhost:8080/api/orders/all', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -140,12 +146,14 @@ function AdminDashboard({ user, onLogout }) {
       const allAppointments = appointmentsRes.data || [];
       const onlineList = onlineUsersRes.data || [];
       const allSubscribers = Array.isArray(newsletterRes) ? newsletterRes : [];
+      const allOrders = Array.isArray(ordersRes) ? ordersRes : [];
 
       setUsers(allUsers);
       setDoctors(allDoctors);
       setAppointments(allAppointments);
       setOnlineUsersList(onlineList);
       setNewsletterSubscribers(allSubscribers);
+      setOrders(allOrders);
       
       const onlineIds = new Set(onlineList.map(u => u.userId));
       setOnlineUsers(onlineIds);
@@ -256,6 +264,7 @@ function AdminDashboard({ user, onLogout }) {
     { key: 'users', icon: <TeamOutlined />, label: 'Quản lý người dùng' },
     { key: 'doctors', icon: <MedicineBoxOutlined />, label: 'Quản lý bác sĩ' },
     { key: 'appointments', icon: <CalendarOutlined />, label: 'Lịch hẹn' },
+    { key: 'orders', icon: <ShoppingCartOutlined />, label: 'Quản lý đơn hàng' },
     { key: 'newsletter', icon: <MailOutlined />, label: 'Thành viên Newsletter' },
     { key: 'cms', icon: <EditOutlined />, label: 'Quản lý nội dung' },
     { key: 'settings', icon: <SettingOutlined />, label: 'Cài đặt' },
@@ -922,6 +931,214 @@ function AdminDashboard({ user, onLogout }) {
                 rowKey="key"
                 className="admin-table"
                 scroll={{ x: 1200 }}
+              />
+            </Card>
+          </div>
+        );
+      case 'orders':
+        return (
+          <div className="admin-section">
+            <div className="admin-section-header">
+              <div className="admin-section-title">
+                <ShoppingCartOutlined />
+                <Title level={3}>Quản lý đơn hàng</Title>
+              </div>
+              <div className="admin-section-actions">
+                <Input
+                  placeholder="Tìm kiếm đơn hàng..."
+                  prefix={<SearchOutlined style={{ color: '#999' }} />}
+                  className="admin-search-input"
+                />
+                <Button icon={<FilterOutlined />} className="admin-btn-secondary">
+                  Lọc
+                </Button>
+              </div>
+            </div>
+            <Card className="admin-card" style={{ borderRadius: 24 }}>
+              <Table
+                dataSource={orders.map((order, index) => ({
+                  key: index,
+                  id: order.id,
+                  orderNumber: order.orderNumber,
+                  customerName: order.customerName,
+                  customerEmail: order.customerEmail,
+                  customerPhone: order.customerPhone,
+                  totalAmount: order.totalAmount,
+                  finalAmount: order.finalAmount,
+                  paymentMethod: order.paymentMethod,
+                  paymentStatus: order.paymentStatus,
+                  status: order.status,
+                  itemCount: order.items?.length || 0,
+                  createdAt: order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN') : '-'
+                }))}
+                columns={[
+                  {
+                    title: 'Mã đơn hàng',
+                    dataIndex: 'orderNumber',
+                    key: 'orderNumber',
+                    width: 180,
+                    render: (text) => <Text strong style={{ color: '#667eea' }}>{text}</Text>
+                  },
+                  {
+                    title: 'Khách hàng',
+                    key: 'customer',
+                    width: 200,
+                    render: (_, record) => (
+                      <div>
+                        <Text strong style={{ display: 'block', fontSize: 14 }}>{record.customerName}</Text>
+                        <Text type="secondary" style={{ fontSize: 12 }}>{record.customerPhone}</Text>
+                      </div>
+                    )
+                  },
+                  {
+                    title: 'Số dịch vụ',
+                    dataIndex: 'itemCount',
+                    key: 'itemCount',
+                    width: 100,
+                    render: (count) => <Tag color="blue">{count} dịch vụ</Tag>
+                  },
+                  {
+                    title: 'Tổng tiền',
+                    dataIndex: 'finalAmount',
+                    key: 'finalAmount',
+                    width: 140,
+                    render: (amount) => (
+                      <Text strong style={{ color: '#667eea', fontSize: 15 }}>
+                        {amount?.toLocaleString()} VNĐ
+                      </Text>
+                    )
+                  },
+                  {
+                    title: 'Thanh toán',
+                    key: 'payment',
+                    width: 140,
+                    render: (_, record) => (
+                      <div>
+                        <Tag color={record.paymentMethod === 'COD' ? 'orange' : 'green'}>
+                          {record.paymentMethod === 'COD' ? 'Tiền mặt' : 'Chuyển khoản'}
+                        </Tag>
+                        <br />
+                        <Tag
+                          style={{ marginTop: 4 }}
+                          color={record.paymentStatus === 'PAID' ? 'success' : 'warning'}
+                        >
+                          {record.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                        </Tag>
+                      </div>
+                    )
+                  },
+                  {
+                    title: 'Trạng thái',
+                    dataIndex: 'status',
+                    key: 'status',
+                    width: 140,
+                    render: (status) => {
+                      const statusConfig = {
+                        PENDING: { color: '#faad14', text: 'Chờ xử lý', icon: <ClockCircleOutlined /> },
+                        CONFIRMED: { color: '#13c2c2', text: 'Đã xác nhận', icon: <CheckCircleOutlined /> },
+                        PROCESSING: { color: '#1890ff', text: 'Đang xử lý', icon: <ClockCircleOutlined /> },
+                        COMPLETED: { color: '#52c41a', text: 'Hoàn thành', icon: <CheckCircleOutlined /> },
+                        CANCELLED: { color: '#ff4d4f', text: 'Đã hủy', icon: <CloseCircleOutlined /> }
+                      };
+                      const config = statusConfig[status] || statusConfig.PENDING;
+                      return (
+                        <Tag
+                          style={{
+                            borderRadius: 20,
+                            padding: '4px 12px',
+                            border: 'none',
+                            background: `${config.color}15`,
+                            color: config.color,
+                            fontWeight: 500,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 6
+                          }}
+                        >
+                          {config.icon}
+                          {config.text}
+                        </Tag>
+                      );
+                    }
+                  },
+                  {
+                    title: 'Ngày đặt',
+                    dataIndex: 'createdAt',
+                    key: 'createdAt',
+                    width: 160
+                  },
+                  {
+                    title: 'Thao tác',
+                    key: 'action',
+                    width: 180,
+                    fixed: 'right',
+                    render: (_, record) => (
+                      <Space>
+                        <Button
+                          type="text"
+                          size="small"
+                          onClick={() => {
+                            Modal.info({
+                              title: `Chi tiết đơn hàng ${record.orderNumber}`,
+                              width: 800,
+                              content: (
+                                <div style={{ marginTop: 20 }}>
+                                  <p><strong>Khách hàng:</strong> {record.customerName}</p>
+                                  <p><strong>Email:</strong> {record.customerEmail}</p>
+                                  <p><strong>Số điện thoại:</strong> {record.customerPhone}</p>
+                                  <p><strong>Tổng tiền:</strong> {record.finalAmount?.toLocaleString()} VNĐ</p>
+                                  <p><strong>Phương thức thanh toán:</strong> {record.paymentMethod}</p>
+                                  <p><strong>Trạng thái thanh toán:</strong> {record.paymentStatus}</p>
+                                  <p><strong>Trạng thái đơn hàng:</strong> {record.status}</p>
+                                </div>
+                              )
+                            });
+                          }}
+                          style={{
+                            borderRadius: 8,
+                            color: '#667eea',
+                            background: '#667eea15'
+                          }}
+                        >
+                          Xem chi tiết
+                        </Button>
+                        {record.status === 'PENDING' && (
+                          <Button
+                            type="primary"
+                            size="small"
+                            onClick={async () => {
+                              try {
+                                await fetch(`http://localhost:8080/api/orders/${record.id}/status`, {
+                                  method: 'PUT',
+                                  headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                    'Content-Type': 'application/json'
+                                  },
+                                  body: JSON.stringify({ status: 'CONFIRMED' })
+                                });
+                                message.success('Đã xác nhận đơn hàng!');
+                                fetchDashboardData();
+                              } catch (error) {
+                                message.error('Có lỗi xảy ra!');
+                              }
+                            }}
+                            style={{ borderRadius: 8 }}
+                          >
+                            Xác nhận
+                          </Button>
+                        )}
+                      </Space>
+                    )
+                  }
+                ]}
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  showTotal: (total) => `Tổng ${total} đơn hàng`
+                }}
+                rowKey="key"
+                className="admin-table"
+                scroll={{ x: 1400 }}
               />
             </Card>
           </div>

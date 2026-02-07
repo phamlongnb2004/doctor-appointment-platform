@@ -1,0 +1,43 @@
+.order-success-page {
+  min-height: 100vh;
+}
+
+.order-success-page .ant-result {
+  padding: 48px 32px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.order-success-page .ant-descriptions-item-label {
+  font-weight: 600;
+  background: #fafafa;
+}
+
+.my-orders-page {
+  min-height: 100vh;
+  background: #fff;
+}
+
+.my-orders-page .ant-table {
+  font-size: 14px;
+}
+
+.my-orders-page .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .order-success-page .ant-result {
+    padding: 24px 16px;
+  }
+  
+  .order-success-page .ant-descriptions {
+    font-size: 13px;
+  }
+  
+  .my-orders-page .ant-table {
+    font-size: 13px;
+  }
+}

@@ -422,3 +422,49 @@ code {
    Switch styling is now handled by ConfigProvider theme
    ======================================== */
 
+/* ========================================
+   MODERN NAVIGATION MENU
+   ======================================== */
+.modern-nav-link {
+  position: relative;
+  overflow: hidden;
+}
+
+.modern-nav-link::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #1890ff, #722ed1);
+  transform: translateX(-50%);
+  transition: width 0.3s ease;
+  border-radius: 3px 3px 0 0;
+}
+
+.modern-nav-link:hover {
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.08), rgba(114, 46, 209, 0.08)) !important;
+  color: #1890ff !important;
+  transform: translateY(-2px);
+}
+
+.modern-nav-link:hover::before {
+  width: 80%;
+}
+
+.modern-nav-link:active {
+  transform: translateY(0);
+}
+
+/* Active state for current page */
+.modern-nav-link.active {
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.12), rgba(114, 46, 209, 0.12)) !important;
+  color: #1890ff !important;
+  font-weight: 600;
+}
+
+.modern-nav-link.active::before {
+  width: 80%;
+}
+

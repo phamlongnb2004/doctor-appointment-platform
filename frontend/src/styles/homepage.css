@@ -911,3 +911,439 @@
   line-height: 1.6;
   font-style: italic;
 }
+
+
+/* ===================================
+   SCROLL ANIMATIONS - Multiple Variations
+   =================================== */
+
+/* Base animation classes */
+.animate-section {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Fade Up - Default */
+.animate-fade-up:not(.animate-in) {
+  opacity: 0;
+  transform: translateY(60px);
+}
+
+.animate-fade-up.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Fade Down */
+.animate-fade-down:not(.animate-in) {
+  opacity: 0;
+  transform: translateY(-60px);
+}
+
+.animate-fade-down.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Fade Left */
+.animate-fade-left:not(.animate-in) {
+  opacity: 0;
+  transform: translateX(-80px);
+}
+
+.animate-fade-left.animate-in {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Fade Right */
+.animate-fade-right:not(.animate-in) {
+  opacity: 0;
+  transform: translateX(80px);
+}
+
+.animate-fade-right.animate-in {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scale Up - Zoom effect */
+.animate-scale:not(.animate-in) {
+  opacity: 0;
+  transform: scale(0.85);
+}
+
+.animate-scale.animate-in {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), 
+              transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Flip In */
+.animate-flip:not(.animate-in) {
+  opacity: 0;
+  transform: perspective(1000px) rotateX(-15deg);
+}
+
+.animate-flip.animate-in {
+  opacity: 1;
+  transform: perspective(1000px) rotateX(0deg);
+  transition: opacity 0.8s ease-out, 
+              transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Slide Rotate */
+.animate-slide-rotate:not(.animate-in) {
+  opacity: 0;
+  transform: translateY(50px) rotate(-5deg);
+}
+
+.animate-slide-rotate.animate-in {
+  opacity: 1;
+  transform: translateY(0) rotate(0deg);
+  transition: opacity 0.8s ease-out, 
+              transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Blur In */
+.animate-blur:not(.animate-in) {
+  opacity: 0;
+  filter: blur(10px);
+  transform: translateY(30px);
+}
+
+.animate-blur.animate-in {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateY(0);
+  transition: opacity 0.8s ease-out, 
+              filter 0.8s ease-out,
+              transform 0.8s ease-out;
+}
+
+/* Legacy support */
+.animate-section:not(.animate-in) {
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+.animate-section.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+/* Staggered animation for children */
+.animate-section.animate-in .homepage-feature-card,
+.animate-section.animate-in .homepage-service-card,
+.animate-section.animate-in .homepage-specialty-card,
+.animate-section.animate-in .homepage-doctor-card,
+.animate-section.animate-in .homepage-news-card,
+.animate-section.animate-in .homepage-benefit-card {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+}
+
+.animate-section.animate-in .homepage-feature-card:nth-child(1),
+.animate-section.animate-in .homepage-service-card:nth-child(1),
+.animate-section.animate-in .homepage-specialty-card:nth-child(1),
+.animate-section.animate-in .homepage-doctor-card:nth-child(1),
+.animate-section.animate-in .homepage-news-card:nth-child(1),
+.animate-section.animate-in .homepage-benefit-card:nth-child(1) {
+  animation-delay: 0.15s;
+}
+
+.animate-section.animate-in .homepage-feature-card:nth-child(2),
+.animate-section.animate-in .homepage-service-card:nth-child(2),
+.animate-section.animate-in .homepage-specialty-card:nth-child(2),
+.animate-section.animate-in .homepage-doctor-card:nth-child(2),
+.animate-section.animate-in .homepage-news-card:nth-child(2),
+.animate-section.animate-in .homepage-benefit-card:nth-child(2) {
+  animation-delay: 0.25s;
+}
+
+.animate-section.animate-in .homepage-feature-card:nth-child(3),
+.animate-section.animate-in .homepage-service-card:nth-child(3),
+.animate-section.animate-in .homepage-specialty-card:nth-child(3),
+.animate-section.animate-in .homepage-doctor-card:nth-child(3),
+.animate-section.animate-in .homepage-news-card:nth-child(3),
+.animate-section.animate-in .homepage-benefit-card:nth-child(3) {
+  animation-delay: 0.35s;
+}
+
+.animate-section.animate-in .homepage-feature-card:nth-child(4),
+.animate-section.animate-in .homepage-service-card:nth-child(4),
+.animate-section.animate-in .homepage-specialty-card:nth-child(4),
+.animate-section.animate-in .homepage-doctor-card:nth-child(4),
+.animate-section.animate-in .homepage-news-card:nth-child(4),
+.animate-section.animate-in .homepage-benefit-card:nth-child(4) {
+  animation-delay: 0.45s;
+}
+
+.animate-section.animate-in .homepage-feature-card:nth-child(5),
+.animate-section.animate-in .homepage-service-card:nth-child(5),
+.animate-section.animate-in .homepage-specialty-card:nth-child(5) {
+  animation-delay: 0.55s;
+}
+
+.animate-section.animate-in .homepage-feature-card:nth-child(6),
+.animate-section.animate-in .homepage-service-card:nth-child(6),
+.animate-section.animate-in .homepage-specialty-card:nth-child(6) {
+  animation-delay: 0.65s;
+}
+
+/* Multiple animation keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(50px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Section title animation */
+.animate-section .homepage-section-title,
+.animate-section .homepage__section-title {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-section.animate-in .homepage-section-title,
+.animate-section.animate-in .homepage__section-title {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Statistics counter animation */
+.animate-section.animate-in .homepage-statistic-value {
+  animation: countUp 1.5s ease-out forwards;
+}
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Fade in from left */
+.animate-fade-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.animate-fade-left.animate-in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Fade in from right */
+.animate-fade-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.animate-fade-right.animate-in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Scale in animation */
+.animate-scale {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-scale.animate-in {
+  opacity: 1;
+  transform: scale(1);
+}
+
+
+/* ===================================
+   ENHANCED HOVER EFFECTS
+   =================================== */
+
+/* Card hover with lift and glow */
+.homepage-service-card,
+.homepage-feature-card,
+.homepage-specialty-card,
+.homepage-doctor-card,
+.homepage-benefit-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.homepage-service-card:hover,
+.homepage-feature-card:hover,
+.homepage-specialty-card:hover,
+.homepage-doctor-card:hover,
+.homepage-benefit-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Shine effect on hover */
+.homepage-service-card::before,
+.homepage-feature-card::before,
+.homepage-specialty-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.6s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.homepage-service-card:hover::before,
+.homepage-feature-card:hover::before,
+.homepage-specialty-card:hover::before {
+  left: 100%;
+}
+
+/* Pulse animation for important elements */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.homepage-service-card:hover .ant-card-body > div:first-child,
+.homepage-feature-card:hover .ant-card-body > div:first-child {
+  animation: pulse 1s ease-in-out;
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.homepage-doctor-card:hover img,
+.homepage-doctor-card:hover .ant-avatar {
+  animation: float 2s ease-in-out infinite;
+}
+
+/* Gradient border on hover */
+.homepage-specialty-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.homepage-specialty-card::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #1890ff, #722ed1, #1890ff);
+  border-radius: inherit;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.4s ease;
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+.homepage-specialty-card:hover::after {
+  opacity: 1;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

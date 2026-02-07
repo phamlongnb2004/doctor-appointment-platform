@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Typography, Row, Col, Card, Timeline, Statistic, Avatar, Spin } from 'antd';
 import { 
   HeartOutlined, 
@@ -21,6 +21,9 @@ function AboutPage() {
   const [isVisible, setIsVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   
+  // Animation refs
+  const sectionsRef = useRef([]);
+  
   // Data from database
   const [heroData, setHeroData] = useState(null);
   const [missionData, setMissionData] = useState(null);
@@ -33,6 +36,64 @@ function AboutPage() {
     setIsVisible(true);
     window.scrollTo(0, 0);
     fetchAboutData();
+    
+    // Reset all sections animation state
+    sectionsRef.current.forEach(section => {
+      if (section) {
+        section.classList.remove('animate-in');
+      }
+    });
+    
+    // Parallax scroll effect - slower movement
+    const handleScroll = () => {
+      const scrolled = window.scrollY;
+      const heroSection = document.querySelector('.about-hero');
+      if (heroSection && scrolled < 800) {
+        // Move background up slowly (15% of scroll speed)
+        heroSection.style.backgroundPositionY = `${-scrolled * 0.15}px`;
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    
+    // Scroll animation observer
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in');
+        }
+      });
+    }, observerOptions);
+    
+    // Small delay to ensure DOM is ready
+    const timeoutId = setTimeout(() => {
+      sectionsRef.current.forEach(section => {
+        if (section) {
+          // Check if section is already in viewport
+          const rect = section.getBoundingClientRect();
+          const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
+          
+          if (isInViewport) {
+            // Already visible, show immediately
+            section.classList.add('animate-in');
+          } else {
+            // Not visible yet, observe for animation
+            observer.observe(section);
+          }
+        }
+      });
+    }, 100);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeoutId);
+      observer.disconnect();
+    };
   }, []);
 
   const fetchAboutData = async () => {
@@ -42,6 +103,7 @@ function AboutPage() {
       
       response.data.forEach(section => {
         const content = JSON.parse(section.contentJson);
+        console.log('Section:', section.sectionKey, 'Content:', content); // Debug log
         switch(section.sectionKey) {
           case 'hero':
             setHeroData(content);
@@ -53,6 +115,7 @@ function AboutPage() {
             setCoreValues(content);
             break;
           case 'achievements':
+            console.log('Achievements data:', content); // Debug achievements
             setAchievements(content);
             break;
           case 'timeline':
@@ -82,15 +145,16 @@ function AboutPage() {
 
   return (
     <div className="about-page">
-      {/* Hero Section */}
+      {/* Hero Section with Parallax */}
       <div 
         className={`about-hero ${isVisible ? 'visible' : ''}`}
         style={{
           backgroundImage: heroData?.backgroundImage 
             ? `url(${heroData.backgroundImage})` 
             : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          backgroundRepeat: 'no-repeat',
           backgroundSize: 'cover',
-          backgroundPosition: 'center'
+          backgroundPosition: 'center center'
         }}
       >
         <div className="about-hero-overlay"></div>
@@ -103,15 +167,18 @@ function AboutPage() {
           </Paragraph>
         </div>
         <div className="about-hero-wave">
-          <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+          <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+            <path d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,58.7C960,64,1056,64,1152,58.7C1248,53,1344,43,1392,37.3L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z" fill="#ffffff"></path>
           </svg>
         </div>
       </div>
 
       {/* Mission & Vision */}
       {missionData && (
-        <div className="about-section about-mission">
+        <div 
+          ref={el => sectionsRef.current[0] = el}
+          className="about-section about-mission animate-section"
+        >
           <div className="container">
             <Row gutter={[48, 48]} align="middle">
               <Col xs={24} lg={12}>
@@ -154,7 +221,10 @@ function AboutPage() {
 
       {/* Core Values */}
       {coreValues.length > 0 && (
-        <div className="about-section about-values">
+        <div 
+          ref={el => sectionsRef.current[1] = el}
+          className="about-section about-values animate-section"
+        >
           <div className="container">
             <div className="about-section-header">
               <Text className="about-label">GIÁ TRỊ CỐT LÕI</Text>
@@ -175,16 +245,38 @@ function AboutPage() {
                     <Card 
                       className="value-card"
                       hoverable
+                      bodyStyle={{
+                        padding: '32px 24px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        textAlign: 'center',
+                        height: '100%'
+                      }}
                       style={{ 
                         animationDelay: `${index * 0.1}s`,
-                        borderTop: `4px solid ${value.color}`
+                        borderTop: `4px solid ${value.color}`,
+                        height: '100%'
                       }}
                     >
-                      <div className="value-icon" style={{ color: value.color }}>
+                      <div 
+                        style={{ 
+                          color: value.color,
+                          fontSize: '48px',
+                          marginBottom: '20px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
                         {iconMap[value.icon] || <HeartOutlined />}
                       </div>
-                      <Title level={4}>{value.title}</Title>
-                      <Paragraph>{value.description}</Paragraph>
+                      <Title level={4} style={{ textAlign: 'center', width: '100%' }}>
+                        {value.title}
+                      </Title>
+                      <Paragraph style={{ textAlign: 'center', width: '100%', margin: 0 }}>
+                        {value.description}
+                      </Paragraph>
                     </Card>
                   </Col>
                 );
@@ -195,53 +287,130 @@ function AboutPage() {
       )}
 
       {/* Achievements */}
-      {achievements.length > 0 && (
-        <div className="about-section about-achievements">
-          <div className="about-achievements-bg"></div>
-          <div className="container">
+      {achievements.length > 0 && (() => {
+        const sectionSettings = achievements[0]?._section ? achievements[0] : null;
+        console.log('=== ACHIEVEMENTS DEBUG ===');
+        console.log('achievements array:', achievements);
+        console.log('achievements[0]:', achievements[0]);
+        console.log('sectionSettings:', sectionSettings);
+        console.log('titleColor:', sectionSettings?.titleColor);
+        console.log('labelColor:', sectionSettings?.labelColor);
+        console.log('textColor:', sectionSettings?.textColor);
+        console.log('========================');
+        
+        // Extract colors with fallbacks
+        const labelColor = sectionSettings?.labelColor || '#FFFFFF';
+        const titleColor = sectionSettings?.titleColor || '#FFFFFF';
+        const textColor = sectionSettings?.textColor || '#FFFFFF';
+        const overlayColor = sectionSettings?.overlayColor || 'rgba(0, 0, 0, 0.5)';
+        const backgroundImage = sectionSettings?.backgroundImage || '';
+        const sectionTitle = sectionSettings?.sectionTitle || 'Con số ấn tượng';
+        
+        console.log('Extracted colors:', { labelColor, titleColor, textColor, overlayColor });
+        
+        return (
+        <div 
+          ref={el => sectionsRef.current[2] = el}
+          className="about-section about-achievements animate-section"
+          style={{
+            backgroundImage: backgroundImage
+              ? `url(${backgroundImage})`
+              : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            position: 'relative'
+          }}
+        >
+          {/* Overlay */}
+          {overlayColor && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: overlayColor,
+              zIndex: 1
+            }}></div>
+          )}
+          
+          <div className="about-achievements-bg" style={{ zIndex: 1 }}></div>
+          <div className="container" style={{ position: 'relative', zIndex: 2 }}>
             <div className="about-section-header">
-              <Text className="about-label" style={{ color: '#fff' }}>THÀNH TỰU</Text>
-              <Title level={2} style={{ color: '#fff' }}>
-                Con số ấn tượng
-              </Title>
+              <span 
+                className="about-label" 
+                style={{ 
+                  color: labelColor,
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  letterSpacing: '2px',
+                  textTransform: 'uppercase',
+                  marginBottom: '12px'
+                }}
+              >
+                THÀNH TỰU
+              </span>
+              <h2 
+                className="achievements-title"
+                ref={(el) => {
+                  if (el) {
+                    el.style.setProperty('color', titleColor, 'important');
+                    el.style.setProperty('font-size', '42px', 'important');
+                    el.style.setProperty('font-weight', '700', 'important');
+                    el.style.setProperty('margin', '0', 'important');
+                  }
+                }}
+              >
+                {sectionTitle}
+              </h2>
             </div>
             <Row gutter={[32, 32]}>
-              {achievements.map((item, index) => {
-                const iconMap = {
-                  'TeamOutlined': <TeamOutlined />,
-                  'MedicineBoxOutlined': <MedicineBoxOutlined />,
-                  'GlobalOutlined': <GlobalOutlined />,
-                  'TrophyOutlined': <TrophyOutlined />
-                };
-                return (
-                  <Col xs={12} sm={12} lg={6} key={index}>
-                    <div className="achievement-card">
-                      <div className="achievement-icon">
-                        {iconMap[item.icon] || <TrophyOutlined />}
-                      </div>
-                      <Statistic
-                        value={item.value}
-                        suffix={item.suffix}
-                        valueStyle={{ 
-                          color: '#fff', 
-                          fontSize: 48, 
-                          fontWeight: 700,
-                          lineHeight: 1
-                        }}
-                      />
-                      <Text className="achievement-title">{item.title}</Text>
+              {achievements.filter(item => !item._section).map((item, index) => (
+                <Col xs={12} sm={12} lg={6} key={index}>
+                  <div className="achievement-card">
+                    <div className="achievement-icon">
+                      {item.iconUrl ? (
+                        <img 
+                          src={item.iconUrl} 
+                          alt={item.title} 
+                          style={{ width: 60, height: 60, objectFit: 'contain' }} 
+                        />
+                      ) : (
+                        <TrophyOutlined />
+                      )}
                     </div>
-                  </Col>
-                );
-              })}
+                    <Statistic
+                      value={item.value}
+                      suffix={item.suffix}
+                      valueStyle={{ 
+                        color: textColor, 
+                        fontSize: 48, 
+                        fontWeight: 700,
+                        lineHeight: 1
+                      }}
+                    />
+                    <Text 
+                      className="achievement-title" 
+                      style={{ color: textColor }}
+                    >
+                      {item.title}
+                    </Text>
+                  </div>
+                </Col>
+              ))}
             </Row>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Timeline */}
       {milestones.length > 0 && (
-        <div className="about-section about-timeline">
+        <div 
+          ref={el => sectionsRef.current[3] = el}
+          className="about-section about-timeline animate-section"
+        >
           <div className="container">
             <div className="about-section-header">
               <Text className="about-label">HÀNH TRÌNH PHÁT TRIỂN</Text>
@@ -272,7 +441,10 @@ function AboutPage() {
 
       {/* Leadership Team */}
       {team.length > 0 && (
-        <div className="about-section about-team">
+        <div 
+          ref={el => sectionsRef.current[4] = el}
+          className="about-section about-team animate-section"
+        >
           <div className="container">
             <div className="about-section-header">
               <Text className="about-label">ĐỘI NGŨ LÃNH ĐẠO</Text>
@@ -311,7 +483,10 @@ function AboutPage() {
       )}
 
       {/* CTA Section */}
-      <div className="about-section about-cta">
+      <div 
+        ref={el => sectionsRef.current[5] = el}
+        className="about-section about-cta animate-section"
+      >
         <div className="container">
           <div className="about-cta-content">
             <Title level={2} style={{ color: '#fff', marginBottom: 16 }}>

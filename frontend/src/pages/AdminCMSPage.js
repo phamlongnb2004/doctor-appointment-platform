@@ -92,6 +92,7 @@ function AdminCMSPage() {
   const [membershipBenefits, setMembershipBenefits] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [iconUrl, setIconUrl] = useState('');
+  const [galleryImages, setGalleryImages] = useState([]); // For multiple images
   const [currentColor, setCurrentColor] = useState('#1890ff');
   const [currentTextColor, setCurrentTextColor] = useState('#FFFFFF');
   const [siteSettings, setSiteSettings] = useState({
@@ -118,6 +119,10 @@ function AdminCMSPage() {
   const [aboutTimeline, setAboutTimeline] = useState([]);
   const [aboutTeam, setAboutTeam] = useState([]);
   const [aboutSubTab, setAboutSubTab] = useState('hero');
+  
+  // Medical Services states
+  const [medicalServices, setMedicalServices] = useState([]);
+  const [serviceCategories, setServiceCategories] = useState([]);
 
   useEffect(() => {
     fetchAllData();
@@ -171,8 +176,10 @@ function AdminCMSPage() {
       // Try admin endpoints first, fallback to public if not available
       const fetchWithFallback = async (adminEndpoint, publicEndpoint) => {
         try {
+          console.log('Fetching:', adminEndpoint);
           return await axios.get(adminEndpoint, { headers });
         } catch (error) {
+          console.error(`Error fetching ${adminEndpoint}:`, error.response?.status, error.response?.data);
           console.log(`Admin endpoint not available, using public: ${publicEndpoint}`);
           return await axios.get(publicEndpoint);
         }
@@ -195,7 +202,9 @@ function AdminCMSPage() {
         membershipBenefitsRes,
         newsSectionsRes,
         newsSidebarWidgetsRes,
-        articleCtaSectionRes
+        articleCtaSectionRes,
+        serviceCategoriesRes,
+        medicalServicesRes
       ] = await Promise.all([
         fetchWithFallback('http://localhost:8080/api/cms/admin/homepage-content/all', 'http://localhost:8080/api/cms/homepage-content'),
         fetchWithFallback('http://localhost:8080/api/cms/admin/services/all', 'http://localhost:8080/api/cms/services'),
@@ -213,7 +222,9 @@ function AdminCMSPage() {
         cmsAPI.getAllMembershipBenefits(),
         cmsAPI.getAllNewsSections(),
         cmsAPI.getAllNewsSidebarWidgets(),
-        cmsAPI.getArticleCtaSection().catch(() => ({ data: null }))
+        cmsAPI.getArticleCtaSection().catch(() => ({ data: null })),
+        cmsAPI.getAllServiceCategories(),
+        cmsAPI.getAllMedicalServices()
       ]);
 
       setHomePageContent(homePageRes.data || []);
@@ -237,6 +248,8 @@ function AdminCMSPage() {
       setNewsSections(newsSectionsRes.data || []);
       setNewsSidebarWidgets(newsSidebarWidgetsRes.data || []);
       setArticleCtaSection(articleCtaSectionRes.data || null);
+      setServiceCategories(serviceCategoriesRes.data || []);
+      setMedicalServices(medicalServicesRes.data || []);
       
       // Fetch About Page data
       try {
@@ -270,7 +283,9 @@ function AdminCMSPage() {
         console.error('Error fetching about data:', error);
       }
     } catch (error) {
-      message.error('Lỗi khi tải dữ liệu: ' + error.message);
+      console.error('Error in fetchAllData:', error);
+      console.error('Error details:', error.response?.status, error.response?.data);
+      message.error('Lỗi khi tải dữ liệu: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -280,6 +295,7 @@ function AdminCMSPage() {
     setEditingItem(null);
     form.resetFields();
     setIconUrl(''); // Reset icon preview
+    setGalleryImages([]); // Reset gallery images
     setBenefitsList(['']); // Reset benefits list
     setCurrentColor('#1890ff'); // Reset color
     setCurrentTextColor('#FFFFFF'); // Reset text color
@@ -315,6 +331,18 @@ function AdminCMSPage() {
     
     // Set icon preview from item (for all types that use icon/image)
     setIconUrl(item.icon || item.imageUrl || item.image1 || item.backgroundImage || '');
+    
+    // Load gallery images for medical-services
+    if (currentTab === 'medical-services' && item.images) {
+      try {
+        const gallery = JSON.parse(item.images);
+        setGalleryImages(Array.isArray(gallery) ? gallery : []);
+      } catch (e) {
+        setGalleryImages([]);
+      }
+    } else {
+      setGalleryImages([]);
+    }
     
     // Set color from item
     setCurrentColor(item.color || '#1890ff');
@@ -377,32 +405,129 @@ function AdminCMSPage() {
     return false; // Prevent default upload behavior
   };
 
+  // Upload multiple gallery images for medical services
+  const handleUploadGalleryImages = async (info) => {
+    const { fileList } = info;
+    
+    if (!fileList || fileList.length === 0) return;
+    
+    setUploading(true);
+    const uploadedUrls = [];
+    
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Upload all files
+      for (const fileItem of fileList) {
+        const formData = new FormData();
+        formData.append('image', fileItem.originFileObj || fileItem);
+        
+        const response = await axios.post('http://localhost:8080/api/images/articles', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const uploadedUrl = response.data.imageUrl || response.data.url;
+        uploadedUrls.push(uploadedUrl);
+      }
+      
+      // Combine with existing gallery
+      const newGallery = [...galleryImages, ...uploadedUrls];
+      setGalleryImages(newGallery);
+      
+      // Set first image as main image if gallery was empty
+      if (galleryImages.length === 0 && uploadedUrls.length > 0) {
+        setIconUrl(uploadedUrls[0]);
+        form.setFieldsValue({ imageUrl: uploadedUrls[0] });
+        message.success(`Upload thành công ${uploadedUrls.length} hình ảnh! Ảnh đầu tiên đã được đặt làm ảnh chính.`);
+      } else {
+        message.success(`Đã thêm ${uploadedUrls.length} hình ảnh vào gallery!`);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      message.error('Lỗi khi upload: ' + (error.response?.data?.error || error.message));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Remove gallery image
+  const handleRemoveGalleryImage = (index) => {
+    const newGallery = galleryImages.filter((_, i) => i !== index);
+    setGalleryImages(newGallery);
+    
+    // If removed first image, update main image to next one
+    if (index === 0 && newGallery.length > 0) {
+      setIconUrl(newGallery[0]);
+      form.setFieldsValue({ imageUrl: newGallery[0] });
+      message.success('Đã xóa hình ảnh! Ảnh tiếp theo đã được đặt làm ảnh chính.');
+    } else {
+      message.success('Đã xóa hình ảnh!');
+    }
+  };
+
+  // Calculate discounted price based on percentage
+  const handleDiscountPercentageChange = (value) => {
+    const originalPrice = form.getFieldValue('originalPrice');
+    if (originalPrice && value) {
+      const discounted = originalPrice * (1 - value / 100);
+      form.setFieldsValue({ discountedPrice: Math.round(discounted) });
+    }
+  };
+
+  // Calculate discount percentage based on prices
+  const handlePriceChange = () => {
+    const originalPrice = form.getFieldValue('originalPrice');
+    const discountedPrice = form.getFieldValue('discountedPrice');
+    
+    if (originalPrice && discountedPrice && originalPrice > 0) {
+      const percentage = ((originalPrice - discountedPrice) / originalPrice) * 100;
+      form.setFieldsValue({ discountPercentage: Math.round(percentage) });
+    }
+  };
+
   // ==================== SLUG HANDLERS ====================
   
-  const handleTitleChange = async (e) => {
+  // Use ref to store timeout ID for debouncing title change
+  const titleChangeTimeoutRef = React.useRef(null);
+  
+  const handleTitleChange = (e) => {
     const title = e.target.value;
+    console.log('handleTitleChange called, title:', title, 'currentTab:', currentTab);
     
-    // Only auto-generate slug for news and doctor-articles tabs
-    if (currentTab !== 'news' && currentTab !== 'doctor-articles') {
+    // Only auto-generate slug for news, doctor-articles, and medical-services tabs
+    if (currentTab !== 'news' && currentTab !== 'doctor-articles' && currentTab !== 'medical-services') {
+      console.log('Tab not supported for auto-slug');
       return;
     }
     
-    // Only auto-generate if creating new article (not editing)
-    if (editingItem) {
-      return;
+    // Clear previous timeout
+    if (titleChangeTimeoutRef.current) {
+      clearTimeout(titleChangeTimeoutRef.current);
     }
     
+    // Debounce slug generation (300ms delay)
     if (title && title.trim()) {
-      try {
-        const response = await cmsAPI.generateSlug(title);
-        const generatedSlug = response.data.slug;
-        form.setFieldsValue({ slug: generatedSlug });
-        
-        // Check if slug exists immediately after generating
-        checkSlugExists(generatedSlug);
-      } catch (error) {
-        console.error('Error generating slug:', error);
-      }
+      console.log('Setting timeout for slug generation...');
+      titleChangeTimeoutRef.current = setTimeout(async () => {
+        try {
+          console.log('Generating slug for:', title);
+          const response = await cmsAPI.generateSlug(title);
+          const generatedSlug = response.data.slug;
+          console.log('Generated slug:', generatedSlug);
+          form.setFieldsValue({ slug: generatedSlug });
+          
+          // Check if slug exists immediately after generating
+          checkSlugExists(generatedSlug);
+        } catch (error) {
+          console.error('Error generating slug:', error);
+        }
+      }, 300);
+    } else {
+      // Clear slug if title is empty
+      form.setFieldsValue({ slug: '' });
     }
   };
   
@@ -415,8 +540,19 @@ function AdminCMSPage() {
     
     setSlugChecking(true);
     try {
-      const response = await cmsAPI.checkSlug(slug, articleId || editingItem?.id);
-      console.log('Slug check response:', response.data); // Debug log
+      // Determine type based on current tab
+      const type = currentTab === 'medical-services' ? 'medical-service' : 'news';
+      const params = new URLSearchParams();
+      if (articleId || editingItem?.id) {
+        params.append('articleId', articleId || editingItem.id);
+      }
+      params.append('type', type);
+      
+      const response = await axios.get(
+        `http://localhost:8080/api/cms/slug/check/${slug}?${params.toString()}`
+      );
+      
+      console.log('Slug check response:', response.data);
       setSlugExists(response.data.exists);
       setSlugSuggestion(response.data.suggestion || '');
     } catch (error) {
@@ -500,9 +636,11 @@ function AdminCMSPage() {
         case 'news-sidebar-widgets':
           await cmsAPI.deleteNewsSidebarWidget(id);
           break;
+        case 'service-categories':
+          await cmsAPI.deleteServiceCategory(id);
           break;
-        case 'news-sections':
-          await cmsAPI.deleteNewsSection(id);
+        case 'medical-services':
+          await cmsAPI.deleteMedicalService(id);
           break;
       }
       message.success('Xóa thành công!');
@@ -557,6 +695,12 @@ function AdminCMSPage() {
           break;
         case 'news-sidebar-widgets':
           currentItem = newsSidebarWidgets.find(item => item.id === id);
+          break;
+        case 'service-categories':
+          currentItem = serviceCategories.find(item => item.id === id);
+          break;
+        case 'medical-services':
+          currentItem = medicalServices.find(item => item.id === id);
           break;
       }
       
@@ -613,6 +757,12 @@ function AdminCMSPage() {
           break;
         case 'news-sidebar-widgets':
           await cmsAPI.updateNewsSidebarWidget(id, updateData);
+          break;
+        case 'service-categories':
+          await cmsAPI.updateServiceCategory(id, updateData);
+          break;
+        case 'medical-services':
+          await cmsAPI.updateMedicalService(id, updateData);
           break;
       }
       
@@ -685,6 +835,12 @@ function AdminCMSPage() {
         console.log('Membership benefits data before save:', JSON.stringify(data, null, 2));
       }
       
+      // Process gallery images for medical-services
+      if (currentTab === 'medical-services') {
+        data.images = JSON.stringify(galleryImages);
+        console.log('Medical service data before save:', JSON.stringify(data, null, 2));
+      }
+      
       if (editingItem) {
         // Update
         switch (currentTab) {
@@ -735,6 +891,12 @@ function AdminCMSPage() {
             const ctaResponse = await cmsAPI.getArticleCtaSection();
             setArticleCtaSection(ctaResponse.data);
             break;
+          case 'service-categories':
+            await cmsAPI.updateServiceCategory(editingItem.id, data);
+            break;
+          case 'medical-services':
+            await cmsAPI.updateMedicalService(editingItem.id, data);
+            break;
         }
         message.success('Cập nhật thành công!');
       } else {
@@ -782,6 +944,12 @@ function AdminCMSPage() {
             break;
           case 'news-sidebar-widgets':
             await cmsAPI.createNewsSidebarWidget(data);
+            break;
+          case 'service-categories':
+            await cmsAPI.createServiceCategory(data);
+            break;
+          case 'medical-services':
+            await cmsAPI.createMedicalService(data);
             break;
         }
         message.success('Tạo mới thành công!');
@@ -1479,6 +1647,102 @@ function AdminCMSPage() {
           <Popconfirm
             title="Bạn có chắc muốn xóa?"
             onConfirm={() => handleDelete(record.id, 'membership-benefits')}
+          >
+            <Button icon={<DeleteOutlined />} danger />
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  const serviceCategoryColumns = [
+    { title: 'Tên danh mục', dataIndex: 'name', key: 'name' },
+    { title: 'Slug', dataIndex: 'slug', key: 'slug' },
+    { title: 'Mô tả', dataIndex: 'description', key: 'description', ellipsis: true },
+    { title: 'Thứ tự', dataIndex: 'displayOrder', key: 'displayOrder' },
+    { 
+      title: 'Trạng thái', 
+      dataIndex: 'isActive', 
+      key: 'isActive',
+      render: (isActive, record) => (
+        <Switch 
+          checked={isActive} 
+          onChange={() => handleToggleStatus(record.id, isActive, 'service-categories')}
+        />
+      )
+    },
+    {
+      title: 'Hành động',
+      key: 'actions',
+      render: (_, record) => (
+        <Space>
+          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+          <Popconfirm
+            title="Bạn có chắc muốn xóa?"
+            onConfirm={() => handleDelete(record.id, 'service-categories')}
+          >
+            <Button icon={<DeleteOutlined />} danger />
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  const medicalServiceColumns = [
+    { title: 'Tiêu đề', dataIndex: 'title', key: 'title', ellipsis: true },
+    { 
+      title: 'Danh mục', 
+      dataIndex: 'categoryId', 
+      key: 'categoryId',
+      render: (categoryId) => {
+        const category = serviceCategories.find(c => c.id === categoryId);
+        return category ? category.name : '-';
+      }
+    },
+    { 
+      title: 'Giá gốc', 
+      dataIndex: 'originalPrice', 
+      key: 'originalPrice',
+      render: (price) => price ? `${price.toLocaleString()}đ` : '-'
+    },
+    { 
+      title: 'Giá KM', 
+      dataIndex: 'discountedPrice', 
+      key: 'discountedPrice',
+      render: (price) => price ? `${price.toLocaleString()}đ` : '-'
+    },
+    { 
+      title: 'Giảm giá', 
+      dataIndex: 'discountPercentage', 
+      key: 'discountPercentage',
+      render: (percent) => percent ? `-${percent}%` : '-'
+    },
+    { 
+      title: 'Nổi bật', 
+      dataIndex: 'isFeatured', 
+      key: 'isFeatured',
+      render: (isFeatured) => isFeatured ? <Tag color="gold">Nổi bật</Tag> : null
+    },
+    { 
+      title: 'Trạng thái', 
+      dataIndex: 'isActive', 
+      key: 'isActive',
+      render: (isActive, record) => (
+        <Switch 
+          checked={isActive} 
+          onChange={() => handleToggleStatus(record.id, isActive, 'medical-services')}
+        />
+      )
+    },
+    {
+      title: 'Hành động',
+      key: 'actions',
+      render: (_, record) => (
+        <Space>
+          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+          <Popconfirm
+            title="Bạn có chắc muốn xóa?"
+            onConfirm={() => handleDelete(record.id, 'medical-services')}
           >
             <Button icon={<DeleteOutlined />} danger />
           </Popconfirm>
@@ -2187,6 +2451,217 @@ function AdminCMSPage() {
             
             <Form.Item name="displayOrder" label="Thứ tự hiển thị">
               <InputNumber min={0} />
+            </Form.Item>
+            <Form.Item name="isActive" label="Kích hoạt" valuePropName="checked">
+              <Switch />
+            </Form.Item>
+          </>
+        );
+      case 'service-categories':
+        return (
+          <>
+            <Form.Item name="name" label="Tên danh mục" rules={[{ required: true }]}>
+              <Input placeholder="Khám sức khỏe" />
+            </Form.Item>
+            <Form.Item name="slug" label="Slug">
+              <Input placeholder="kham-suc-khoe" />
+            </Form.Item>
+            <Form.Item name="description" label="Mô tả">
+              <TextArea rows={3} placeholder="Nhập mô tả danh mục" />
+            </Form.Item>
+            <Form.Item name="displayOrder" label="Thứ tự hiển thị">
+              <InputNumber min={0} />
+            </Form.Item>
+            <Form.Item name="isActive" label="Kích hoạt" valuePropName="checked">
+              <Switch />
+            </Form.Item>
+          </>
+        );
+      case 'medical-services':
+        return (
+          <>
+            <Form.Item name="categoryId" label="Danh mục" rules={[{ required: true }]}>
+              <Select placeholder="Chọn danh mục">
+                {serviceCategories.map(cat => (
+                  <Option key={cat.id} value={cat.id}>{cat.name}</Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name="title" label="Tiêu đề" rules={[{ required: true }]}>
+              <Input 
+                placeholder="Nhập tiêu đề ở đây..."
+                onChange={handleTitleChange}
+              />
+            </Form.Item>
+            <Form.Item 
+              name="slug" 
+              label={
+                <span>
+                  Slug 
+                  <span style={{ color: '#8c8c8c', fontWeight: 'normal', marginLeft: 8 }}>
+                    (Tự động tạo từ tiêu đề)
+                  </span>
+                </span>
+              }
+              validateStatus={slugExists ? 'error' : slugChecking ? 'validating' : ''}
+              help={
+                slugExists ? (
+                  <span style={{ color: '#ff4d4f' }}>
+                    Slug đã tồn tại! 
+                    {slugSuggestion && (
+                      <Button 
+                        type="link" 
+                        size="small" 
+                        onClick={useSuggestedSlug}
+                        style={{ padding: '0 4px', height: 'auto' }}
+                      >
+                        Dùng: {slugSuggestion}
+                      </Button>
+                    )}
+                  </span>
+                ) : slugChecking ? 'Đang kiểm tra...' : null
+              }
+            >
+              <Input 
+                placeholder="slug-tu-dong-tao"
+                onChange={handleSlugChange}
+              />
+            </Form.Item>
+            <Form.Item name="description" label="Mô tả ngắn">
+              <TextArea rows={3} placeholder="Mô tả ngắn về dịch vụ" />
+            </Form.Item>
+            
+            <Divider orientation="left">Hình ảnh (Upload nhiều ảnh cùng lúc)</Divider>
+            <Form.Item 
+              label="Thư viện ảnh"
+              extra="Chọn nhiều ảnh cùng lúc. Ảnh đầu tiên sẽ là ảnh chính."
+            >
+              <Space direction="vertical" style={{ width: '100%' }}>
+                <Upload
+                  beforeUpload={() => false}
+                  onChange={handleUploadGalleryImages}
+                  showUploadList={false}
+                  accept="image/*"
+                  multiple
+                  disabled={uploading}
+                  fileList={[]}
+                >
+                  <Button icon={<PictureOutlined />} loading={uploading} type="primary">
+                    {galleryImages.length > 0 ? 'Thêm ảnh khác' : 'Chọn nhiều ảnh'}
+                  </Button>
+                </Upload>
+                
+                {galleryImages.length > 0 && (
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
+                    gap: 12,
+                    marginTop: 12
+                  }}>
+                    {galleryImages.map((url, index) => (
+                      <div key={index} style={{ position: 'relative' }}>
+                        <img 
+                          src={url} 
+                          alt={`gallery-${index}`} 
+                          style={{ 
+                            width: '100%', 
+                            height: 120, 
+                            objectFit: 'cover', 
+                            borderRadius: 8,
+                            border: index === 0 ? '3px solid #1890ff' : '1px solid #d9d9d9'
+                          }} 
+                        />
+                        {index === 0 && (
+                          <Tag 
+                            color="blue" 
+                            style={{ 
+                              position: 'absolute', 
+                              top: 4, 
+                              left: 4,
+                              fontWeight: 600
+                            }}
+                          >
+                            Ảnh chính
+                          </Tag>
+                        )}
+                        <Button
+                          type="primary"
+                          danger
+                          size="small"
+                          icon={<DeleteOutlined />}
+                          onClick={() => handleRemoveGalleryImage(index)}
+                          style={{
+                            position: 'absolute',
+                            top: 4,
+                            right: 4,
+                            padding: '2px 8px',
+                            height: 24
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {galleryImages.length === 0 && (
+                  <div style={{ 
+                    padding: 24, 
+                    textAlign: 'center', 
+                    background: '#fafafa', 
+                    border: '2px dashed #d9d9d9',
+                    borderRadius: 8,
+                    color: '#8c8c8c'
+                  }}>
+                    <PictureOutlined style={{ fontSize: 32, marginBottom: 8 }} />
+                    <div>Chưa có ảnh. Chọn nhiều ảnh cùng lúc.</div>
+                    <div style={{ fontSize: 12, marginTop: 4 }}>Ảnh đầu tiên sẽ là ảnh chính</div>
+                  </div>
+                )}
+              </Space>
+            </Form.Item>
+            
+            {/* Hidden field for imageUrl (will be set from first gallery image) */}
+            <Form.Item name="imageUrl" hidden>
+              <Input />
+            </Form.Item>
+            
+            <Divider orientation="left">Giá cả</Divider>
+            <Form.Item name="originalPrice" label="Giá gốc (VNĐ)">
+              <InputNumber 
+                min={0} 
+                style={{ width: '100%' }} 
+                placeholder="Nhập giá gốc..."
+                formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                onChange={handlePriceChange}
+              />
+            </Form.Item>
+            <Form.Item name="discountPercentage" label="% Giảm giá">
+              <InputNumber 
+                min={0} 
+                max={100} 
+                style={{ width: '100%' }} 
+                placeholder="Nhập % giảm giá..."
+                onChange={handleDiscountPercentageChange}
+              />
+            </Form.Item>
+            <Form.Item name="discountedPrice" label="Giá khuyến mãi (VNĐ)">
+              <InputNumber 
+                min={0} 
+                style={{ width: '100%' }} 
+                placeholder="Giá sau giảm (tự động tính)..."
+                formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                onChange={handlePriceChange}
+              />
+            </Form.Item>
+            
+            <Divider orientation="left">Cài đặt</Divider>
+            <Form.Item name="displayOrder" label="Thứ tự hiển thị">
+              <InputNumber min={0} />
+            </Form.Item>
+            <Form.Item name="isFeatured" label="Nổi bật" valuePropName="checked">
+              <Switch />
             </Form.Item>
             <Form.Item name="isActive" label="Kích hoạt" valuePropName="checked">
               <Switch />
@@ -3547,6 +4022,28 @@ function AdminCMSPage() {
           </Menu.ItemGroup>
 
           <Menu.ItemGroup 
+            key="services-group" 
+            title={
+              <span style={{ 
+                fontSize: 12, 
+                fontWeight: 700, 
+                color: '#8c8c8c',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                <MedicineBoxOutlined /> Dịch vụ
+              </span>
+            }
+          >
+            <Menu.Item key="service-categories" icon={<TagOutlined />}>
+              Danh mục dịch vụ
+            </Menu.Item>
+            <Menu.Item key="medical-services" icon={<MedicineBoxOutlined />}>
+              Dịch vụ y tế
+            </Menu.Item>
+          </Menu.ItemGroup>
+
+          <Menu.ItemGroup 
             key="settings-group" 
             title={
               <span style={{ 
@@ -3560,6 +4057,12 @@ function AdminCMSPage() {
               </span>
             }
           >
+            <Menu.Item key="bank-account" icon={<SettingOutlined />}>
+              Thông tin ngân hàng
+            </Menu.Item>
+            <Menu.Item key="footer-settings" icon={<SettingOutlined />}>
+              Footer
+            </Menu.Item>
             <Menu.Item key="site-settings" icon={<SettingOutlined />}>
               Thông tin Website
             </Menu.Item>
@@ -4406,6 +4909,165 @@ function AdminCMSPage() {
             </Card>
           )}
 
+          {/* Service Categories Tab */}
+          {currentTab === 'service-categories' && (
+            <Card 
+              className="admin-cms-card"
+              title={
+                <div>
+                  <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Danh mục dịch vụ</div>
+                  <div style={{ fontSize: 12, color: '#8c8c8c', fontWeight: 400 }}>
+                    <TagOutlined /> Quản lý danh mục dịch vụ y tế
+                  </div>
+                </div>
+              }
+              extra={
+                <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+                  Thêm danh mục
+                </Button>
+              }
+            >
+              <Table
+                className="admin-cms-table"
+                columns={serviceCategoryColumns}
+                dataSource={serviceCategories}
+                rowKey="id"
+                loading={loading}
+                pagination={{ pageSize: 10 }}
+              />
+            </Card>
+          )}
+
+          {/* Medical Services Tab */}
+          {currentTab === 'medical-services' && (
+            <Card 
+              className="admin-cms-card"
+              title={
+                <div>
+                  <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Dịch vụ y tế</div>
+                  <div style={{ fontSize: 12, color: '#8c8c8c', fontWeight: 400 }}>
+                    <MedicineBoxOutlined /> Quản lý dịch vụ y tế
+                  </div>
+                </div>
+              }
+              extra={
+                <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+                  Thêm dịch vụ
+                </Button>
+              }
+            >
+              <Table
+                className="admin-cms-table"
+                columns={medicalServiceColumns}
+                dataSource={medicalServices}
+                rowKey="id"
+                loading={loading}
+                pagination={{ pageSize: 10 }}
+                scroll={{ x: 1200 }}
+              />
+            </Card>
+          )}
+
+          {/* Bank Account Tab */}
+          {currentTab === 'bank-account' && (
+            <Card 
+              className="admin-cms-card"
+              title={
+                <div>
+                  <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Thông tin ngân hàng</div>
+                  <div style={{ fontSize: 12, color: '#8c8c8c', fontWeight: 400 }}>
+                    <SettingOutlined /> Cấu hình thông tin ngân hàng cho thanh toán QR
+                  </div>
+                </div>
+              }
+            >
+              <Form
+                layout="vertical"
+                initialValues={siteSettings}
+                onFinish={async (values) => {
+                  try {
+                    await cmsAPI.updateSiteSettings({ ...siteSettings, ...values });
+                    message.success('Cập nhật thành công!');
+                    fetchAllData();
+                  } catch (error) {
+                    message.error('Lỗi khi cập nhật: ' + error.message);
+                  }
+                }}
+              >
+                <Form.Item label="Mã ngân hàng" name="bankId">
+                  <Input placeholder="VD: MB, VCB, TCB" />
+                </Form.Item>
+                <Form.Item label="Tên ngân hàng" name="bankName">
+                  <Input placeholder="VD: Ngân hàng Quân đội MB" />
+                </Form.Item>
+                <Form.Item label="Số tài khoản" name="bankAccountNo">
+                  <Input placeholder="Nhập số tài khoản" />
+                </Form.Item>
+                <Form.Item label="Tên chủ tài khoản" name="bankAccountName">
+                  <Input placeholder="Nhập tên chủ tài khoản" />
+                </Form.Item>
+                <Form.Item>
+                  <Button type="primary" htmlType="submit">
+                    Lưu thông tin
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Card>
+          )}
+
+          {/* Footer Settings Tab */}
+          {currentTab === 'footer-settings' && (
+            <Card 
+              className="admin-cms-card"
+              title={
+                <div>
+                  <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Cài đặt Footer</div>
+                  <div style={{ fontSize: 12, color: '#8c8c8c', fontWeight: 400 }}>
+                    <SettingOutlined /> Cấu hình nội dung footer
+                  </div>
+                </div>
+              }
+            >
+              <Form
+                layout="vertical"
+                initialValues={siteSettings}
+                onFinish={async (values) => {
+                  try {
+                    await cmsAPI.updateSiteSettings({ ...siteSettings, ...values });
+                    message.success('Cập nhật thành công!');
+                    fetchAllData();
+                  } catch (error) {
+                    message.error('Lỗi khi cập nhật: ' + error.message);
+                  }
+                }}
+              >
+                <Form.Item label="Giới thiệu Footer" name="footerAboutText">
+                  <TextArea rows={4} placeholder="Nhập nội dung giới thiệu" />
+                </Form.Item>
+                <Form.Item label="Giờ làm việc" name="footerWorkingHours">
+                  <TextArea rows={3} placeholder="VD: Thứ 2 - Thứ 7: 7:00 - 20:00" />
+                </Form.Item>
+                <Form.Item label="Facebook URL" name="footerFacebookUrl">
+                  <Input placeholder="https://facebook.com/..." />
+                </Form.Item>
+                <Form.Item label="YouTube URL" name="footerYoutubeUrl">
+                  <Input placeholder="https://youtube.com/..." />
+                </Form.Item>
+                <Form.Item label="Zalo URL" name="footerZaloUrl">
+                  <Input placeholder="https://zalo.me/..." />
+                </Form.Item>
+                <Form.Item label="Copyright Text" name="footerCopyrightText">
+                  <Input placeholder="© 2024 MEDLATEC. All rights reserved." />
+                </Form.Item>
+                <Form.Item>
+                  <Button type="primary" htmlType="submit">
+                    Lưu cài đặt
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Card>
+          )}
+
           {/* About Page Section */}
           {currentTab === 'about-page' && (
             <Card 
@@ -4816,6 +5478,28 @@ function AdminCMSPage() {
         </Menu.ItemGroup>
 
         <Menu.ItemGroup 
+          key="services-group" 
+          title={
+            <span style={{ 
+              fontSize: 12, 
+              fontWeight: 700, 
+              color: '#8c8c8c',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}>
+              <MedicineBoxOutlined /> Dịch vụ
+            </span>
+          }
+        >
+          <Menu.Item key="service-categories" icon={<TagOutlined />}>
+            Danh mục dịch vụ
+          </Menu.Item>
+          <Menu.Item key="medical-services" icon={<MedicineBoxOutlined />}>
+            Dịch vụ y tế
+          </Menu.Item>
+        </Menu.ItemGroup>
+
+        <Menu.ItemGroup 
           key="settings-group" 
           title={
             <span style={{ 
@@ -4829,6 +5513,12 @@ function AdminCMSPage() {
             </span>
           }
         >
+          <Menu.Item key="bank-account" icon={<SettingOutlined />}>
+            Thông tin ngân hàng
+          </Menu.Item>
+          <Menu.Item key="footer-settings" icon={<SettingOutlined />}>
+            Footer
+          </Menu.Item>
           <Menu.Item key="site-settings" icon={<SettingOutlined />}>
             Thông tin Website
           </Menu.Item>

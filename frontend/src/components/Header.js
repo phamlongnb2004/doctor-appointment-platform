@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Button, Dropdown, Avatar, message, Input, Drawer } from 'antd';
-import { Link, useNavigate } from 'react-router-dom';
+import { Layout, Menu, Button, Dropdown, Avatar, message, Input, Drawer, Badge } from 'antd';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   UserOutlined, 
   LogoutOutlined, 
@@ -12,16 +12,20 @@ import {
   EditOutlined,
   MenuOutlined,
   CloseOutlined,
-  RightOutlined
+  RightOutlined,
+  ShoppingCartOutlined
 } from '@ant-design/icons';
 import { userAPI } from '../services/api';
 import webSocketService from '../services/websocket';
 import cmsAPI from '../services/cmsApi';
+import { useCart } from '../contexts/CartContext';
 
 const { Header } = Layout;
 
 function HeaderComponent({ user, onLogout }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { cart, resetCart } = useCart();
   const [siteSettings, setSiteSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -29,6 +33,14 @@ function HeaderComponent({ user, onLogout }) {
   useEffect(() => {
     fetchSiteSettings();
   }, []);
+
+  // Helper function to check if menu item is active
+  const isActive = (path) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
 
   const fetchSiteSettings = async () => {
     try {
@@ -59,6 +71,7 @@ function HeaderComponent({ user, onLogout }) {
     } catch (error) {
       console.error('Error during logout:', error);
     } finally {
+      resetCart(); // Reset cart before logout
       onLogout();
       navigate('/');
       message.success('Đã đăng xuất!');
@@ -82,6 +95,11 @@ function HeaderComponent({ user, onLogout }) {
       key: 'appointments',
       label: 'Lịch hẹn của tôi',
       onClick: () => navigate('/appointments'),
+    },
+    {
+      key: 'my-orders',
+      label: 'Đơn hàng của tôi',
+      onClick: () => navigate('/my-orders'),
     },
   ];
 
@@ -116,20 +134,23 @@ function HeaderComponent({ user, onLogout }) {
     return null;
   }
 
+  // Don't render until settings are loaded
+  if (loading || !siteSettings) {
+    return null;
+  }
+
   return (
     <>
       {/* Main Header */}
-      <Header style={{ 
-        background: '#fff', 
-        padding: '0 24px', 
-        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-        borderBottom: '1px solid #f0f0f0',
-        position: 'sticky',
-        top: 0,
-        zIndex: 999,
-        height: 64,
-        lineHeight: '64px'
-      }}>
+      <Header 
+        style={{ 
+          background: '#fff', 
+          padding: '0 24px', 
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          borderBottom: '1px solid #f0f0f0',
+          height: 64,
+          lineHeight: '64px'
+        }}>
         <div style={{ 
           maxWidth: 1400, 
           margin: '0 auto',
@@ -220,6 +241,21 @@ function HeaderComponent({ user, onLogout }) {
               <PhoneOutlined style={{ color: '#1890ff', fontSize: 12 }} />
               <span style={{ fontSize: 12, fontWeight: 600, color: '#1890ff' }}>{siteSettings.hotline}</span>
             </a>
+
+            {/* Cart Icon */}
+            <Badge count={cart.totalItems} offset={[-2, 2]} size="small">
+              <Button
+                icon={<ShoppingCartOutlined />}
+                onClick={() => navigate('/cart')}
+                style={{
+                  border: '1px solid #d9d9d9',
+                  borderRadius: 4,
+                  height: 26,
+                  padding: '0 8px',
+                  fontSize: 14
+                }}
+              />
+            </Badge>
 
             {/* Post Article Button */}
             {canPostArticle && (
@@ -328,51 +364,137 @@ function HeaderComponent({ user, onLogout }) {
         </div>
       </Header>
 
-      {/* Navigation Menu */}
+      {/* Navigation Menu - Modern Design */}
       <div style={{ 
         background: '#fff',
-        borderBottom: '1px solid #f0f0f0',
-        padding: '0 24px'
+        borderBottom: '1px solid #e8e8e8',
+        padding: '0 24px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
       }}>
         <div style={{ maxWidth: 1400, margin: '0 auto' }}>
-          <Menu 
-            mode="horizontal" 
-            style={{ 
-              border: 'none',
-              background: 'transparent',
-              fontSize: 15,
-              fontWeight: 500,
-              display: 'flex',
-              justifyContent: 'center'
-            }}
-            selectedKeys={[]}
-          >
-            <Menu.Item key="home" style={{ padding: '14px 24px' }}>
-              <Link to="/" style={{ color: '#262626' }}>Trang chủ</Link>
-            </Menu.Item>
-            <Menu.Item key="about" style={{ padding: '14px 24px' }}>
-              <Link to="/about" style={{ color: '#262626' }}>Giới thiệu</Link>
-            </Menu.Item>
-            <Menu.Item key="services" style={{ padding: '14px 24px' }}>
-              <span style={{ color: '#262626' }}>Dịch vụ y tế</span>
-            </Menu.Item>
-            <Menu.Item key="booking" style={{ padding: '14px 24px' }}>
-              <Link to="/doctors" style={{ color: '#262626' }}>Đặt lịch khám</Link>
-            </Menu.Item>
-            <Menu.Item key="news" style={{ padding: '14px 24px' }}>
-              <Link to="/news" style={{ color: '#262626' }}>Tin tức</Link>
-            </Menu.Item>
+          <nav style={{ 
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 8,
+            padding: '12px 0'
+          }}>
+            <Link 
+              to="/" 
+              className={`modern-nav-link ${isActive('/') ? 'active' : ''}`}
+              style={{
+                padding: '10px 20px',
+                fontSize: 15,
+                fontWeight: 500,
+                color: '#262626',
+                textDecoration: 'none',
+                borderRadius: 8,
+                transition: 'all 0.3s ease',
+                position: 'relative'
+              }}
+            >
+              Trang chủ
+            </Link>
+            <Link 
+              to="/about" 
+              className={`modern-nav-link ${isActive('/about') ? 'active' : ''}`}
+              style={{
+                padding: '10px 20px',
+                fontSize: 15,
+                fontWeight: 500,
+                color: '#262626',
+                textDecoration: 'none',
+                borderRadius: 8,
+                transition: 'all 0.3s ease',
+                position: 'relative'
+              }}
+            >
+              Giới thiệu
+            </Link>
+            <Link 
+              to="/services" 
+              className={`modern-nav-link ${isActive('/services') ? 'active' : ''}`}
+              style={{
+                padding: '10px 20px',
+                fontSize: 15,
+                fontWeight: 500,
+                color: '#262626',
+                textDecoration: 'none',
+                borderRadius: 8,
+                transition: 'all 0.3s ease',
+                position: 'relative'
+              }}
+            >
+              Dịch vụ y tế
+            </Link>
+            <Link 
+              to="/doctors" 
+              className={`modern-nav-link ${isActive('/doctors') ? 'active' : ''}`}
+              style={{
+                padding: '10px 20px',
+                fontSize: 15,
+                fontWeight: 500,
+                color: '#262626',
+                textDecoration: 'none',
+                borderRadius: 8,
+                transition: 'all 0.3s ease',
+                position: 'relative'
+              }}
+            >
+              Đặt lịch khám
+            </Link>
+            <Link 
+              to="/news" 
+              className={`modern-nav-link ${isActive('/news') ? 'active' : ''}`}
+              style={{
+                padding: '10px 20px',
+                fontSize: 15,
+                fontWeight: 500,
+                color: '#262626',
+                textDecoration: 'none',
+                borderRadius: 8,
+                transition: 'all 0.3s ease',
+                position: 'relative'
+              }}
+            >
+              Tin tức
+            </Link>
             {user && canChat && (
-              <Menu.Item key="chat" style={{ padding: '14px 24px' }}>
-                <Link to="/chat" style={{ color: '#262626' }}>Chat tư vấn</Link>
-              </Menu.Item>
+              <Link 
+                to="/chat" 
+                className={`modern-nav-link ${isActive('/chat') ? 'active' : ''}`}
+                style={{
+                  padding: '10px 20px',
+                  fontSize: 15,
+                  fontWeight: 500,
+                  color: '#262626',
+                  textDecoration: 'none',
+                  borderRadius: 8,
+                  transition: 'all 0.3s ease',
+                  position: 'relative'
+                }}
+              >
+                Chat tư vấn
+              </Link>
             )}
             {user && (
-              <Menu.Item key="appointments" style={{ padding: '14px 24px' }}>
-                <Link to="/appointments" style={{ color: '#262626' }}>Lịch hẹn</Link>
-              </Menu.Item>
+              <Link 
+                to="/appointments" 
+                className={`modern-nav-link ${isActive('/appointments') ? 'active' : ''}`}
+                style={{
+                  padding: '10px 20px',
+                  fontSize: 15,
+                  fontWeight: 500,
+                  color: '#262626',
+                  textDecoration: 'none',
+                  borderRadius: 8,
+                  transition: 'all 0.3s ease',
+                  position: 'relative'
+                }}
+              >
+                Lịch hẹn
+              </Link>
             )}
-          </Menu>
+          </nav>
         </div>
       </div>
 
@@ -429,6 +551,7 @@ function HeaderComponent({ user, onLogout }) {
             </div>
             
             <div 
+              onClick={() => { navigate('/services'); setMobileMenuOpen(false); }}
               style={{ padding: '15px 20px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
             >
               <span style={{ fontSize: 15, color: '#262626' }}>Dịch vụ y tế</span>

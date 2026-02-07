@@ -630,3 +630,37 @@
     max-height: calc(100vh - 150px);
   }
 }
+
+/* About Page Tables - Same dark header style */
+.admin-cms-card .ant-table-thead > tr > th {
+  background: #2c3e50 !important;
+  color: #fff !important;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 18px 16px;
+  border: none !important;
+}
+
+.admin-cms-card .ant-table-thead > tr > th::before {
+  display: none !important;
+}
+
+.admin-cms-card .ant-table-tbody > tr {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fff !important;
+}
+
+.admin-cms-card .ant-table-tbody > tr:hover {
+  background: #f8fafb !important;
+}
+
+.admin-cms-card .ant-table-tbody > tr > td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f5f5f5;
+  color: #1e293b !important;
+  font-size: 14px;
+  font-weight: 500;
+}

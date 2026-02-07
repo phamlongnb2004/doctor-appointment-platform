@@ -23,6 +23,7 @@ import {
 import cmsAPI from '../services/cmsApi';
 import RichTextEditor from '../components/RichTextEditor';
 import axios from 'axios';
+import '../styles/admin-cms.css';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -408,6 +409,7 @@ function DoctorArticlesPage({ user }) {
         }
       >
         <Table
+          className="admin-cms-table"
           columns={columns}
           dataSource={articles}
           rowKey="id"

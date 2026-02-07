@@ -44,4 +44,36 @@ public class SiteSettings {
 
     @Column(name = "zalo_url")
     private String zaloUrl;
+    
+    // Footer Information
+    @Column(name = "footer_about_text", columnDefinition = "TEXT")
+    private String footerAboutText;
+    
+    @Column(name = "footer_working_hours", columnDefinition = "TEXT")
+    private String footerWorkingHours;
+    
+    @Column(name = "footer_facebook_url", length = 255)
+    private String footerFacebookUrl;
+    
+    @Column(name = "footer_youtube_url", length = 255)
+    private String footerYoutubeUrl;
+    
+    @Column(name = "footer_zalo_url", length = 255)
+    private String footerZaloUrl;
+    
+    @Column(name = "footer_copyright_text", length = 255)
+    private String footerCopyrightText;
+    
+    // Bank Account Information for QR Payment
+    @Column(name = "bank_id", length = 50)
+    private String bankId; // Mã ngân hàng (VD: MB, VCB, TCB)
+    
+    @Column(name = "bank_name", length = 255)
+    private String bankName; // Tên ngân hàng đầy đủ
+    
+    @Column(name = "bank_account_no", length = 50)
+    private String bankAccountNo; // Số tài khoản
+    
+    @Column(name = "bank_account_name", length = 255)
+    private String bankAccountName; // Tên chủ tài khoản
 }

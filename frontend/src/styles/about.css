@@ -2,6 +2,8 @@
 .about-page {
   min-height: 100vh;
   background: #fff;
+  padding-top: 0;
+  margin-top: 0;
 }
 
 /* Hero Section */
@@ -15,6 +17,7 @@
   opacity: 0;
   transform: translateY(30px);
   transition: all 0.8s ease;
+  margin-top: 65px;
 }
 
 .about-hero.visible {

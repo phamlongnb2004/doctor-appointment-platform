@@ -24,6 +24,9 @@ public class CMSController {
     @Autowired
     private com.doctorappointment.repository.NewsArticleRepository newsArticleRepository;
     
+    @Autowired
+    private com.doctorappointment.repository.MedicalServiceRepository medicalServiceRepository;
+    
     // Site Settings endpoints
     @GetMapping("/site-settings")
     public ResponseEntity<SiteSettings> getSiteSettings() {
@@ -188,17 +191,33 @@ public class CMSController {
         return ResponseEntity.ok(response);
     }
     
-    @GetMapping("/slug/check")
+    @GetMapping("/slug/check/{slug}")
     public ResponseEntity<Map<String, Object>> checkSlug(
-            @RequestParam String slug,
-            @RequestParam(required = false) Long articleId) {
+            @PathVariable String slug,
+            @RequestParam(required = false) Long articleId,
+            @RequestParam(required = false) String type) {
         boolean exists;
-        if (articleId != null) {
-            // Check if slug exists for other articles (excluding current article)
-            exists = newsArticleRepository.existsBySlugAndIdNot(slug, articleId);
+        
+        // Default to news article if type not specified
+        if (type == null || "news".equals(type)) {
+            if (articleId != null) {
+                // Check if slug exists for other articles (excluding current article)
+                exists = newsArticleRepository.existsBySlugAndIdNot(slug, articleId);
+            } else {
+                // Check if slug exists at all
+                exists = newsArticleRepository.existsBySlug(slug);
+            }
+        } else if ("medical-service".equals(type)) {
+            // Check medical services
+            if (articleId != null) {
+                exists = medicalServiceRepository.findBySlug(slug)
+                    .map(s -> !s.getId().equals(articleId))
+                    .orElse(false);
+            } else {
+                exists = medicalServiceRepository.findBySlug(slug).isPresent();
+            }
         } else {
-            // Check if slug exists at all
-            exists = newsArticleRepository.existsBySlug(slug);
+            exists = false;
         }
         
         Map<String, Object> response = new HashMap<>();
@@ -213,7 +232,14 @@ public class CMSController {
             do {
                 newSlug = com.doctorappointment.util.SlugUtils.makeUniqueSlug(baseSlug, counter);
                 counter++;
-            } while (newsArticleRepository.existsBySlug(newSlug) && counter < 100);
+                
+                // Check based on type
+                if ("medical-service".equals(type)) {
+                    exists = medicalServiceRepository.findBySlug(newSlug).isPresent();
+                } else {
+                    exists = newsArticleRepository.existsBySlug(newSlug);
+                }
+            } while (exists && counter < 100);
             
             response.put("suggestion", newSlug);
         }
@@ -852,5 +878,92 @@ public class CMSController {
     public ResponseEntity<List<AboutPageContent>> getAllAboutSections() {
         return ResponseEntity.ok(cmsService.getAllAboutSections());
     }
+    
+    // ==================== SERVICE CATEGORIES ====================
+    
+    // Public endpoints
+    @GetMapping("/service-categories")
+    public ResponseEntity<List<ServiceCategory>> getActiveServiceCategories() {
+        return ResponseEntity.ok(cmsService.getActiveServiceCategories());
+    }
+    
+    @GetMapping("/service-categories/{slug}")
+    public ResponseEntity<ServiceCategory> getServiceCategoryBySlug(@PathVariable String slug) {
+        return cmsService.getServiceCategoryBySlug(slug)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    // Admin endpoints
+    @GetMapping("/admin/service-categories")
+    public ResponseEntity<List<ServiceCategory>> getAllServiceCategories() {
+        return ResponseEntity.ok(cmsService.getAllServiceCategories());
+    }
+    
+    @PostMapping("/admin/service-categories")
+    public ResponseEntity<ServiceCategory> createServiceCategory(@RequestBody ServiceCategory category) {
+        return ResponseEntity.ok(cmsService.saveServiceCategory(category));
+    }
+    
+    @PutMapping("/admin/service-categories/{id}")
+    public ResponseEntity<ServiceCategory> updateServiceCategory(@PathVariable Long id, @RequestBody ServiceCategory category) {
+        category.setId(id);
+        return ResponseEntity.ok(cmsService.saveServiceCategory(category));
+    }
+    
+    @DeleteMapping("/admin/service-categories/{id}")
+    public ResponseEntity<Void> deleteServiceCategory(@PathVariable Long id) {
+        cmsService.deleteServiceCategory(id);
+        return ResponseEntity.ok().build();
+    }
+    
+    // ==================== MEDICAL SERVICES ====================
+    
+    // Public endpoints
+    @GetMapping("/medical-services")
+    public ResponseEntity<List<MedicalService>> getActiveMedicalServices() {
+        return ResponseEntity.ok(cmsService.getActiveMedicalServices());
+    }
+    
+    @GetMapping("/medical-services/category/{categoryId}")
+    public ResponseEntity<List<MedicalService>> getMedicalServicesByCategory(@PathVariable Long categoryId) {
+        return ResponseEntity.ok(cmsService.getMedicalServicesByCategory(categoryId));
+    }
+    
+    @GetMapping("/medical-services/featured")
+    public ResponseEntity<List<MedicalService>> getFeaturedMedicalServices() {
+        return ResponseEntity.ok(cmsService.getFeaturedMedicalServices());
+    }
+    
+    @GetMapping("/medical-services/{slug}")
+    public ResponseEntity<MedicalService> getMedicalServiceBySlug(@PathVariable String slug) {
+        return cmsService.getMedicalServiceBySlug(slug)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    // Admin endpoints
+    @GetMapping("/admin/medical-services")
+    public ResponseEntity<List<MedicalService>> getAllMedicalServices() {
+        return ResponseEntity.ok(cmsService.getAllMedicalServices());
+    }
+    
+    @PostMapping("/admin/medical-services")
+    public ResponseEntity<MedicalService> createMedicalService(@RequestBody MedicalService service) {
+        return ResponseEntity.ok(cmsService.saveMedicalService(service));
+    }
+    
+    @PutMapping("/admin/medical-services/{id}")
+    public ResponseEntity<MedicalService> updateMedicalService(@PathVariable Long id, @RequestBody MedicalService service) {
+        service.setId(id);
+        return ResponseEntity.ok(cmsService.saveMedicalService(service));
+    }
+    
+    @DeleteMapping("/admin/medical-services/{id}")
+    public ResponseEntity<Void> deleteMedicalService(@PathVariable Long id) {
+        cmsService.deleteMedicalService(id);
+        return ResponseEntity.ok().build();
+    }
 }
+
 

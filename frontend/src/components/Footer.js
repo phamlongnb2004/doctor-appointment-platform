@@ -8,7 +8,13 @@ function Footer() {
     siteName: 'MEDLATEC',
     hotline: '19005656',
     email: '',
-    address: ''
+    address: '',
+    footerAboutText: '',
+    footerWorkingHours: 'Thứ 2 - Thứ 6: 7:00 - 20:00\nThứ 7 - Chủ nhật: 7:00 - 17:00',
+    footerFacebookUrl: '',
+    footerYoutubeUrl: '',
+    footerZaloUrl: '',
+    footerCopyrightText: 'Copyright © 2024 MEDLATEC. All rights reserved.'
   });
 
   useEffect(() => {
@@ -43,11 +49,16 @@ function Footer() {
             <h3 style={{ color: '#fff', fontSize: 18, marginBottom: 20 }}>
               {siteSettings.siteName}
             </h3>
+            {siteSettings.footerAboutText && (
+              <p style={{ color: '#fff', marginBottom: 16, lineHeight: 1.6 }}>
+                {siteSettings.footerAboutText}
+              </p>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {siteSettings.hotline && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <PhoneOutlined style={{ color: '#1890ff' }} />
-                  <a href={`tel:${siteSettings.hotline}`} style={{ color: '#fff', textDecoration: 'none' }}>
+                  <a href={`tel:${siteSettings.hotline}`} style={{ color: '#60a5fa', textDecoration: 'none' }}>
                     {siteSettings.hotline}
                   </a>
                 </div>
@@ -55,7 +66,7 @@ function Footer() {
               {siteSettings.email && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <MailOutlined style={{ color: '#1890ff' }} />
-                  <a href={`mailto:${siteSettings.email}`} style={{ color: '#fff', textDecoration: 'none' }}>
+                  <a href={`mailto:${siteSettings.email}`} style={{ color: '#60a5fa', textDecoration: 'none' }}>
                     {siteSettings.email}
                   </a>
                 </div>
@@ -75,10 +86,10 @@ function Footer() {
               Liên kết nhanh
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <Link to="/" style={{ color: '#fff', textDecoration: 'none' }}>Trang chủ</Link>
-              <Link to="/doctors" style={{ color: '#fff', textDecoration: 'none' }}>Đặt lịch khám</Link>
-              <span style={{ color: '#fff', cursor: 'pointer' }}>Giới thiệu</span>
-              <span style={{ color: '#fff', cursor: 'pointer' }}>Tin tức</span>
+              <Link to="/" style={{ color: '#60a5fa', textDecoration: 'none' }}>Trang chủ</Link>
+              <Link to="/doctors" style={{ color: '#60a5fa', textDecoration: 'none' }}>Đặt lịch khám</Link>
+              <Link to="/about" style={{ color: '#60a5fa', textDecoration: 'none' }}>Giới thiệu</Link>
+              <Link to="/news" style={{ color: '#60a5fa', textDecoration: 'none' }}>Tin tức</Link>
             </div>
           </div>
 
@@ -100,17 +111,87 @@ function Footer() {
             <h3 style={{ color: '#fff', fontSize: 18, marginBottom: 20 }}>
               Giờ làm việc
             </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div style={{ color: '#fff' }}>
-                <strong>Thứ 2 - Thứ 6:</strong> 7:00 - 20:00
+            {siteSettings.footerWorkingHours ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {siteSettings.footerWorkingHours.split('\n').map((line, index) => (
+                  <div key={index} style={{ color: '#fff' }}>
+                    {line}
+                  </div>
+                ))}
+                <div style={{ color: '#60a5fa', marginTop: 10 }}>
+                  <strong>Hotline 24/7: {siteSettings.hotline}</strong>
+                </div>
               </div>
-              <div style={{ color: '#fff' }}>
-                <strong>Thứ 7 - Chủ nhật:</strong> 7:00 - 17:00
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ color: '#fff' }}>
+                  <strong>Thứ 2 - Thứ 6:</strong> 7:00 - 20:00
+                </div>
+                <div style={{ color: '#fff' }}>
+                  <strong>Thứ 7 - Chủ nhật:</strong> 7:00 - 17:00
+                </div>
+                <div style={{ color: '#60a5fa', marginTop: 10 }}>
+                  <strong>Hotline 24/7: {siteSettings.hotline}</strong>
+                </div>
               </div>
-              <div style={{ color: '#1890ff', marginTop: 10 }}>
-                <strong>Hotline 24/7: {siteSettings.hotline}</strong>
+            )}
+            
+            {/* Social Media Links */}
+            {(siteSettings.footerFacebookUrl || siteSettings.footerYoutubeUrl || siteSettings.footerZaloUrl) && (
+              <div style={{ marginTop: 20 }}>
+                <h4 style={{ color: '#fff', fontSize: 14, marginBottom: 10 }}>Theo dõi chúng tôi</h4>
+                <div style={{ display: 'flex', gap: 15, alignItems: 'center' }}>
+                  {siteSettings.footerFacebookUrl && (
+                    <a 
+                      href={siteSettings.footerFacebookUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      style={{ 
+                        color: '#60a5fa',
+                        fontSize: 24,
+                        transition: 'color 0.3s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.color = '#3b82f6'}
+                      onMouseLeave={(e) => e.target.style.color = '#60a5fa'}
+                    >
+                      <i className="fab fa-facebook"></i>
+                    </a>
+                  )}
+                  {siteSettings.footerYoutubeUrl && (
+                    <a 
+                      href={siteSettings.footerYoutubeUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      style={{ 
+                        color: '#60a5fa',
+                        fontSize: 24,
+                        transition: 'color 0.3s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.color = '#ef4444'}
+                      onMouseLeave={(e) => e.target.style.color = '#60a5fa'}
+                    >
+                      <i className="fab fa-youtube"></i>
+                    </a>
+                  )}
+                  {siteSettings.footerZaloUrl && (
+                    <a 
+                      href={siteSettings.footerZaloUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      style={{ 
+                        color: '#60a5fa',
+                        fontSize: 24,
+                        transition: 'color 0.3s'
+                      }}
+                      onMouseEnter={(e) => e.target.style.color = '#0068ff'}
+                      onMouseLeave={(e) => e.target.style.color = '#60a5fa'}
+                    >
+                      <i className="fab fa-facebook-messenger"></i>
+                    </a>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -122,7 +203,7 @@ function Footer() {
           color: '#ffffff80',
           fontSize: 14
         }}>
-          © {new Date().getFullYear()} {siteSettings.siteName}. All rights reserved.
+          {siteSettings.footerCopyrightText || `© ${new Date().getFullYear()} ${siteSettings.siteName}. All rights reserved.`}
         </div>
       </div>
     </footer>

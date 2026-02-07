@@ -1,0 +1,35 @@
+.checkout-page {
+  min-height: 100vh;
+  background: #fff;
+}
+
+.checkout-page .ant-form-item-label > label {
+  font-weight: 600;
+}
+
+.checkout-page .ant-radio-wrapper {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.checkout-page .ant-radio-wrapper:hover {
+  background: #f5f5f5;
+}
+
+.checkout-page .ant-radio-wrapper-checked {
+  background: #e6f7ff;
+  border: 1px solid #1890ff;
+}
+
+@media (max-width: 768px) {
+  .checkout-page h1 {
+    font-size: 24px !important;
+  }
+  
+  .checkout-page .ant-card {
+    margin-bottom: 16px;
+  }
+}
