@@ -16,7 +16,7 @@ import java.util.Random;
 public class NewsletterService {
     
     private final NewsletterSubscriptionRepository subscriptionRepository;
-    private final EmailService emailService;
+    private final SendGridEmailService sendGridEmailService;
     
     @Transactional
     public NewsletterSubscription subscribe(String email, String name, String phone) {
@@ -40,7 +40,7 @@ public class NewsletterService {
             
             // Send verification email (non-blocking, log if fails)
             try {
-                emailService.sendVerificationEmail(email, name, newCode);
+                sendGridEmailService.sendVerificationEmail(email, name, newCode);
             } catch (Exception e) {
                 log.warn("Failed to send verification email to {}, but code updated. Code: {}", email, newCode);
             }
@@ -65,7 +65,7 @@ public class NewsletterService {
         
         // Send verification email (non-blocking, log if fails)
         try {
-            emailService.sendVerificationEmail(email, name, verificationCode);
+            sendGridEmailService.sendVerificationEmail(email, name, verificationCode);
         } catch (Exception e) {
             log.warn("Failed to send verification email to {}, but subscription created. Code: {}", email, verificationCode);
         }
@@ -97,7 +97,7 @@ public class NewsletterService {
         
         // Send welcome email (non-blocking, log if fails)
         try {
-            emailService.sendWelcomeEmail(email, subscription.getName());
+            sendGridEmailService.sendWelcomeEmail(email, subscription.getName());
         } catch (Exception e) {
             log.warn("Failed to send welcome email to {}, but subscription verified", email);
         }

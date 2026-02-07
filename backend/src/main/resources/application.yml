@@ -75,6 +75,11 @@ cloudinary:
   api-key: 
   api-secret: 
 
+sendgrid:
+  api-key: 
+  from-email: noreply@medlatec.com
+  from-name: MEDLATEC
+
 logging:
   level:
     root: INFO

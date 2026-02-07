@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test GET Newsletter</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+        .result { margin: 10px 0; padding: 10px; border: 1px solid #ddd; white-space: pre-wrap; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+    </style>
+</head>
+<body>
+    <h2>Test Newsletter Endpoints</h2>
+    
+    <button onclick="testHealth()">1. Test Health (Should work)</button>
+    <div id="health" class="result"></div>
+
+    <button onclick="testGet()">2. Test GET /subscribers</button>
+    <div id="get" class="result"></div>
+
+    <button onclick="testPost()">3. Test POST /subscribe</button>
+    <div id="post" class="result"></div>
+
+    <script>
+        const BASE = 'https://doctor-appointment-backend-mq2p.onrender.com';
+
+        async function testHealth() {
+            const div = document.getElementById('health');
+            div.textContent = 'Testing...';
+            try {
+                const res = await fetch(`${BASE}/api/test/health`);
+                const text = await res.text();
+                div.textContent = `Status: ${res.status}\n${text}`;
+                div.className = res.ok ? 'result success' : 'result error';
+            } catch (e) {
+                div.textContent = `Error: ${e.message}`;
+                div.className = 'result error';
+            }
+        }
+
+        async function testGet() {
+            const div = document.getElementById('get');
+            div.textContent = 'Testing...';
+            try {
+                const res = await fetch(`${BASE}/api/newsletter/subscribers`);
+                const text = await res.text();
+                div.textContent = `Status: ${res.status}\n${text}`;
+                div.className = res.ok ? 'result success' : 'result error';
+            } catch (e) {
+                div.textContent = `Error: ${e.message}`;
+                div.className = 'result error';
+            }
+        }
+
+        async function testPost() {
+            const div = document.getElementById('post');
+            div.textContent = 'Testing...';
+            try {
+                const res = await fetch(`${BASE}/api/newsletter/subscribe`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'test@test.com' })
+                });
+                const text = await res.text();
+                div.textContent = `Status: ${res.status}\n${text}`;
+                div.className = res.ok ? 'result success' : 'result error';
+            } catch (e) {
+                div.textContent = `Error: ${e.message}`;
+                div.className = 'result error';
+            }
+        }
+    </script>
+</body>
+</html>
