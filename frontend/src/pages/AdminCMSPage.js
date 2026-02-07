@@ -391,7 +391,7 @@ function AdminCMSPage() {
       setIconUrl(uploadedUrl);
       
       // Set appropriate field based on current tab or fieldName
-      if (fieldName) {
+      if (fieldName && typeof fieldName === 'string') {
         // For article-cta with specific field names
         console.log('🔵 Setting field:', fieldName, '=', uploadedUrl);
         form.setFieldsValue({ [fieldName]: uploadedUrl });
