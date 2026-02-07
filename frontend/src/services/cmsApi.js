@@ -458,7 +458,7 @@ const cmsAPI = {
   
   updateAboutSection: (sectionKey, data) => {
     const token = localStorage.getItem('token');
-    return axios.put(`${API_BASE_URL}/cms/admin/about/${sectionKey}`, data, {
+    return axios.post(`${API_BASE_URL}/cms/about/${sectionKey}`, data, {
       headers: { Authorization: `Bearer ${token}` }
     });
   },
