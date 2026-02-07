@@ -3131,7 +3131,7 @@ function AdminCMSPage() {
           values.backgroundImage = heroImageUrl;
         }
         
-        await cmsAPI.saveAboutSection('hero', {
+        await cmsAPI.updateAboutSection('hero', {
           sectionKey: 'hero',
           contentJson: JSON.stringify(values),
           isActive: true
@@ -3239,7 +3239,7 @@ function AdminCMSPage() {
           values.imageUrl = missionImageUrl;
         }
         
-        await cmsAPI.saveAboutSection('mission', {
+        await cmsAPI.updateAboutSection('mission', {
           sectionKey: 'mission',
           contentJson: JSON.stringify(values),
           isActive: true
@@ -3357,7 +3357,7 @@ function AdminCMSPage() {
     
     const saveValuesData = async (data) => {
       try {
-        await cmsAPI.saveAboutSection('values', {
+        await cmsAPI.updateAboutSection('values', {
           sectionKey: 'values',
           contentJson: JSON.stringify(data),
           isActive: true
@@ -3485,7 +3485,7 @@ function AdminCMSPage() {
     
     const saveAchievementsData = async (data) => {
       try {
-        await cmsAPI.saveAboutSection('achievements', {
+        await cmsAPI.updateAboutSection('achievements', {
           sectionKey: 'achievements',
           contentJson: JSON.stringify(data),
           isActive: true
@@ -3603,7 +3603,7 @@ function AdminCMSPage() {
     
     const saveMilestonesData = async (data) => {
       try {
-        await cmsAPI.saveAboutSection('timeline', {
+        await cmsAPI.updateAboutSection('timeline', {
           sectionKey: 'timeline',
           contentJson: JSON.stringify(data),
           isActive: true
@@ -3752,7 +3752,7 @@ function AdminCMSPage() {
     
     const saveTeamData = async (data) => {
       try {
-        await cmsAPI.saveAboutSection('team', {
+        await cmsAPI.updateAboutSection('team', {
           sectionKey: 'team',
           contentJson: JSON.stringify(data),
           isActive: true
