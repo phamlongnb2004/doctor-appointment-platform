@@ -5,6 +5,9 @@ import { CheckCircleOutlined, HomeOutlined, FileTextOutlined } from '@ant-design
 import axios from 'axios';
 import '../styles/order.css';
 
+// Get API base URL from environment variable
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 function OrderSuccessPage() {
   const { orderNumber } = useParams();
   const navigate = useNavigate();
@@ -17,7 +20,7 @@ function OrderSuccessPage() {
 
   const fetchOrder = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/orders/number/${orderNumber}`);
+      const response = await axios.get(`${API_BASE_URL}/orders/number/${orderNumber}`);
       setOrder(response.data);
     } catch (error) {
       console.error('Error fetching order:', error);

@@ -5,6 +5,9 @@ import { HomeOutlined, EyeOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import '../styles/order.css';
 
+// Get API base URL from environment variable
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 function MyOrdersPage() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
@@ -35,7 +38,7 @@ function MyOrdersPage() {
   const fetchOrders = async () => {
     try {
       const user = getUserInfo();
-      const response = await axios.get(`http://localhost:8080/api/orders/user`, {
+      const response = await axios.get(`${API_BASE_URL}/orders/user`, {
         params: { userId: user.id }
       });
       setOrders(response.data);

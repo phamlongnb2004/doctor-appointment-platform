@@ -8,6 +8,9 @@ import '../styles/checkout.css';
 
 const { TextArea } = Input;
 
+// Get API base URL from environment variable
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 function CheckoutPage() {
   const navigate = useNavigate();
   const { cart, loading: cartLoading } = useCart();
@@ -54,7 +57,7 @@ function CheckoutPage() {
   useEffect(() => {
     const fetchBankInfo = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/cms/site-settings');
+        const response = await axios.get(`${API_BASE_URL}/cms/site-settings`);
         const settings = response.data;
         if (settings.bankId && settings.bankAccountNo) {
           setBankInfo({
@@ -131,7 +134,7 @@ function CheckoutPage() {
       intervalId = setInterval(async () => {
         try {
           const response = await axios.get(
-            `http://localhost:8080/api/orders/number/${orderData.orderNumber}`
+            `${API_BASE_URL}/orders/number/${orderData.orderNumber}`
           );
           
           if (response.data.paymentStatus === 'PAID') {
@@ -179,7 +182,7 @@ function CheckoutPage() {
 
       const params = user ? { userId: user.id } : {};
       const response = await axios.post(
-        'http://localhost:8080/api/orders/checkout',
+        `${API_BASE_URL}/orders/checkout`,
         checkoutData,
         { params }
       );
@@ -215,7 +218,7 @@ function CheckoutPage() {
     if (orderData && orderData.id) {
       try {
         await axios.put(
-          `http://localhost:8080/api/orders/${orderData.id}/cancel`,
+          `${API_BASE_URL}/orders/${orderData.id}/cancel`,
           {},
           {
             headers: {

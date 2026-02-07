@@ -4,6 +4,9 @@ import axios from 'axios';
 
 const { Title, Text } = Typography;
 
+// Get API base URL from environment variable
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 function PaymentTestPage() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -13,7 +16,7 @@ function PaymentTestPage() {
       setLoading(true);
       
       // Gọi API để xác nhận thanh toán
-      await axios.post('http://localhost:8080/api/orders/webhook/payment', {
+      await axios.post(`${API_BASE_URL}/orders/webhook/payment`, {
         orderNumber: values.orderNumber,
         status: 'SUCCESS',
         transactionId: `TXN${Date.now()}`,

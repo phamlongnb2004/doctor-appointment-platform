@@ -4,6 +4,9 @@ import 'react-quill/dist/quill.snow.css';
 import { message } from 'antd';
 import axios from 'axios';
 
+// Get API base URL from environment variable
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 // Custom image handler
 const imageHandler = function() {
   const input = document.createElement('input');
@@ -33,7 +36,7 @@ const imageHandler = function() {
         message.loading({ content: 'Đang tải ảnh lên...', key: 'uploadImage' });
         
         const token = localStorage.getItem('token');
-        const response = await axios.post('http://localhost:8080/api/images/articles', formData, {
+        const response = await axios.post(`${API_BASE_URL}/images/articles`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${token}`

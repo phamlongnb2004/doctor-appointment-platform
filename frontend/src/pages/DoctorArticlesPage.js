@@ -28,6 +28,9 @@ import '../styles/admin-cms.css';
 const { TextArea } = Input;
 const { Option } = Select;
 
+// Get API base URL from environment variable
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 function DoctorArticlesPage({ user }) {
   const [loading, setLoading] = useState(false);
   const [articles, setArticles] = useState([]);
@@ -90,7 +93,7 @@ function DoctorArticlesPage({ user }) {
   const fetchDoctorId = async () => {
     try {
       // Fetch doctor info by userId
-      const response = await axios.get(`http://localhost:8080/api/doctors/user/${user.id}`, {
+      const response = await axios.get(`${API_BASE_URL}/doctors/user/${user.id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -292,7 +295,7 @@ function DoctorArticlesPage({ user }) {
         formData.append('image', featuredImage);
         
         const token = localStorage.getItem('token');
-        const uploadResponse = await axios.post('http://localhost:8080/api/images/articles', formData, {
+        const uploadResponse = await axios.post(`${API_BASE_URL}/images/articles`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${token}`

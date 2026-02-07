@@ -10,6 +10,9 @@ const { Header, Content, Sider } = Layout;
 const { Title, Text } = Typography;
 const { Paragraph } = AntTypography;
 
+// Get API base URL from environment variable
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+
 function AdminDashboard({ user, onLogout }) {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -109,7 +112,7 @@ function AdminDashboard({ user, onLogout }) {
           // profileImage already contains full URL or relative path
           const avatarUrl = response.data.profileImage.startsWith('http') 
             ? response.data.profileImage 
-            : `http://localhost:8080${response.data.profileImage}`;
+            : `${API_BASE_URL.replace('/api', '')}${response.data.profileImage}`;
           console.log('AdminDashboard - Setting avatar URL:', avatarUrl);
           setUserAvatar(avatarUrl);
         } else {
@@ -129,12 +132,12 @@ function AdminDashboard({ user, onLogout }) {
         doctorAPI.getAllDoctors(),
         appointmentAPI.getAllAppointments(),
         userAPI.getOnlineUsers(),
-        fetch('http://localhost:8080/api/api/newsletter/subscribers', {
+        fetch(`${API_BASE_URL}/newsletter/subscribers`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         }).then(res => res.json()).catch(() => []),
-        fetch('http://localhost:8080/api/orders/all', {
+        fetch(`${API_BASE_URL}/orders/all`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -212,7 +215,7 @@ function AdminDashboard({ user, onLogout }) {
   const handlePromoteToDoctor = async (userId) => {
     try {
       // Sử dụng secret endpoint để promote user lên DOCTOR
-      const response = await fetch(`http://localhost:8080/api/users/${userId}/promote?secret=mySuperSecretAdminKey2026&role=DOCTOR`, {
+      const response = await fetch(`${API_BASE_URL}/users/${userId}/promote?secret=mySuperSecretAdminKey2026&role=DOCTOR`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -237,7 +240,7 @@ function AdminDashboard({ user, onLogout }) {
   const handlePromoteToConsultant = async (userId) => {
     try {
       // Sử dụng secret endpoint để promote user lên CONSULTANT
-      const response = await fetch(`http://localhost:8080/api/users/${userId}/promote?secret=mySuperSecretAdminKey2026&role=CONSULTANT`, {
+      const response = await fetch(`${API_BASE_URL}/users/${userId}/promote?secret=mySuperSecretAdminKey2026&role=CONSULTANT`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -852,7 +855,7 @@ function AdminDashboard({ user, onLogout }) {
                         size="small"
                         onClick={async () => {
                           try {
-                            await fetch(`http://localhost:8080/api/api/newsletter/subscribers/${record.id}/toggle`, {
+                            await fetch(`${API_BASE_URL}/newsletter/subscribers/${record.id}/toggle`, {
                               method: 'PUT',
                               headers: {
                                 'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -903,7 +906,7 @@ function AdminDashboard({ user, onLogout }) {
                             okButtonProps: { danger: true },
                             onOk: async () => {
                               try {
-                                await fetch(`http://localhost:8080/api/api/newsletter/subscribers/${record.id}`, {
+                                await fetch(`${API_BASE_URL}/newsletter/subscribers/${record.id}`, {
                                   method: 'DELETE',
                                   headers: {
                                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -1108,7 +1111,7 @@ function AdminDashboard({ user, onLogout }) {
                             size="small"
                             onClick={async () => {
                               try {
-                                await fetch(`http://localhost:8080/api/orders/${record.id}/status`, {
+                                await fetch(`${API_BASE_URL}/orders/${record.id}/status`, {
                                   method: 'PUT',
                                   headers: {
                                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
