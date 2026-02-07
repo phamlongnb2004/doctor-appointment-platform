@@ -816,6 +816,16 @@ function AdminCMSPage() {
     try {
       const data = { ...values };
       
+      // Debug log for banners
+      if (currentTab === 'banners' || currentTab === 'news-banners') {
+        console.log('🟢 === BANNER SUBMIT DEBUG ===');
+        console.log('🟢 Current tab:', currentTab);
+        console.log('🟢 Editing item:', editingItem);
+        console.log('🟢 Form values:', values);
+        console.log('🟢 Data to save:', data);
+        console.log('🟢 iconUrl state:', iconUrl);
+      }
+      
       // Debug log for certifications
       if (currentTab === 'certifications') {
         console.log('Certification data before save:', JSON.stringify(data, null, 2));
@@ -881,7 +891,9 @@ function AdminCMSPage() {
             break;
           case 'banners':
           case 'news-banners':
+            console.log('🟢 Updating banner ID:', editingItem.id, 'with data:', JSON.stringify(data, null, 2));
             await cmsAPI.updateBanner(editingItem.id, data);
+            console.log('🟢 Banner updated successfully!');
             break;
           case 'specialties':
             await cmsAPI.updateSpecialty(editingItem.id, data);
@@ -936,12 +948,16 @@ function AdminCMSPage() {
           case 'banners':
             // Set page to 'home' for home banners
             data.page = 'home';
+            console.log('🟢 Creating HOME banner with data:', JSON.stringify(data, null, 2));
             await cmsAPI.createBanner(data);
+            console.log('🟢 Banner created successfully!');
             break;
           case 'news-banners':
             // Set page to 'news' for news banners
             data.page = 'news';
+            console.log('🟢 Creating NEWS banner with data:', JSON.stringify(data, null, 2));
             await cmsAPI.createBanner(data);
+            console.log('🟢 Banner created successfully!');
             break;
           case 'specialties':
             await cmsAPI.createSpecialty(data);
