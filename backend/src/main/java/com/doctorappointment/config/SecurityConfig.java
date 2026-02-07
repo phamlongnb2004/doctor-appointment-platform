@@ -31,13 +31,10 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        System.out.println("=== SecurityConfig.securityFilterChain() CALLED ===");
-        
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> {
-                    System.out.println("=== authorizeHttpRequests CALLED ===");
                     auth
                         .requestMatchers("/users/online/**").hasAnyRole("ADMIN", "CONSULTANT")
                         .requestMatchers("/users/stats").hasAnyRole("ADMIN", "CONSULTANT")
@@ -58,13 +55,11 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        System.out.println("=== passwordEncoder() CALLED ===");
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        System.out.println("=== corsConfigurationSource() CALLED ===");
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
             "http://localhost:3000", 
