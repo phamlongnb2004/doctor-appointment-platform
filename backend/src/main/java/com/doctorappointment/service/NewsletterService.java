@@ -57,7 +57,8 @@ public class NewsletterService {
         subscription.setName(name);
         subscription.setPhone(phone);
         subscription.setVerificationCode(verificationCode);
-        subscription.setIsVerified(false);
+        subscription.setIsVerified(true); // Auto-verify since email doesn't work on Render
+        subscription.setVerifiedAt(LocalDateTime.now());
         subscription.setIsActive(true);
         subscription.setExpiresAt(LocalDateTime.now().plusMinutes(15));
         
