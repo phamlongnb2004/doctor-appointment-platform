@@ -26,6 +26,18 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@CrossOrigin(
+    origins = {
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://doctor-appointment-platform-vaff.onrender.com",
+        "https://doctor-appointment-frontend-ujug.onrender.com",
+        "https://doctor-appointment-frontend.onrender.com"
+    },
+    allowedHeaders = "*",
+    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
+    allowCredentials = "true"
+)
 public class UserController {
     private final UserService userService;
     private final ImageService imageService;
