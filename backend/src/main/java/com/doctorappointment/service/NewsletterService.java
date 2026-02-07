@@ -37,7 +37,13 @@ public class NewsletterService {
             existing.setPhone(phone);
             
             subscriptionRepository.save(existing);
-            emailService.sendVerificationEmail(email, name, newCode);
+            
+            // Send verification email (non-blocking, log if fails)
+            try {
+                emailService.sendVerificationEmail(email, name, newCode);
+            } catch (Exception e) {
+                log.warn("Failed to send verification email to {}, but code updated. Code: {}", email, newCode);
+            }
             
             log.info("Resent verification code to existing subscription: {}", email);
             return existing;
@@ -57,8 +63,12 @@ public class NewsletterService {
         
         subscriptionRepository.save(subscription);
         
-        // Send verification email
-        emailService.sendVerificationEmail(email, name, verificationCode);
+        // Send verification email (non-blocking, log if fails)
+        try {
+            emailService.sendVerificationEmail(email, name, verificationCode);
+        } catch (Exception e) {
+            log.warn("Failed to send verification email to {}, but subscription created. Code: {}", email, verificationCode);
+        }
         
         log.info("Created new newsletter subscription for: {}", email);
         return subscription;
@@ -85,8 +95,12 @@ public class NewsletterService {
         subscription.setVerifiedAt(LocalDateTime.now());
         subscriptionRepository.save(subscription);
         
-        // Send welcome email
-        emailService.sendWelcomeEmail(email, subscription.getName());
+        // Send welcome email (non-blocking, log if fails)
+        try {
+            emailService.sendWelcomeEmail(email, subscription.getName());
+        } catch (Exception e) {
+            log.warn("Failed to send welcome email to {}, but subscription verified", email);
+        }
         
         log.info("Verified newsletter subscription for: {}", email);
         return subscription;
