@@ -62,13 +62,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-            "http://localhost:3000", 
-            "http://localhost:5173",
-            "https://doctor-appointment-platform-vaff.onrender.com",
-            "https://doctor-appointment-frontend-ujug.onrender.com",
-            "https://doctor-appointment-frontend.onrender.com"
-        ));
+        // Allow all origins temporarily for deployment testing
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
