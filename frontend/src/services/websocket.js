@@ -78,6 +78,12 @@ class WebSocketService {
    * Handle reconnection logic
    */
   handleReconnect() {
+    // Don't reconnect if no userId or sessionId (user not logged in)
+    if (!this.userId || !this.sessionId) {
+      console.log('No user session, skipping reconnect');
+      return;
+    }
+
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);

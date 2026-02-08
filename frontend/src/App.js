@@ -199,14 +199,18 @@ function App() {
           setIsAuthenticated(true);
           console.log('User restored from localStorage');
 
-          // Reconnect to WebSocket if sessionId exists
+          // Reconnect to WebSocket ONLY if sessionId exists
           const sessionId = localStorage.getItem('sessionId');
           const userId = localStorage.getItem('userId');
-          if (sessionId && userId) {
+          if (sessionId && userId && parsedUser.id) {
             console.log('Reconnecting WebSocket for user:', userId);
-            webSocketService.connect(parseInt(userId), sessionId, (status) => {
-              console.log('WebSocket status update:', status);
-            });
+            try {
+              webSocketService.connect(parseInt(userId), sessionId, (status) => {
+                console.log('WebSocket status update:', status);
+              });
+            } catch (error) {
+              console.warn('WebSocket connection failed:', error);
+            }
           }
         }
       } catch (error) {
@@ -225,13 +229,17 @@ function App() {
     localStorage.setItem('auth_time', Date.now().toString());
     console.log('User saved to localStorage');
 
-    // Connect to WebSocket for real-time status if sessionId exists
-    if (userData.sessionId) {
+    // Connect to WebSocket for real-time status ONLY if sessionId exists
+    if (userData.sessionId && userData.id) {
       localStorage.setItem('sessionId', userData.sessionId);
-      webSocketService.connect(userData.id, userData.sessionId, (status) => {
-        console.log('WebSocket status update:', status);
-      });
-      console.log('WebSocket connected for user:', userData.id);
+      try {
+        webSocketService.connect(userData.id, userData.sessionId, (status) => {
+          console.log('WebSocket status update:', status);
+        });
+        console.log('WebSocket connected for user:', userData.id);
+      } catch (error) {
+        console.warn('WebSocket connection failed:', error);
+      }
     }
   };
 
