@@ -184,8 +184,9 @@ function AboutPage() {
               <Col xs={24} lg={12}>
                 <div className="about-mission-image">
                   <img 
-                    src={missionData.imageUrl || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800'} 
+                    src={missionData.imageUrl && missionData.imageUrl !== 'null' ? missionData.imageUrl : 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800'} 
                     alt="Mission" 
+                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800'; }}
                   />
                   <div className="about-mission-badge">
                     <HeartOutlined />
