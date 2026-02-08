@@ -101,33 +101,44 @@ function AboutPage() {
       setLoading(true);
       const response = await cmsAPI.getAllAboutSections();
       
+      console.log('=== FETCH ABOUT DATA ===');
+      console.log('Response:', response.data);
+      
       response.data.forEach(section => {
         const content = JSON.parse(section.contentJson);
-        console.log('Section:', section.sectionKey, 'Content:', content); // Debug log
+        console.log('Section:', section.sectionKey, 'Content:', content);
         switch(section.sectionKey) {
           case 'hero':
             setHeroData(content);
+            console.log('✓ Hero data set');
             break;
           case 'mission':
             setMissionData(content);
+            console.log('✓ Mission data set');
             break;
           case 'values':
             setCoreValues(content);
+            console.log('✓ Values data set, length:', content.length);
             break;
           case 'achievements':
-            console.log('Achievements data:', content); // Debug achievements
+            console.log('✓ Achievements data:', content);
             setAchievements(content);
+            console.log('✓ Achievements set, length:', content.length);
             break;
           case 'timeline':
             setMilestones(content);
+            console.log('✓ Timeline data set, length:', content.length);
             break;
           case 'team':
             setTeam(content);
+            console.log('✓ Team data set, length:', content.length);
             break;
           default:
             break;
         }
       });
+      
+      console.log('=== DATA SET COMPLETE ===');
     } catch (error) {
       console.error('Error fetching about data:', error);
     } finally {
@@ -174,121 +185,120 @@ function AboutPage() {
       </div>
 
       {/* Mission & Vision */}
-      {missionData && (
-        <div 
-          ref={el => sectionsRef.current[0] = el}
-          className="about-section about-mission animate-section"
-        >
-          <div className="container">
-            <Row gutter={[48, 48]} align="middle">
-              <Col xs={24} lg={12}>
-                <div className="about-mission-image">
-                  <img 
-                    src={missionData.imageUrl && missionData.imageUrl !== 'null' ? missionData.imageUrl : 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800'} 
-                    alt="Mission" 
-                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800'; }}
-                  />
-                  <div className="about-mission-badge">
-                    <HeartOutlined />
-                    <span>15+ Năm</span>
+      <div 
+        ref={el => sectionsRef.current[0] = el}
+        className="about-section about-mission animate-section"
+        style={{ display: missionData ? 'block' : 'none' }}
+      >
+        <div className="container">
+          <Row gutter={[48, 48]} align="middle">
+            <Col xs={24} lg={12}>
+              <div className="about-mission-image">
+                <img 
+                  src={missionData?.imageUrl && missionData.imageUrl !== 'null' ? missionData.imageUrl : 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800'} 
+                  alt="Mission" 
+                  onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800'; }}
+                />
+                <div className="about-mission-badge">
+                  <HeartOutlined />
+                  <span>15+ Năm</span>
+                </div>
+              </div>
+            </Col>
+            <Col xs={24} lg={12}>
+              <div className="about-mission-content">
+                <Text className="about-label">{missionData?.label || 'SỨ MỆNH CỦA CHÚNG TÔI'}</Text>
+                <Title level={2}>
+                  {missionData?.title || 'Mang đến dịch vụ y tế chất lượng cao'}
+                </Title>
+                <Paragraph className="about-text">
+                  {missionData?.description || ''}
+                </Paragraph>
+                {missionData?.features && missionData.features.length > 0 && (
+                  <div className="about-mission-features">
+                    {missionData.features.map((feature, index) => (
+                      <div className="feature-item" key={index}>
+                        <CheckCircleOutlined />
+                        <span>{feature}</span>
+                      </div>
+                    ))}
                   </div>
-                </div>
-              </Col>
-              <Col xs={24} lg={12}>
-                <div className="about-mission-content">
-                  <Text className="about-label">{missionData.label || 'SỨ MỆNH CỦA CHÚNG TÔI'}</Text>
-                  <Title level={2}>
-                    {missionData.title || 'Mang đến dịch vụ y tế chất lượng cao'}
-                  </Title>
-                  <Paragraph className="about-text">
-                    {missionData.description}
-                  </Paragraph>
-                  {missionData.features && missionData.features.length > 0 && (
-                    <div className="about-mission-features">
-                      {missionData.features.map((feature, index) => (
-                        <div className="feature-item" key={index}>
-                          <CheckCircleOutlined />
-                          <span>{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </Col>
-            </Row>
-          </div>
+                )}
+              </div>
+            </Col>
+          </Row>
         </div>
-      )}
+      </div>
 
       {/* Core Values */}
-      {coreValues.length > 0 && (
-        <div 
-          ref={el => sectionsRef.current[1] = el}
-          className="about-section about-values animate-section"
-        >
-          <div className="container">
-            <div className="about-section-header">
-              <Text className="about-label">GIÁ TRỊ CỐT LÕI</Text>
-              <Title level={2}>
-                Những giá trị chúng tôi <span className="text-primary">theo đuổi</span>
-              </Title>
-            </div>
-            <Row gutter={[32, 32]}>
-              {coreValues.map((value, index) => {
-                const iconMap = {
-                  'HeartOutlined': <HeartOutlined />,
-                  'SafetyOutlined': <SafetyOutlined />,
-                  'TeamOutlined': <TeamOutlined />,
-                  'TrophyOutlined': <TrophyOutlined />
-                };
-                return (
-                  <Col xs={24} sm={12} lg={6} key={index}>
-                    <Card 
-                      className="value-card"
-                      hoverable
-                      bodyStyle={{
-                        padding: '32px 24px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        textAlign: 'center',
-                        height: '100%'
-                      }}
+      <div 
+        ref={el => sectionsRef.current[1] = el}
+        className="about-section about-values animate-section"
+        style={{ display: coreValues.length > 0 ? 'block' : 'none' }}
+      >
+        <div className="container">
+          <div className="about-section-header">
+            <Text className="about-label">GIÁ TRỊ CỐT LÕI</Text>
+            <Title level={2}>
+              Những giá trị chúng tôi <span className="text-primary">theo đuổi</span>
+            </Title>
+          </div>
+          <Row gutter={[32, 32]}>
+            {coreValues.map((value, index) => {
+              const iconMap = {
+                'HeartOutlined': <HeartOutlined />,
+                'SafetyOutlined': <SafetyOutlined />,
+                'TeamOutlined': <TeamOutlined />,
+                'TrophyOutlined': <TrophyOutlined />
+              };
+              return (
+                <Col xs={24} sm={12} lg={6} key={index}>
+                  <Card 
+                    className="value-card"
+                    hoverable
+                    bodyStyle={{
+                      padding: '32px 24px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      textAlign: 'center',
+                      height: '100%'
+                    }}
+                    style={{ 
+                      animationDelay: `${index * 0.1}s`,
+                      borderTop: `4px solid ${value.color}`,
+                      height: '100%'
+                    }}
+                  >
+                    <div 
                       style={{ 
-                        animationDelay: `${index * 0.1}s`,
-                        borderTop: `4px solid ${value.color}`,
-                        height: '100%'
+                        color: value.color,
+                        fontSize: '48px',
+                        marginBottom: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
                       }}
                     >
-                      <div 
-                        style={{ 
-                          color: value.color,
-                          fontSize: '48px',
-                          marginBottom: '20px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        {iconMap[value.icon] || <HeartOutlined />}
-                      </div>
-                      <Title level={4} style={{ textAlign: 'center', width: '100%' }}>
-                        {value.title}
-                      </Title>
-                      <Paragraph style={{ textAlign: 'center', width: '100%', margin: 0 }}>
-                        {value.description}
-                      </Paragraph>
-                    </Card>
-                  </Col>
-                );
-              })}
-            </Row>
-          </div>
+                      {iconMap[value.icon] || <HeartOutlined />}
+                    </div>
+                    <Title level={4} style={{ textAlign: 'center', width: '100%' }}>
+                      {value.title}
+                    </Title>
+                    <Paragraph style={{ textAlign: 'center', width: '100%', margin: 0 }}>
+                      {value.description}
+                    </Paragraph>
+                  </Card>
+                </Col>
+              );
+            })}
+          </Row>
         </div>
-      )}
+      </div>
 
       {/* Achievements */}
-      {achievements.length > 0 && (() => {
+      {(() => {
+        if (achievements.length === 0) return null;
         const sectionSettings = achievements[0]?._section ? achievements[0] : null;
         console.log('=== ACHIEVEMENTS DEBUG ===');
         console.log('achievements array:', achievements);
@@ -414,81 +424,79 @@ function AboutPage() {
       })()}
 
       {/* Timeline */}
-      {milestones.length > 0 && (
-        <div 
-          ref={el => sectionsRef.current[3] = el}
-          className="about-section about-timeline animate-section"
-        >
-          <div className="container">
-            <div className="about-section-header">
-              <Text className="about-label">HÀNH TRÌNH PHÁT TRIỂN</Text>
-              <Title level={2}>
-                Cột mốc <span className="text-primary">quan trọng</span>
-              </Title>
-            </div>
-            <div className="timeline-wrapper">
-              <Timeline mode="alternate">
-                {milestones.map((milestone, index) => (
-                  <Timeline.Item
-                    key={index}
-                    dot={<RiseOutlined style={{ fontSize: 20 }} />}
-                    color="#1890ff"
-                  >
-                    <Card className="timeline-card" hoverable>
-                      <div className="timeline-year">{milestone.year}</div>
-                      <Title level={4}>{milestone.title}</Title>
-                      <Paragraph>{milestone.description}</Paragraph>
-                    </Card>
-                  </Timeline.Item>
-                ))}
-              </Timeline>
-            </div>
+      <div 
+        ref={el => sectionsRef.current[3] = el}
+        className="about-section about-timeline animate-section"
+        style={{ display: milestones.length > 0 ? 'block' : 'none' }}
+      >
+        <div className="container">
+          <div className="about-section-header">
+            <Text className="about-label">HÀNH TRÌNH PHÁT TRIỂN</Text>
+            <Title level={2}>
+              Cột mốc <span className="text-primary">quan trọng</span>
+            </Title>
+          </div>
+          <div className="timeline-wrapper">
+            <Timeline mode="alternate">
+              {milestones.map((milestone, index) => (
+                <Timeline.Item
+                  key={index}
+                  dot={<RiseOutlined style={{ fontSize: 20 }} />}
+                  color="#1890ff"
+                >
+                  <Card className="timeline-card" hoverable>
+                    <div className="timeline-year">{milestone.year}</div>
+                    <Title level={4}>{milestone.title}</Title>
+                    <Paragraph>{milestone.description}</Paragraph>
+                  </Card>
+                </Timeline.Item>
+              ))}
+            </Timeline>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Leadership Team */}
-      {team.length > 0 && (
-        <div 
-          ref={el => sectionsRef.current[4] = el}
-          className="about-section about-team animate-section"
-        >
-          <div className="container">
-            <div className="about-section-header">
-              <Text className="about-label">ĐỘI NGŨ LÃNH ĐẠO</Text>
-              <Title level={2}>
-                Ban lãnh đạo <span className="text-primary">chuyên nghiệp</span>
-              </Title>
-            </div>
-            <Row gutter={[32, 32]}>
-              {team.map((member, index) => (
-                <Col xs={24} sm={12} lg={6} key={index}>
-                  <Card 
-                    className="team-card"
-                    hoverable
-                    cover={
-                      <div className="team-avatar-wrapper">
-                        <Avatar 
-                          size={150} 
-                          src={member.avatarUrl}
-                          className="team-avatar"
-                        />
-                      </div>
-                    }
-                  >
-                    <Title level={4} className="team-name">{member.name}</Title>
-                    <Text className="team-position">{member.position}</Text>
-                    <div className="team-specialty">
-                      <MedicineBoxOutlined />
-                      <span>{member.specialty}</span>
-                    </div>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+      <div 
+        ref={el => sectionsRef.current[4] = el}
+        className="about-section about-team animate-section"
+        style={{ display: team.length > 0 ? 'block' : 'none' }}
+      >
+        <div className="container">
+          <div className="about-section-header">
+            <Text className="about-label">ĐỘI NGŨ LÃNH ĐẠO</Text>
+            <Title level={2}>
+              Ban lãnh đạo <span className="text-primary">chuyên nghiệp</span>
+            </Title>
           </div>
+          <Row gutter={[32, 32]}>
+            {team.map((member, index) => (
+              <Col xs={24} sm={12} lg={6} key={index}>
+                <Card 
+                  className="team-card"
+                  hoverable
+                  cover={
+                    <div className="team-avatar-wrapper">
+                      <Avatar 
+                        size={150} 
+                        src={member.avatarUrl}
+                        className="team-avatar"
+                      />
+                    </div>
+                  }
+                >
+                  <Title level={4} className="team-name">{member.name}</Title>
+                  <Text className="team-position">{member.position}</Text>
+                  <div className="team-specialty">
+                    <MedicineBoxOutlined />
+                    <span>{member.specialty}</span>
+                  </div>
+                </Card>
+              </Col>
+            ))}
+          </Row>
         </div>
-      )}
+      </div>
 
       {/* CTA Section */}
       <div 
