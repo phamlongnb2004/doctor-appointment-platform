@@ -130,35 +130,42 @@ public class SendGridEmailService {
             <html>
             <head>
                 <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                     .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
                     .header { background: linear-gradient(135deg, #1890ff 0%%, #096dd9 100%%); color: white; padding: 40px 30px; text-align: center; }
                     .header h1 { margin: 0 0 10px 0; font-size: 32px; }
                     .content { padding: 40px 30px; }
                     .code-box { background: linear-gradient(135deg, #e6f7ff 0%%, #bae7ff 100%%); border: 3px dashed #1890ff; padding: 30px; text-align: center; margin: 30px 0; border-radius: 12px; }
                     .code { font-size: 42px; font-weight: 800; color: #1890ff; letter-spacing: 8px; font-family: 'Courier New', monospace; }
-                    .footer { background: #262626; color: #999; padding: 30px; text-align: center; font-size: 13px; }
+                    .footer { background: #f5f5f5; color: #666; padding: 30px; text-align: center; font-size: 13px; }
+                    .unsubscribe { color: #999; font-size: 11px; margin-top: 15px; }
+                    .unsubscribe a { color: #999; text-decoration: underline; }
                 </style>
             </head>
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>🏥 MEDLATEC</h1>
+                        <h1>🏥 DOCTOR APPOINTMENT PLATFORM</h1>
                         <p>Xác nhận đăng ký nhận tin</p>
                     </div>
                     <div class="content">
                         <p>Xin chào <strong>%s</strong>,</p>
-                        <p>Cảm ơn bạn đã đăng ký nhận tin từ <strong>MEDLATEC</strong>!</p>
-                        <p>Để hoàn tất đăng ký, vui lòng nhập mã xác nhận sau vào trang web:</p>
+                        <p>Cảm ơn bạn đã đăng ký nhận tin từ hệ thống của chúng tôi.</p>
+                        <p>Để hoàn tất đăng ký, vui lòng sử dụng mã xác nhận sau:</p>
                         <div class="code-box">
                             <div class="code">%s</div>
                         </div>
                         <p style="color: #d46b08;">⏰ Mã xác nhận có hiệu lực trong <strong>15 phút</strong>.</p>
+                        <p>Nếu bạn không yêu cầu đăng ký này, vui lòng bỏ qua email này.</p>
                     </div>
                     <div class="footer">
-                        <p><strong>© 2026 MEDLATEC</strong> - Hệ thống Y tế chất lượng cao</p>
-                        <p>Email này được gửi tự động, vui lòng không trả lời.</p>
+                        <p><strong>© 2026 DOCTOR APPOINTMENT PLATFORM</strong></p>
+                        <p>Hệ thống đặt lịch khám bệnh trực tuyến</p>
+                        <div class="unsubscribe">
+                            <p>Email này được gửi tự động. Vui lòng không trả lời trực tiếp.</p>
+                        </div>
                     </div>
                 </div>
             </body>
@@ -172,34 +179,40 @@ public class SendGridEmailService {
             <html>
             <head>
                 <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                     .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
                     .header { background: linear-gradient(135deg, #10b981 0%%, #059669 100%%); color: white; padding: 40px 30px; text-align: center; }
                     .header h1 { margin: 0 0 10px 0; font-size: 32px; }
                     .content { padding: 40px 30px; }
                     .success-box { background: linear-gradient(135deg, #d1fae5 0%%, #a7f3d0 100%%); border: 3px solid #10b981; padding: 30px; text-align: center; margin: 30px 0; border-radius: 12px; }
-                    .footer { background: #262626; color: #999; padding: 30px; text-align: center; font-size: 13px; }
+                    .footer { background: #f5f5f5; color: #666; padding: 30px; text-align: center; font-size: 13px; }
+                    .unsubscribe { color: #999; font-size: 11px; margin-top: 15px; }
+                    .unsubscribe a { color: #999; text-decoration: underline; }
                 </style>
             </head>
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>🏥 MEDLATEC</h1>
-                        <p>Chào mừng bạn!</p>
+                        <h1>🏥 DOCTOR APPOINTMENT PLATFORM</h1>
+                        <p>Chào mừng bạn</p>
                     </div>
                     <div class="content">
                         <div class="success-box">
                             <div style="font-size: 64px;">🎉</div>
-                            <h2 style="margin: 0; color: #10b981;">Đăng ký thành công!</h2>
+                            <h2 style="margin: 0; color: #10b981;">Đăng ký thành công</h2>
                         </div>
                         <p>Xin chào <strong>%s</strong>,</p>
-                        <p>Chúc mừng! Bạn đã trở thành thành viên nhận tin của <strong>MEDLATEC</strong>.</p>
-                        <p>Bạn sẽ nhận được các thông báo ưu đãi và tin tức y tế mới nhất qua email.</p>
+                        <p>Cảm ơn bạn đã xác nhận đăng ký nhận tin từ hệ thống của chúng tôi.</p>
+                        <p>Bạn sẽ nhận được các thông báo và tin tức mới nhất qua email này.</p>
                     </div>
                     <div class="footer">
-                        <p><strong>© 2026 MEDLATEC</strong> - Hệ thống Y tế chất lượng cao</p>
-                        <p>Hotline: <strong>1900 56 56 56</strong></p>
+                        <p><strong>© 2026 DOCTOR APPOINTMENT PLATFORM</strong></p>
+                        <p>Hệ thống đặt lịch khám bệnh trực tuyến</p>
+                        <div class="unsubscribe">
+                            <p>Email này được gửi tự động. Vui lòng không trả lời trực tiếp.</p>
+                        </div>
                     </div>
                 </div>
             </body>
