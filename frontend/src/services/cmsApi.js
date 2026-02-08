@@ -447,12 +447,7 @@ const cmsAPI = {
   },
 
   // About Page endpoints
-  getAllAboutSections: () => {
-    const token = localStorage.getItem('token');
-    return axios.get(`${API_BASE_URL}/cms/about`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
+  getAllAboutSections: () => axios.get(`${API_BASE_URL}/cms/about`),
   
   getAboutSection: (sectionKey) => axios.get(`${API_BASE_URL}/cms/about/${sectionKey}`),
   
