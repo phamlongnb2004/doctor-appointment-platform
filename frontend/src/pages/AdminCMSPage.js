@@ -3152,6 +3152,9 @@ function AdminCMSPage() {
         <Form.Item name="subtitle" label="Phụ đề">
           <TextArea rows={2} placeholder="Hệ thống Y tế chất lượng cao" />
         </Form.Item>
+        <Form.Item name="backgroundImage" hidden>
+          <Input />
+        </Form.Item>
         <Form.Item label="Ảnh nền">
           <Upload
             showUploadList={false}
@@ -3262,6 +3265,9 @@ function AdminCMSPage() {
         </Form.Item>
         <Form.Item name="description" label="Mô tả">
           <TextArea rows={4} />
+        </Form.Item>
+        <Form.Item name="imageUrl" hidden>
+          <Input />
         </Form.Item>
         <Form.Item label="Hình ảnh">
           <Upload
