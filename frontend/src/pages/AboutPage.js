@@ -304,7 +304,14 @@ function AboutPage() {
         const titleColor = sectionSettings?.titleColor || '#FFFFFF';
         const textColor = sectionSettings?.textColor || '#FFFFFF';
         const overlayColor = sectionSettings?.overlayColor || 'rgba(0, 0, 0, 0.5)';
-        const backgroundImage = sectionSettings?.backgroundImage || '';
+        
+        // Fix backgroundImage - add Cloudinary domain if missing
+        let backgroundImage = sectionSettings?.backgroundImage || '';
+        if (backgroundImage && !backgroundImage.startsWith('http')) {
+          // If path doesn't start with http, add Cloudinary domain
+          backgroundImage = `https://res.cloudinary.com/dms0oco5w/image/upload/v1/uploads/${backgroundImage}`;
+        }
+        
         const sectionTitle = sectionSettings?.sectionTitle || 'Con số ấn tượng';
         
         console.log('Extracted colors:', { labelColor, titleColor, textColor, overlayColor });
