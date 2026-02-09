@@ -53,6 +53,17 @@ function CheckoutPage() {
     return localStorage.getItem('cart_session_id');
   };
 
+  // Check login requirement
+  useEffect(() => {
+    const user = getUserInfo();
+    if (!user) {
+      message.warning('Vui lòng đăng nhập để thanh toán');
+      // Save current path to redirect back after login
+      localStorage.setItem('redirect_after_login', '/checkout');
+      navigate('/login');
+    }
+  }, [navigate]);
+
   // Fetch bank info from site settings
   useEffect(() => {
     const fetchBankInfo = async () => {

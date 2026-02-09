@@ -4,6 +4,7 @@ import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, GoogleOutlined
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../services/api';
 import webSocketService from '../services/websocket';
+import { useCart } from '../contexts/CartContext';
 import useFallingFlowers from '../hooks/useFallingFlowers';
 import '../styles/animations.css';
 
@@ -13,6 +14,7 @@ function LoginPage({ onLogin }) {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
   const navigate = useNavigate();
+  const { mergeCart } = useCart();
   const flowerContainerRef = useFallingFlowers({ maxPetals: 50 });
 
   const onFinishLogin = async (values) => {
@@ -48,9 +50,20 @@ function LoginPage({ onLogin }) {
         console.log('WebSocket connected for user:', userData.id);
       }
 
+      // Merge cart from localStorage into database
+      await mergeCart(userData.id);
+
       onLogin(userData);
       message.success('Đăng nhập thành công!');
-      navigate(userData.role === 'ADMIN' ? '/admin' : '/');
+      
+      // Check if there's a redirect path
+      const redirectPath = localStorage.getItem('redirect_after_login');
+      if (redirectPath) {
+        localStorage.removeItem('redirect_after_login');
+        navigate(redirectPath);
+      } else {
+        navigate(userData.role === 'ADMIN' ? '/admin' : '/');
+      }
     } catch (error) {
       console.error('Login error:', error);
       message.error(error.response?.data?.error || 'Email hoặc mật khẩu không đúng!');

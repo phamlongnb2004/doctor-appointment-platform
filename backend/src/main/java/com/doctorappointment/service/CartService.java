@@ -197,6 +197,51 @@ public class CartService {
         return response;
     }
 
+    @Transactional
+    public CartResponse mergeCart(Long userId, String sessionId) {
+        // Get session cart (guest cart)
+        Optional<Cart> sessionCartOpt = cartRepository.findBySessionId(sessionId);
+        
+        if (sessionCartOpt.isEmpty() || sessionCartOpt.get().getItems().isEmpty()) {
+            // No session cart or empty, just return user cart
+            return getCart(userId, null);
+        }
+
+        Cart sessionCart = sessionCartOpt.get();
+        
+        // Get or create user cart
+        Cart userCart = getOrCreateCart(userId, null);
+
+        // Merge items from session cart to user cart
+        for (CartItem sessionItem : sessionCart.getItems()) {
+            // Check if item already exists in user cart
+            Optional<CartItem> existingItem = cartItemRepository
+                    .findByCartIdAndServiceId(userCart.getId(), sessionItem.getServiceId());
+
+            if (existingItem.isPresent()) {
+                // Update quantity (add session quantity to existing)
+                CartItem item = existingItem.get();
+                item.setQuantity(item.getQuantity() + sessionItem.getQuantity());
+                cartItemRepository.save(item);
+            } else {
+                // Add new item to user cart
+                CartItem newItem = new CartItem();
+                newItem.setCart(userCart);
+                newItem.setServiceId(sessionItem.getServiceId());
+                newItem.setQuantity(sessionItem.getQuantity());
+                newItem.setPrice(sessionItem.getPrice());
+                cartItemRepository.save(newItem);
+            }
+        }
+
+        // Clear session cart after merge
+        cartItemRepository.deleteAll(sessionCart.getItems());
+        cartRepository.delete(sessionCart);
+
+        // Return merged user cart
+        return getCart(userId, null);
+    }
+
     private CartResponse createEmptyCartResponse() {
         CartResponse response = new CartResponse();
         response.setItems(new ArrayList<>());

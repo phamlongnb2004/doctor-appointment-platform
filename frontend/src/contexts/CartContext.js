@@ -176,6 +176,36 @@ export const CartProvider = ({ children }) => {
     setCart({ items: [], totalItems: 0, totalAmount: 0 });
   };
 
+  // Merge session cart into user cart after login
+  const mergeCart = async (userId) => {
+    try {
+      const sessionId = localStorage.getItem('cart_session_id');
+      
+      // If no session cart, just fetch user cart
+      if (!sessionId) {
+        await fetchCart(false);
+        return;
+      }
+
+      // Call merge endpoint
+      const response = await axios.post(`${API_BASE_URL}/cart/merge`, null, {
+        params: { userId, sessionId }
+      });
+
+      // Update cart with merged data
+      setCart(response.data);
+      
+      // Clear session ID after merge
+      localStorage.removeItem('cart_session_id');
+      
+      console.log('Cart merged successfully');
+    } catch (error) {
+      console.error('Error merging cart:', error);
+      // If merge fails, just fetch user cart
+      await fetchCart(false);
+    }
+  };
+
   // Load cart on mount
   useEffect(() => {
     fetchCart();
@@ -202,7 +232,8 @@ export const CartProvider = ({ children }) => {
     removeCartItem,
     clearCart,
     resetCart,
-    refreshCart: fetchCart
+    refreshCart: fetchCart,
+    mergeCart
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

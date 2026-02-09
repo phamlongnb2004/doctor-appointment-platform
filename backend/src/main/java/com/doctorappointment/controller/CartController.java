@@ -56,4 +56,12 @@ public class CartController {
         cartService.clearCart(userId, sessionId);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/merge")
+    public ResponseEntity<CartResponse> mergeCart(
+            @RequestParam Long userId,
+            @RequestParam String sessionId) {
+        CartResponse cart = cartService.mergeCart(userId, sessionId);
+        return ResponseEntity.ok(cart);
+    }
 }
