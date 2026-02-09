@@ -139,7 +139,11 @@
 }
 
 .about-section-header * {
-  color: #262626 !important;
+  color: #262626;
+}
+
+.about-section-header .text-primary {
+  color: #1890ff !important;
 }
 
 .about-label {
@@ -160,7 +164,7 @@
 }
 
 .text-primary {
-  color: #1890ff;
+  color: #1890ff !important;
 }
 
 /* Mission Section */
