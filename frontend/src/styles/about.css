@@ -97,7 +97,7 @@
   visibility: visible !important;
   z-index: 2;
   background: #fff;
-  color: #262626 !important;
+  color: #262626;
   display: block !important;
   clear: both;
 }
@@ -107,20 +107,24 @@
   z-index: 3;
 }
 
+/* Only force color for text elements, not icons */
 .about-section h1,
 .about-section h2,
 .about-section h3,
 .about-section h4,
 .about-section h5,
-.about-section h6,
-.about-section p,
-.about-section span,
-.about-section div {
-  color: inherit !important;
+.about-section h6 {
+  color: #262626 !important;
 }
 
+.about-section p,
 .about-section .ant-typography {
-  color: #262626 !important;
+  color: #595959 !important;
+}
+
+/* Keep icon colors */
+.about-section .anticon {
+  color: inherit;
 }
 
 .container {
@@ -301,7 +305,7 @@
   justify-content: center !important;
   width: 100%;
   height: 60px;
-  animation: pulse 2s ease infinite;
+  /* Color is set inline from data */
 }
 
 .value-card h4 {
@@ -371,7 +375,6 @@
   font-size: 48px;
   color: #fff;
   margin-bottom: 20px;
-  animation: bounce 2s ease infinite;
 }
 
 .achievement-title {
