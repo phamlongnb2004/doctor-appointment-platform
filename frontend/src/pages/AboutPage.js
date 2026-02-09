@@ -188,7 +188,6 @@ function AboutPage() {
       <div 
         ref={el => sectionsRef.current[0] = el}
         className="about-section about-mission animate-section"
-        style={{ display: missionData ? 'block' : 'none' }}
       >
         <div className="container">
           <Row gutter={[48, 48]} align="middle">
@@ -234,7 +233,6 @@ function AboutPage() {
       <div 
         ref={el => sectionsRef.current[1] = el}
         className="about-section about-values animate-section"
-        style={{ display: coreValues.length > 0 ? 'block' : 'none' }}
       >
         <div className="container">
           <div className="about-section-header">
@@ -427,7 +425,6 @@ function AboutPage() {
       <div 
         ref={el => sectionsRef.current[3] = el}
         className="about-section about-timeline animate-section"
-        style={{ display: milestones.length > 0 ? 'block' : 'none' }}
       >
         <div className="container">
           <div className="about-section-header">
@@ -460,7 +457,6 @@ function AboutPage() {
       <div 
         ref={el => sectionsRef.current[4] = el}
         className="about-section about-team animate-section"
-        style={{ display: team.length > 0 ? 'block' : 'none' }}
       >
         <div className="container">
           <div className="about-section-header">
