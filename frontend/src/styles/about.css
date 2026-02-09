@@ -4,6 +4,8 @@
   background: #fff;
   padding-top: 0;
   margin-top: 0;
+  position: relative;
+  overflow-x: hidden;
 }
 
 /* Hero Section with Parallax */
@@ -18,9 +20,11 @@
   transform: translateY(30px);
   transition: all 0.8s ease;
   margin-top: 65px;
+  margin-bottom: 0;
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat !important;
+  z-index: 1;
 }
 
 .about-hero.visible {
@@ -70,7 +74,8 @@
   width: 100%;
   overflow: hidden;
   line-height: 0;
-  z-index: 2;
+  z-index: 3;
+  pointer-events: none;
 }
 
 .about-hero-wave svg {
@@ -88,16 +93,18 @@
 .about-section {
   padding: 100px 0;
   position: relative;
-  opacity: 1;
-  visibility: visible;
-  z-index: 1;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 2;
   background: #fff;
   color: #262626 !important;
+  display: block !important;
+  clear: both;
 }
 
 .about-section .container {
   position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 
 .about-section h1,
