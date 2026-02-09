@@ -167,21 +167,6 @@ function DoctorArticlesPage({ user }) {
     }
   };
 
-  const handleImageChange = (info) => {
-    if (info.file.status === 'uploading') {
-      return;
-    }
-    if (info.file.status === 'done') {
-      // Get this url from response
-      const imageUrl = info.file.response.imageUrl || info.file.response.url;
-      setImageUrl(imageUrl);
-      setImagePreview(imageUrl);
-      message.success('Tải ảnh đại diện thành công!');
-    } else if (info.file.status === 'error') {
-      message.error('Lỗi khi tải ảnh lên!');
-    }
-  };
-
   const beforeUpload = (file) => {
     const isImage = file.type.startsWith('image/');
     if (!isImage) {
