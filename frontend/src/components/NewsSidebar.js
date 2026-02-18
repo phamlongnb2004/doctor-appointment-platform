@@ -18,7 +18,7 @@ const NewsSidebar = () => {
     try {
       setLoading(true);
       const [widgetsRes, newsRes] = await Promise.all([
-        cmsAPI.getNewsSidebarWidgets(),
+        cmsAPI.getActiveNewsSidebarWidgets(),
         cmsAPI.getLatestNews(10)
       ]);
       setWidgets(widgetsRes.data || []);

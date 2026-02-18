@@ -26,6 +26,7 @@ import PaymentTestPage from './pages/PaymentTestPage';
 import NotFoundPage from './pages/NotFoundPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import FloatingBookingButton from './components/FloatingBookingButton';
 import { CartProvider } from './contexts/CartContext';
 import webSocketService from './services/websocket';
 
@@ -157,6 +158,7 @@ function AppContent({ user, isAuthenticated, handleLogin, handleLogout, handleUs
         </Routes>
       </Content>
       {!isAdminRoute && <Footer />}
+      {!isAdminRoute && <FloatingBookingButton />}
     </Layout>
   );
 }

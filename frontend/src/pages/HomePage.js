@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button, Card, Row, Col, Typography, Avatar, Input, Form, Select, Modal, message } from 'antd';
-import { CheckOutlined } from '@ant-design/icons';
+import { CheckOutlined, StarFilled } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { doctorAPI } from '../services/api';
 import cmsAPI from '../services/cmsApi';
@@ -1194,8 +1194,17 @@ function HomePage() {
                         <div style={{ fontSize: 12, color: '#666' }}>{testimonial.customerTitle}</div>
                       </div>
                     </div>
-                    <div style={{ color: '#FFD700', fontSize: 16, marginBottom: 8 }}>
-                      {'⭐'.repeat(testimonial.rating || 5)}
+                    <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+                      {[...Array(testimonial.rating || 5)].map((_, index) => (
+                        <StarFilled 
+                          key={index}
+                          style={{ 
+                            fontSize: 18,
+                            color: '#fadb14',
+                            filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))'
+                          }} 
+                        />
+                      ))}
                     </div>
                   </div>
                   <Paragraph style={{ color: '#666', fontSize: 14, lineHeight: 1.6, fontStyle: 'italic' }}>
