@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Button, Dropdown, Avatar, message, Input, Drawer, Badge } from 'antd';
+import { Layout, Button, Dropdown, Avatar, message, Input, Drawer, Badge } from 'antd';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   UserOutlined, 
   LogoutOutlined, 
   DashboardOutlined, 
   SettingOutlined, 
-  MessageOutlined,
   PhoneOutlined,
   SearchOutlined,
   EditOutlined,
@@ -385,9 +384,9 @@ function HeaderComponent({ user, onLogout }) {
                 padding: '10px 20px',
                 fontSize: 15,
                 fontWeight: 500,
-                color: '#262626',
+                color: 'rgb(3, 66, 142)',
                 textDecoration: 'none',
-                borderRadius: 8,
+                borderRadius: 20,
                 transition: 'all 0.3s ease',
                 position: 'relative'
               }}
@@ -401,9 +400,9 @@ function HeaderComponent({ user, onLogout }) {
                 padding: '10px 20px',
                 fontSize: 15,
                 fontWeight: 500,
-                color: '#262626',
+                color: 'rgb(3, 66, 142)',
                 textDecoration: 'none',
-                borderRadius: 8,
+                borderRadius: 20,
                 transition: 'all 0.3s ease',
                 position: 'relative'
               }}
@@ -417,9 +416,9 @@ function HeaderComponent({ user, onLogout }) {
                 padding: '10px 20px',
                 fontSize: 15,
                 fontWeight: 500,
-                color: '#262626',
+                color: 'rgb(3, 66, 142)',
                 textDecoration: 'none',
-                borderRadius: 8,
+                borderRadius: 20,
                 transition: 'all 0.3s ease',
                 position: 'relative'
               }}
@@ -433,9 +432,9 @@ function HeaderComponent({ user, onLogout }) {
                 padding: '10px 20px',
                 fontSize: 15,
                 fontWeight: 500,
-                color: '#262626',
+                color: 'rgb(3, 66, 142)',
                 textDecoration: 'none',
-                borderRadius: 8,
+                borderRadius: 20,
                 transition: 'all 0.3s ease',
                 position: 'relative'
               }}
@@ -449,9 +448,9 @@ function HeaderComponent({ user, onLogout }) {
                 padding: '10px 20px',
                 fontSize: 15,
                 fontWeight: 500,
-                color: '#262626',
+                color: 'rgb(3, 66, 142)',
                 textDecoration: 'none',
-                borderRadius: 8,
+                borderRadius: 20,
                 transition: 'all 0.3s ease',
                 position: 'relative'
               }}
@@ -466,9 +465,9 @@ function HeaderComponent({ user, onLogout }) {
                   padding: '10px 20px',
                   fontSize: 15,
                   fontWeight: 500,
-                  color: '#262626',
+                  color: 'rgb(3, 66, 142)',
                   textDecoration: 'none',
-                  borderRadius: 8,
+                  borderRadius: 20,
                   transition: 'all 0.3s ease',
                   position: 'relative'
                 }}
@@ -484,9 +483,9 @@ function HeaderComponent({ user, onLogout }) {
                   padding: '10px 20px',
                   fontSize: 15,
                   fontWeight: 500,
-                  color: '#262626',
+                  color: 'rgb(3, 66, 142)',
                   textDecoration: 'none',
-                  borderRadius: 8,
+                  borderRadius: 20,
                   transition: 'all 0.3s ease',
                   position: 'relative'
                 }}

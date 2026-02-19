@@ -245,18 +245,16 @@ function HomePage() {
 
   return (
     <div className="homepage-container">
-      
-      {/* Show loading state */}
+      {/* Show minimal loading only on first load */}
       {loading && (
         <div className="homepage__loading">
           <div className="homepage__loading-content">
             <div className="homepage__loading-spinner" />
-            <p className="homepage__loading-text">Đang tải...</p>
           </div>
         </div>
       )}
 
-      {/* Only show content when not loading */}
+      {/* Show content immediately after loading */}
       {!loading && (
         <>
           {/* Banner Slider - Full Width */}
@@ -1217,8 +1215,6 @@ function HomePage() {
         </div>
       </div>
       )}
-      </>
-      )}
       
       {/* Verification Modal */}
       <Modal
@@ -1259,6 +1255,8 @@ function HomePage() {
           </Text>
         </div>
       </Modal>
+      </>
+      )}
     </div>
   );
 }
