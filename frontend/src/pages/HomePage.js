@@ -486,7 +486,7 @@ function HomePage() {
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <Title level={2} style={{ color: '#262626', marginBottom: 16, fontSize: 32 }}>
-              TẠI SAO CHỌN <span style={{ color: '#1890ff' }}>MEDLATEC</span>?
+              TẠI SAO CHỌN <span style={{ color: '#1890ff' }}>KHAMNOW</span>?
             </Title>
             <Paragraph style={{ color: '#666', fontSize: 16, maxWidth: 600, margin: '0 auto' }}>
               Chúng tôi cam kết mang đến dịch vụ y tế chất lượng cao với sự chăm sóc tận tâm
@@ -763,7 +763,7 @@ function HomePage() {
       </div>
       )}
 
-      {/* Specialties Section - CÁC CHUYÊN KHOA Y TẾ TẠI MEDLATEC */}
+      {/* Specialties Section - CÁC CHUYÊN KHOA Y TẾ TẠI KHAMNOW */}
       {specialties.length > 0 && (
       <div 
         ref={el => sectionsRef.current[3] = el}
@@ -775,7 +775,7 @@ function HomePage() {
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <Title level={2} style={{ color: '#262626', marginBottom: 16, fontSize: 32 }}>
-              Các chuyên khoa y tế tại <span style={{ color: '#1890ff' }}>MEDLATEC</span>
+              Các chuyên khoa y tế tại <span style={{ color: '#1890ff' }}>KHAMNOW</span>
             </Title>
           </div>
           
@@ -852,7 +852,7 @@ function HomePage() {
         <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 2 }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <Title level={2} style={{ color: '#fff', marginBottom: 16, fontSize: 32, textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
-              MEDLATEC TRONG SỐ LIỆU
+              KHAMNOW TRONG SỐ LIỆU
             </Title>
             <Paragraph style={{ color: 'rgba(255,255,255,0.95)', fontSize: 16, textShadow: '1px 1px 2px rgba(0,0,0,0.3)' }}>
               Những con số ấn tượng khẳng định uy tín và chất lượng dịch vụ
@@ -940,7 +940,7 @@ function HomePage() {
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <Title level={2} style={{ color: '#fff', marginBottom: 16, fontSize: 32 }}>
-              MEDLATEC TRONG SỐ LIỆU
+              KHAMNOW TRONG SỐ LIỆU
             </Title>
             <Paragraph style={{ color: 'rgba(255,255,255,0.9)', fontSize: 16 }}>
               Những con số ấn tượng khẳng định uy tín và chất lượng dịch vụ
@@ -1011,7 +1011,7 @@ function HomePage() {
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ marginBottom: 48 }}>
             <Title level={2} style={{ color: '#262626', marginBottom: 16, fontSize: 32 }}>
-              {membershipBenefits[0].title || 'ƯU ĐÃI THÀNH VIÊN CỦA MEDLATEC'}
+              {membershipBenefits[0].title || 'ƯU ĐÃI THÀNH VIÊN CỦA KHAMNOW'}
             </Title>
             {membershipBenefits[0].subtitle && (
               <Text style={{ fontSize: 16, color: '#666' }}>

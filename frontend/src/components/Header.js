@@ -50,7 +50,7 @@ function HeaderComponent({ user, onLogout }) {
       console.error('Error fetching site settings:', error);
       // Set default values if fetch fails
       setSiteSettings({
-        siteName: 'MEDLATEC',
+        siteName: 'KHAMNOW',
         siteTagline: 'Chăm sóc sức khỏe',
         logoUrl: null,
         hotline: '19005656'
