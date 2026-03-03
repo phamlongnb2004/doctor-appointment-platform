@@ -98,8 +98,10 @@ function AdminCMSPage() {
   const [galleryImages, setGalleryImages] = useState([]); // For multiple images
   const [currentColor, setCurrentColor] = useState('#1890ff');
   const [currentTextColor, setCurrentTextColor] = useState('#FFFFFF');
+  const [imagePreview, setImagePreview] = useState(''); // For doctor-articles image preview
+  const [uploadedImage, setUploadedImage] = useState(null); // For doctor-articles uploaded file
   const [siteSettings, setSiteSettings] = useState({
-    siteName: 'MEDLATEC',
+    siteName: 'KHAMNOW',
     siteTagline: 'Chăm sóc sức khỏe',
     logoUrl: '',
     hotline: '19005656',
@@ -298,6 +300,8 @@ function AdminCMSPage() {
     setEditingItem(null);
     form.resetFields();
     setIconUrl(''); // Reset icon preview
+    setImagePreview(''); // Reset image preview for doctor-articles
+    setUploadedImage(null); // Reset uploaded image
     setGalleryImages([]); // Reset gallery images
     setBenefitsList(['']); // Reset benefits list
     setCurrentColor('#1890ff'); // Reset color
@@ -334,6 +338,15 @@ function AdminCMSPage() {
     
     // Set icon preview from item (for all types that use icon/image)
     setIconUrl(item.icon || item.imageUrl || item.image1 || item.backgroundImage || '');
+    
+    // Set image preview for doctor-articles
+    if (currentTab === 'doctor-articles' && item.imageUrl) {
+      setImagePreview(item.imageUrl);
+      setUploadedImage(null);
+    } else {
+      setImagePreview('');
+      setUploadedImage(null);
+    }
     
     // Load gallery images for medical-services
     if (currentTab === 'medical-services' && item.images) {
@@ -829,6 +842,25 @@ function AdminCMSPage() {
       }
       
       const data = { ...values };
+      
+      // Upload image for doctor-articles if new image selected
+      if (currentTab === 'doctor-articles' && uploadedImage) {
+        const formData = new FormData();
+        formData.append('image', uploadedImage);
+        
+        const token = localStorage.getItem('token');
+        const uploadResponse = await axios.post(`${API_BASE_URL}/images/articles`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        data.imageUrl = uploadResponse.data.imageUrl || uploadResponse.data.url;
+      } else if (currentTab === 'doctor-articles' && imagePreview) {
+        // Keep existing image if no new upload
+        data.imageUrl = imagePreview;
+      }
       
       // Debug log for banners
       if (currentTab === 'banners' || currentTab === 'news-banners') {
@@ -1934,8 +1966,40 @@ function AdminCMSPage() {
             <Form.Item name="content" label="Nội dung">
               <TextArea rows={6} />
             </Form.Item>
-            <Form.Item name="imageUrl" label="URL Hình ảnh">
-              <Input />
+            <Form.Item label="Hình ảnh đại diện">
+              <Upload
+                listType="picture-card"
+                showUploadList={false}
+                beforeUpload={(file) => {
+                  const isImage = file.type.startsWith('image/');
+                  if (!isImage) {
+                    message.error('Chỉ chấp nhận file ảnh!');
+                    return false;
+                  }
+                  const isLt5M = file.size / 1024 / 1024 < 5;
+                  if (!isLt5M) {
+                    message.error('Kích thước ảnh phải nhỏ hơn 5MB!');
+                    return false;
+                  }
+                  setUploadedImage(file);
+                  const reader = new FileReader();
+                  reader.onload = (e) => {
+                    setImagePreview(e.target.result);
+                  };
+                  reader.readAsDataURL(file);
+                  return false;
+                }}
+                accept="image/*"
+              >
+                {imagePreview ? (
+                  <img src={imagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <div>
+                    <UploadOutlined />
+                    <div style={{ marginTop: 8 }}>Tải ảnh lên</div>
+                  </div>
+                )}
+              </Upload>
             </Form.Item>
             <Form.Item 
               name="slug" 
@@ -2421,7 +2485,7 @@ function AdminCMSPage() {
         return (
           <>
             <Form.Item name="title" label="Tiêu đề" rules={[{ required: true }]}>
-              <Input placeholder="ƯU ĐÃI THÀNH VIÊN CỦA MEDLATEC" />
+              <Input placeholder="ƯU ĐÃI THÀNH VIÊN CỦA KHAMNOW" />
             </Form.Item>
             <Form.Item name="subtitle" label="Phụ đề">
               <Input placeholder="Đăng ký thành viên để nhận nhiều ưu đãi đặc biệt" />
@@ -3028,7 +3092,7 @@ function AdminCMSPage() {
             </Form.Item>
             
             <Form.Item name="cta2Title" label="Tiêu đề 2" rules={[{ required: true }]}>
-              <Input placeholder="Đặt lịch thăm khám tại MEDLATEC" />
+              <Input placeholder="Đặt lịch thăm khám tại KHAMNOW" />
             </Form.Item>
             
             <Form.Item name="cta2Description" label="Mô tả 2">
@@ -3093,7 +3157,7 @@ function AdminCMSPage() {
       }
     }, [aboutHero]);
     
-    const handleUploadHeroImage = async (file) => {
+    const handleUploadHeroImage = async (file) => { 
       const formData = new FormData();
       formData.append('image', file);
       
@@ -4198,7 +4262,7 @@ function AdminCMSPage() {
               className="admin-cms-card"
               title={
                 <div>
-                  <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Tại sao chọn MEDLATEC?</div>
+                  <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Tại sao chọn KHAMNOW?</div>
                   <div style={{ fontSize: 12, color: '#8c8c8c', fontWeight: 400 }}>
                     <HomeOutlined /> Hiển thị ở: Trang chủ (Section 2)
                   </div>
@@ -4254,7 +4318,7 @@ function AdminCMSPage() {
               className="admin-cms-card"
               title={
                 <div>
-                  <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>MEDLATEC trong số liệu</div>
+                  <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>KHAMNOW trong số liệu</div>
                   <div style={{ fontSize: 12, color: '#8c8c8c', fontWeight: 400 }}>
                     <HomeOutlined /> Hiển thị ở: Trang chủ (Section 6)
                   </div>
@@ -4761,7 +4825,7 @@ function AdminCMSPage() {
                       setLoading(true);
                       // Clean data - ensure all fields are strings, not null/undefined
                       const dataToSave = {
-                        siteName: String(values.siteName || 'MEDLATEC'),
+                        siteName: String(values.siteName || 'KHAMNOW'),
                         siteTagline: String(values.siteTagline || ''),
                         logoUrl: String(logoPreview || ''),
                         hotline: String(values.hotline || '19005656'),
@@ -4795,7 +4859,7 @@ function AdminCMSPage() {
                     name="siteName"
                     rules={[{ required: true, message: 'Vui lòng nhập tên website!' }]}
                   >
-                    <Input placeholder="MEDLATEC" />
+                    <Input placeholder="KHAMNOW" />
                   </Form.Item>
 
                   <Form.Item
@@ -4957,7 +5021,7 @@ function AdminCMSPage() {
                     )}
                   </div>
                   <div style={{ marginTop: 4, fontSize: 12, color: '#8c8c8c' }}>
-                    Ảnh nền cho section "MEDLATEC TRONG SỐ LIỆU"<br/>
+                    Ảnh nền cho section "KHAMNOW TRONG SỐ LIỆU"<br/>
                     Khuyến nghị: Ảnh ngang, kích thước 1920x600px
                   </div>
                 </Form.Item>
@@ -5120,7 +5184,7 @@ function AdminCMSPage() {
                   <Input placeholder="https://zalo.me/..." />
                 </Form.Item>
                 <Form.Item label="Copyright Text" name="footerCopyrightText">
-                  <Input placeholder="© 2024 MEDLATEC. All rights reserved." />
+                  <Input placeholder="© 2024 KHAMNOW. All rights reserved." />
                 </Form.Item>
                 <Form.Item>
                   <Button type="primary" htmlType="submit">

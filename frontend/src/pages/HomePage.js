@@ -292,7 +292,7 @@ function HomePage() {
                 }}
                 bodyStyle={{ padding: '32px 24px' }}
               >
-                <Title level={4} style={{ color: '#1890ff', marginBottom: 16, fontSize: 20 }}>
+                <Title level={4} style={{ color: '#13c2c2', marginBottom: 16, fontSize: 20 }}>
                   Đặt lịch nhanh
                 </Title>
                 <Paragraph style={{ color: '#666', fontSize: 14, marginBottom: 24 }}>
@@ -346,16 +346,25 @@ function HomePage() {
                   
                   {/* Submit Button */}
                   <Button 
-                    type="primary" 
                     size="large" 
                     block
                     style={{ 
-                      background: '#1890ff',
+                      background: '#13c2c2',
+                      borderColor: '#13c2c2',
+                      color: '#fff',
                       borderRadius: 8,
                       height: 48,
                       fontSize: 16,
                       fontWeight: 600,
                       marginBottom: 16
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#36cfc9';
+                      e.currentTarget.style.borderColor = '#36cfc9';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#13c2c2';
+                      e.currentTarget.style.borderColor = '#13c2c2';
                     }}
                   >
                     Đăng ký ngay
@@ -365,7 +374,7 @@ function HomePage() {
                   <div style={{ textAlign: 'center' }}>
                     <Text style={{ fontSize: 12, color: '#666' }}>
                       Cần tư vấn trực tiếp?{' '}
-                      <a href="/doctors" style={{ color: '#1890ff', fontWeight: 600 }}>
+                      <a href="/doctors" style={{ color: '#13c2c2', fontWeight: 600 }}>
                         Quy chế hoạt động
                       </a>
                     </Text>
@@ -423,7 +432,7 @@ function HomePage() {
                       <Title level={4} style={{ 
                         marginTop: 0,
                         marginBottom: 12, 
-                        color: service.color || '#1890ff', 
+                        color: service.color || '#13c2c2', 
                         fontSize: 18,
                         fontWeight: 600,
                         lineHeight: 1.4
@@ -452,7 +461,7 @@ function HomePage() {
                           <Button 
                             type="link"
                             style={{ 
-                              color: service.color || '#1890ff',
+                              color: service.color || '#13c2c2',
                               padding: 0,
                               fontWeight: 600,
                               fontSize: 15,
@@ -486,7 +495,7 @@ function HomePage() {
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <Title level={2} style={{ color: '#262626', marginBottom: 16, fontSize: 32 }}>
-              TẠI SAO CHỌN <span style={{ color: '#1890ff' }}>KHAMNOW</span>?
+              TẠI SAO CHỌN <span style={{ color: '#13c2c2' }}>KHAMNOW</span>?
             </Title>
             <Paragraph style={{ color: '#666', fontSize: 16, maxWidth: 600, margin: '0 auto' }}>
               Chúng tôi cam kết mang đến dịch vụ y tế chất lượng cao với sự chăm sóc tận tâm
@@ -606,7 +615,7 @@ function HomePage() {
                       margin: '0 auto',
                       borderRadius: '50%',
                       overflow: 'hidden',
-                      border: '4px solid #1890ff',
+                      border: '4px solid #13c2c2',
                       background: '#f0f9ff'
                     }}>
                       {doctor.user?.profileImage ? (
@@ -634,7 +643,7 @@ function HomePage() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          background: 'linear-gradient(135deg, #1890ff 0%, #40a9ff 100%)',
+                          background: 'linear-gradient(135deg, #13c2c2 0%, #36cfc9 100%)',
                           color: '#fff',
                           fontSize: 48,
                           fontWeight: 600,
@@ -673,7 +682,7 @@ function HomePage() {
                           transition: 'color 0.3s ease'
                         }}
                         onMouseEnter={(e) => {
-                          e.target.style.color = '#1890ff';
+                          e.target.style.color = '#13c2c2';
                         }}
                         onMouseLeave={(e) => {
                           e.target.style.color = '#132432';
@@ -715,7 +724,7 @@ function HomePage() {
                         href={`/doctors/${doctor.id}?datlich=1`}
                         style={{
                           display: 'inline-block',
-                          background: '#1890ff',
+                          background: '#13c2c2',
                           color: '#fff',
                           padding: '8px 20px',
                           borderRadius: 6,
@@ -725,11 +734,11 @@ function HomePage() {
                           transition: 'all 0.3s ease'
                         }}
                         onMouseEnter={(e) => {
-                          e.target.style.background = '#40a9ff';
+                          e.target.style.background = '#36cfc9';
                           e.target.style.transform = 'translateY(-2px)';
                         }}
                         onMouseLeave={(e) => {
-                          e.target.style.background = '#1890ff';
+                          e.target.style.background = '#13c2c2';
                           e.target.style.transform = 'translateY(0)';
                         }}
                       >
@@ -748,8 +757,8 @@ function HomePage() {
               size="large"
               style={{ 
                 borderRadius: 8,
-                border: '2px solid #1890ff',
-                color: '#1890ff',
+                border: '2px solid #13c2c2',
+                color: '#13c2c2',
                 fontWeight: 600,
                 padding: '0 32px',
                 height: 48
@@ -775,7 +784,7 @@ function HomePage() {
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <Title level={2} style={{ color: '#262626', marginBottom: 16, fontSize: 32 }}>
-              Các chuyên khoa y tế tại <span style={{ color: '#1890ff' }}>KHAMNOW</span>
+              Các chuyên khoa y tế tại <span style={{ color: '#13c2c2' }}>KHAMNOW</span>
             </Title>
           </div>
           
@@ -863,7 +872,7 @@ function HomePage() {
             {statistics.map((stat) => (
               <Col xs={24} sm={12} md={6} key={stat.id}>
                 <div style={{ 
-                  background: stat.color || '#1890ff',
+                  background: stat.color || '#13c2c2',
                   borderRadius: 12,
                   padding: '32px 24px',
                   textAlign: 'center',
@@ -933,7 +942,7 @@ function HomePage() {
       {/* Fallback: Statistics Section without background image */}
       {statistics.length > 0 && !siteSettings?.statisticsBackgroundImage && (
       <div style={{ 
-        background: 'linear-gradient(135deg, #1890ff 0%, #40a9ff 100%)',
+        background: 'linear-gradient(135deg, #13c2c2 0%, #36cfc9 100%)',
         padding: '80px 24px',
         color: '#fff'
       }}>
@@ -1069,7 +1078,7 @@ function HomePage() {
                         width: 24,
                         height: 24,
                         borderRadius: 4,
-                        background: '#1890ff',
+                        background: '#13c2c2',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -1111,17 +1120,29 @@ function HomePage() {
                 <Row gutter={[16, 16]}>
                   <Col xs={24} sm={12}>
                     <Button 
-                      type="primary"
                       size="large"
                       block
                       loading={subscribing}
                       style={{
                         height: 48,
                         borderRadius: 8,
-                        background: '#1890ff',
-                        border: 'none',
+                        background: '#13c2c2',
+                        borderColor: '#13c2c2',
+                        color: '#fff',
                         fontWeight: 600,
                         fontSize: 15
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!subscribing) {
+                          e.currentTarget.style.background = '#36cfc9';
+                          e.currentTarget.style.borderColor = '#36cfc9';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!subscribing) {
+                          e.currentTarget.style.background = '#13c2c2';
+                          e.currentTarget.style.borderColor = '#13c2c2';
+                        }
                       }}
                       onClick={handleNewsletterSubscribe}
                     >
@@ -1135,8 +1156,8 @@ function HomePage() {
                       style={{
                         height: 48,
                         borderRadius: 8,
-                        border: '2px solid #1890ff',
-                        color: '#1890ff',
+                        border: '2px solid #13c2c2',
+                        color: '#13c2c2',
                         fontWeight: 600,
                         fontSize: 15
                       }}
@@ -1183,7 +1204,7 @@ function HomePage() {
                       {testimonial.customerImage ? (
                         <Avatar size={48} src={testimonial.customerImage} />
                       ) : (
-                        <Avatar size={48} style={{ background: '#1890ff', color: '#fff' }}>
+                        <Avatar size={48} style={{ background: '#13c2c2', color: '#fff' }}>
                           {testimonial.customerName?.charAt(0)}
                         </Avatar>
                       )}

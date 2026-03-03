@@ -3,6 +3,7 @@ import { Row, Col, Card, Typography, Breadcrumb, Spin, Tag, Button } from 'antd'
 import { HomeOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import cmsAPI from '../services/cmsApi';
+import NewsSidebar from '../components/NewsSidebar';
 import '../styles/services.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -148,21 +149,8 @@ function ServicesPage() {
               </div>
             </Card>
 
-            {/* Hotline Card */}
-            <Card style={{ background: 'linear-gradient(135deg, #1890ff 0%, #722ed1 100%)', border: 'none' }}>
-              <div style={{ textAlign: 'center', color: '#fff' }}>
-                <div style={{ fontSize: 14, marginBottom: 8 }}>Tư vấn miễn phí</div>
-                <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 16 }}>19005656</div>
-                <Button 
-                  type="default" 
-                  size="large" 
-                  block
-                  style={{ background: '#fff', color: '#1890ff', fontWeight: 600 }}
-                >
-                  Gọi ngay
-                </Button>
-              </div>
-            </Card>
+            {/* Sidebar with only hotline widget from CMS */}
+            <NewsSidebar onlyHotline={true} />
           </Col>
 
           {/* Services Grid */}

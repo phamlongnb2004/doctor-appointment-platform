@@ -24,6 +24,7 @@ import {
 } from '@ant-design/icons';
 import cmsAPI from '../services/cmsApi';
 import ArticleCtaSection from '../components/ArticleCtaSection';
+import NewsSidebar from '../components/NewsSidebar';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -358,38 +359,8 @@ function NewsDetailPage() {
 
           {/* Sidebar */}
           <Col xs={24} lg={8}>
-            {/* Contact Card */}
-            <Card 
-              style={{ 
-                borderRadius: 12,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                marginBottom: 24
-              }}
-            >
-              <Title level={4} style={{ color: 'white' }}>
-                Hotline
-              </Title>
-              <Title level={2} style={{ color: 'white', margin: '16px 0' }}>
-                1900 56 56 56
-              </Title>
-              <Paragraph style={{ color: 'white' }}>
-                Liên hệ ngay với số hotline của MEDLATEC để được phục vụ và sử dụng các dịch vụ khám, chữa bệnh hiện đại & cao cấp nhất.
-              </Paragraph>
-              <Button 
-                type="primary" 
-                size="large" 
-                block
-                style={{ 
-                  background: 'white', 
-                  color: '#667eea',
-                  border: 'none',
-                  fontWeight: 'bold'
-                }}
-              >
-                Liên hệ với chúng tôi
-              </Button>
-            </Card>
+            {/* Sidebar with widgets from CMS */}
+            <NewsSidebar />
 
             {/* Registration Form */}
             <Card 
