@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Typography, Button, Input, Select, Avatar, Rate, Spin, Empty, Tag, Space } from 'antd';
-import { UserOutlined, SearchOutlined, CalendarOutlined, MessageOutlined, PhoneOutlined, StarOutlined } from '@ant-design/icons';
+import { Row, Col, Button, Input, Select, Avatar, Spin } from 'antd';
+import { UserOutlined, SearchOutlined, PhoneOutlined, StarOutlined, CalendarOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { doctorAPI } from '../services/api';
 import ChatButton from '../components/ChatButton';
-import useFallingFlowers from '../hooks/useFallingFlowers';
-import '../styles/animations.css';
+import '../styles/doctors.css';
 
-const { Title, Text } = Typography;
 const { Option } = Select;
 
 function DoctorListPage() {
@@ -17,12 +15,16 @@ function DoctorListPage() {
   const [selectedSpecialization, setSelectedSpecialization] = useState(null);
   const [specializations, setSpecializations] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [heroContent, setHeroContent] = useState({
+    title: 'Đặt lịch khám bác sĩ',
+    subtitle: 'Tìm kiếm và đặt lịch khám với hơn 200 bác sĩ chuyên khoa hàng đầu',
+    background: null
+  });
   const navigate = useNavigate();
-  const flowerContainerRef = useFallingFlowers({ numberOfFlowers: 5 });
 
   useEffect(() => {
     fetchDoctors();
-    // Lấy thông tin user hiện tại từ localStorage
+    fetchSiteSettings();
     const userData = {
       id: parseInt(localStorage.getItem('userId')),
       email: localStorage.getItem('userEmail'),
@@ -36,6 +38,31 @@ function DoctorListPage() {
   useEffect(() => {
     fetchSpecializations();
   }, []);
+
+  const fetchSiteSettings = async () => {
+    try {
+      const apiUrl = `${process.env.REACT_APP_API_URL}/api/cms/site-settings`;
+      console.log('Fetching site settings from:', apiUrl);
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      console.log('Site settings response:', data);
+      console.log('doctorsHeroBackground:', data.doctorsHeroBackground);
+      if (data) {
+        setHeroContent({
+          title: data.doctorsHeroTitle || 'Đặt lịch khám bác sĩ',
+          subtitle: data.doctorsHeroSubtitle || 'Tìm kiếm và đặt lịch khám với hơn 200 bác sĩ chuyên khoa hàng đầu',
+          background: data.doctorsHeroBackground
+        });
+        console.log('Hero content set:', {
+          title: data.doctorsHeroTitle,
+          subtitle: data.doctorsHeroSubtitle,
+          background: data.doctorsHeroBackground
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching site settings:', error);
+    }
+  };
 
   const fetchDoctors = async () => {
     setLoading(true);
@@ -76,130 +103,128 @@ function DoctorListPage() {
   });
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8f9fa' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 24px' }}>
-        {/* Header Section */}
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <h1 className="medical-hero-title" style={{ color: '#262626' }}>
-            Đặt lịch khám bác sĩ
-          </h1>
-          <p className="medical-subtitle">
-            Tìm kiếm và đặt lịch khám với hơn 200 bác sĩ chuyên khoa hàng đầu
-          </p>
+    <div className="doctors-page">
+      {/* Hero Section */}
+      <div 
+        className="doctors-hero"
+        style={{
+          background: heroContent.background 
+            ? `linear-gradient(135deg, rgba(0, 102, 255, 0.9) 0%, rgba(0, 82, 204, 0.9) 100%), url(${heroContent.background})`
+            : 'linear-gradient(135deg, #0066FF 0%, #0052CC 100%)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="doctors-hero-content">
+          <h1>{heroContent.title}</h1>
+          <p>{heroContent.subtitle}</p>
+        </div>
+      </div>
+
+      <div className="doctors-container">
+        {/* Search Card */}
+        <div className="doctors-search-card">
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={24} md={8}>
+              <Input
+                size="large"
+                placeholder="Tìm kiếm bác sĩ theo tên hoặc chuyên khoa..."
+                prefix={<SearchOutlined />}
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+              />
+            </Col>
+            <Col xs={24} sm={12} md={8}>
+              <Select
+                size="large"
+                placeholder="Chọn chuyên khoa"
+                style={{ width: '100%' }}
+                onChange={setSelectedSpecialization}
+                allowClear
+              >
+                {specializations.map((spec) => (
+                  <Option key={spec} value={spec}>{spec}</Option>
+                ))}
+              </Select>
+            </Col>
+            <Col xs={24} sm={12} md={8}>
+              <Button 
+                size="large"
+                block
+                icon={<PhoneOutlined />}
+                className="doctors-action-btn doctors-action-btn-primary"
+              >
+                Hotline: 1900-1234
+              </Button>
+            </Col>
+          </Row>
         </div>
 
-        {/* Search & Filter */}
-        <div className="medical-card" style={{ marginBottom: 32 }}>
-          <div style={{ padding: 24 }}>
-            <Row gutter={[16, 16]}>
-              <Col xs={24} sm={12} md={8}>
-                <Input
-                  size="large"
-                  placeholder="Tìm kiếm bác sĩ..."
-                  prefix={<SearchOutlined style={{ color: '#52c41a' }} />}
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="medical-input"
-                  style={{ borderRadius: 8 }}
-                />
-              </Col>
-              <Col xs={24} sm={12} md={6}>
-                <Select
-                  size="large"
-                  placeholder="Chọn chuyên khoa"
-                  style={{ width: '100%' }}
-                  onChange={setSelectedSpecialization}
-                  allowClear
-                >
-                  {specializations.map((spec) => (
-                    <Option key={spec} value={spec}>{spec}</Option>
-                  ))}
-                </Select>
-              </Col>
-              <Col xs={24} sm={24} md={10}>
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-                  <Button 
-                    size="large"
-                    icon={<CalendarOutlined />}
-                    className="btn-medical-secondary"
-                  >
-                    Lịch khám hôm nay
-                  </Button>
-                  <Button 
-                    type="primary" 
-                    size="large"
-                    icon={<PhoneOutlined />}
-                    className="btn-medical-primary"
-                  >
-                    Hotline: 1900-1234
-                  </Button>
-                </div>
-              </Col>
-            </Row>
-          </div>
-        </div>
-
-        {/* Loading */}
         {loading ? (
-          <div style={{ textAlign: 'center', padding: 100 }}>
+          <div className="doctors-loading">
             <Spin size="large" />
-            <p style={{ marginTop: 16, color: '#666' }}>Đang tải danh sách bác sĩ...</p>
+            <p className="doctors-loading-text">Đang tải danh sách bác sĩ...</p>
           </div>
         ) : (
           <>
-            {/* Results Header */}
-            <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="doctors-results-header">
               <div>
-                <h3 style={{ margin: 0, color: '#262626' }}>
+                <h3 className="doctors-results-title">
                   Tìm thấy {filteredDoctors.length} bác sĩ
                 </h3>
-                <p style={{ margin: 0, color: '#666', fontSize: 14 }}>
+                <p className="doctors-results-subtitle">
                   Sắp xếp theo đánh giá cao nhất
                 </p>
               </div>
             </div>
 
-            {/* Doctor Grid */}
             {filteredDoctors.length > 0 ? (
               <Row gutter={[24, 24]}>
                 {filteredDoctors.map((doctor) => (
                   <Col xs={24} sm={12} lg={8} xl={6} key={doctor.id}>
                     <div className="doctor-card" onClick={() => navigate(`/doctors/${doctor.id}`)}>
-                      <Avatar
-                        size={80}
-                        src={doctor.user?.profileImage}
-                        icon={<UserOutlined />}
-                        className="doctor-avatar"
-                      />
+                      <div className="doctor-card-avatar">
+                        <Avatar
+                          size={70}
+                          src={doctor.user?.profileImage}
+                          icon={<UserOutlined />}
+                        />
+                        <div className="doctor-card-badge">
+                          <CheckCircleOutlined />
+                        </div>
+                      </div>
                       
-                      <div className="doctor-name">
+                      <div className="doctor-card-name">
                         {doctor.user?.firstName} {doctor.user?.lastName}
                       </div>
                       
-                      <div className="doctor-specialty">
+                      <div className="doctor-card-specialty">
                         {doctor.specialization}
                       </div>
                       
-                      <div className="doctor-rating">
-                        <StarOutlined style={{ color: '#faad14' }} />
+                      <div className="doctor-card-rating">
+                        <StarOutlined />
                         <span>{(doctor.ratingScore || 0).toFixed(1)}</span>
-                        <span>({doctor.reviewCount || 0} đánh giá)</span>
+                        <span>({doctor.reviewCount || 0})</span>
                       </div>
                       
-                      <div style={{ marginTop: 12, color: '#666', fontSize: 13 }}>
-                        <CalendarOutlined /> {doctor.experienceYears || 0} năm kinh nghiệm
+                      <div className="doctor-card-divider"></div>
+                      
+                      <div className="doctor-card-info">
+                        <CalendarOutlined />
+                        <span>{doctor.experienceYears || 0} năm kinh nghiệm</span>
                       </div>
                       
-                      <div style={{ marginTop: 8, fontWeight: 600, color: '#52c41a', fontSize: 16 }}>
+                      <div className="doctor-card-fee">
                         {doctor.consultationFee?.toLocaleString() || 0} VNĐ
                       </div>
 
-                      <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
+                      <div className="doctor-card-actions">
                         <Button 
                           type="primary" 
                           size="small"
-                          className="btn-medical-primary"
-                          style={{ flex: 1 }}
+                          className="doctor-card-btn doctor-card-btn-primary"
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/doctors/${doctor.id}`);
@@ -207,7 +232,7 @@ function DoctorListPage() {
                         >
                           Đặt lịch
                         </Button>
-                        {currentUser && (
+                        {currentUser && currentUser.id && (
                           <ChatButton
                             currentUser={currentUser}
                             targetUser={{
@@ -219,6 +244,7 @@ function DoctorListPage() {
                             }}
                             type="default"
                             size="small"
+                            className="doctor-card-btn doctor-card-btn-secondary"
                           />
                         )}
                       </div>
@@ -227,10 +253,10 @@ function DoctorListPage() {
                 ))}
               </Row>
             ) : (
-              <div style={{ textAlign: 'center', padding: 60 }}>
-                <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
-                <h3 style={{ color: '#666' }}>Không tìm thấy bác sĩ</h3>
-                <p style={{ color: '#999' }}>Thử thay đổi từ khóa tìm kiếm hoặc chuyên khoa</p>
+              <div className="doctors-empty">
+                <div className="doctors-empty-icon">🔍</div>
+                <h3 className="doctors-empty-title">Không tìm thấy bác sĩ</h3>
+                <p className="doctors-empty-text">Thử thay đổi từ khóa tìm kiếm hoặc chuyên khoa</p>
               </div>
             )}
           </>

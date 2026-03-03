@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Input, Button, DatePicker, Select, Row, Col, Typography, Divider, message, Avatar, Rate, Space } from 'antd';
-import { UserOutlined, CalendarOutlined, ClockCircleOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Card, Form, Input, Button, DatePicker, Select, Row, Col, Typography, message, Avatar, Rate, Space } from 'antd';
+import { UserOutlined, CalendarOutlined, ClockCircleOutlined, CheckCircleOutlined, PhoneOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { doctorAPI, appointmentAPI, userAPI } from '../services/api';
-import useFallingFlowers from '../hooks/useFallingFlowers';
-import '../styles/animations.css';
+import { doctorAPI, appointmentAPI } from '../services/api';
+import '../styles/appointment.css';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -14,15 +13,12 @@ function AppointmentPage({ user }) {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [doctors, setDoctors] = useState([]);
-  const [specializations, setSpecializations] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
   const navigate = useNavigate();
-  const flowerContainerRef = useFallingFlowers(5);
 
   useEffect(() => {
     fetchDoctors();
-    fetchSpecializations();
   }, []);
 
   const fetchDoctors = async () => {
@@ -35,14 +31,6 @@ function AppointmentPage({ user }) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const fetchSpecializations = async () => {
-    // Get unique specializations from doctors
-    const response = await doctorAPI.getAllDoctors();
-    const docs = response.data || [];
-    const specs = [...new Set(docs.map(d => d.specialization).filter(Boolean))];
-    setSpecializations(specs);
   };
 
   const handleDoctorChange = (doctorId) => {
@@ -67,15 +55,7 @@ function AppointmentPage({ user }) {
         status: 'PENDING'
       };
       await appointmentAPI.createAppointment(appointmentData);
-      message.success({
-        content: (
-          <div>
-            <CheckCircleOutlined style={{ color: '#52c41a', marginRight: 8 }} />
-            Đặt lịch thành công! Vui lòng chờ bác sĩ xác nhận.
-          </div>
-        ),
-        duration: 5
-      });
+      message.success('Đặt lịch thành công! Vui lòng chờ bác sĩ xác nhận.');
       form.resetFields();
       setSelectedDoctor(null);
     } catch (error) {
@@ -91,24 +71,30 @@ function AppointmentPage({ user }) {
   ];
 
   return (
-    <div ref={flowerContainerRef} style={{ minHeight: '100vh', padding: '40px 50px', background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%)' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <Title level={2} style={{ textAlign: 'center', marginBottom: 8 }}>
-          📅 Đặt Lịch Khám
-        </Title>
-        <Text style={{ textAlign: 'center', display: 'block', color: '#666', marginBottom: 32 }}>
-          Điền thông tin bên dưới để đặt lịch khám với bác sĩ
-        </Text>
+    <div className="appointment-page">
+      <div className="appointment-container">
+        <div className="appointment-header">
+          <Title level={2}>Đặt lịch khám</Title>
+          <Text>Điền thông tin để đặt lịch khám với bác sĩ chuyên khoa</Text>
+        </div>
 
-        <Row gutter={32}>
+        <Row gutter={[24, 24]}>
           <Col xs={24} lg={16}>
-            <Card title="Thông Tin Đặt Lịch" style={{ borderRadius: 16, marginBottom: 24 }}>
-              <Form form={form} onFinish={onFinish} layout="vertical">
+            <Card className="appointment-form-card" bordered={false}>
+              <div className="ant-card-head">
+                <div className="ant-card-head-title">Thông tin đặt lịch</div>
+              </div>
+              <Form 
+                form={form} 
+                onFinish={onFinish} 
+                layout="vertical"
+                className="appointment-form"
+              >
                 <Row gutter={16}>
                   <Col xs={24} md={12}>
                     <Form.Item
                       name="patientName"
-                      label="Họ tên bệnh nhân"
+                      label="Họ và tên"
                       rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}
                       initialValue={user ? `${user.firstName} ${user.lastName}` : ''}
                     >
@@ -122,7 +108,7 @@ function AppointmentPage({ user }) {
                       rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
                       initialValue={user?.phone || ''}
                     >
-                      <Input size="large" placeholder="Nhập số điện thoại" />
+                      <Input size="large" prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" />
                     </Form.Item>
                   </Col>
                 </Row>
@@ -130,17 +116,17 @@ function AppointmentPage({ user }) {
                 <Form.Item
                   name="email"
                   label="Email"
-                  rules={[{ required: true, type: 'email' }]}
+                  rules={[{ required: true, type: 'email', message: 'Vui lòng nhập email hợp lệ!' }]}
                   initialValue={user?.email || ''}
                 >
-                  <Input size="large" placeholder="Nhập email" />
+                  <Input size="large" prefix={<MailOutlined />} placeholder="Nhập email" />
                 </Form.Item>
 
                 <Row gutter={16}>
                   <Col xs={24} md={12}>
                     <Form.Item
                       name="doctor"
-                      label="Bác sĩ"
+                      label="Chọn bác sĩ"
                       rules={[{ required: true, message: 'Vui lòng chọn bác sĩ!' }]}
                     >
                       <Select 
@@ -175,23 +161,28 @@ function AppointmentPage({ user }) {
 
                 <Form.Item
                   name="time"
-                  label="Khung giờ"
+                  label="Khung giờ khám"
                   rules={[{ required: true, message: 'Vui lòng chọn khung giờ!' }]}
                 >
                   <Select placeholder="Chọn khung giờ" size="large">
                     {timeSlots.map((time) => (
                       <Option key={time} value={time}>
-                        <Space>
+                        <div className="time-slot-option">
                           <ClockCircleOutlined />
-                          {time}
-                        </Space>
+                          <span>{time}</span>
+                        </div>
                       </Option>
                     ))}
                   </Select>
                 </Form.Item>
 
-                <Form.Item name="notes" label="Ghi chú">
-                  <TextArea rows={3} placeholder="Mô tả triệu chứng hoặc yêu cầu đặc biệt..." />
+                <Form.Item name="notes" label="Ghi chú (không bắt buộc)">
+                  <TextArea 
+                    rows={4} 
+                    placeholder="Mô tả triệu chứng hoặc yêu cầu đặc biệt..."
+                    maxLength={500}
+                    showCount
+                  />
                 </Form.Item>
 
                 <Form.Item>
@@ -201,10 +192,10 @@ function AppointmentPage({ user }) {
                     loading={submitLoading} 
                     block 
                     size="large"
-                    style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', border: 'none', height: 48, fontSize: 16 }}
+                    className="appointment-submit-btn"
                     icon={<CalendarOutlined />}
                   >
-                    Xác Nhận Đặt Lịch
+                    Xác nhận đặt lịch
                   </Button>
                 </Form.Item>
               </Form>
@@ -212,53 +203,59 @@ function AppointmentPage({ user }) {
           </Col>
 
           <Col xs={24} lg={8}>
-            <Card title="Thông Tin Bác Sĩ" style={{ borderRadius: 16, position: 'sticky', top: 20 }}>
+            <Card className="doctor-info-card" bordered={false}>
+              <div className="ant-card-head">
+                <div className="ant-card-head-title">Thông tin bác sĩ</div>
+              </div>
               {selectedDoctor ? (
                 <div>
-                  <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                  <div className="doctor-avatar-section">
                     <Avatar 
                       size={80} 
                       src={selectedDoctor.user?.profileImage}
                       icon={<UserOutlined />}
-                      style={{ border: '3px solid #667eea' }}
                     />
-                    <Title level={4} style={{ marginTop: 12, marginBottom: 4 }}>
+                    <div className="doctor-name">
                       {selectedDoctor.user?.firstName} {selectedDoctor.user?.lastName}
-                    </Title>
-                    <Text type="secondary">{selectedDoctor.specialization}</Text>
+                    </div>
+                    <div className="doctor-specialty">{selectedDoctor.specialization}</div>
                   </div>
-                  <Divider />
-                  <div style={{ marginBottom: 12 }}>
-                    <Text type="secondary">Kinh nghiệm:</Text>
-                    <br />
-                    <Text strong>{selectedDoctor.experienceYears || 0} năm</Text>
+                  
+                  <div className="doctor-info-item">
+                    <span className="doctor-info-label">Kinh nghiệm</span>
+                    <div className="doctor-info-value">{selectedDoctor.experienceYears || 0} năm</div>
                   </div>
-                  <div style={{ marginBottom: 12 }}>
-                    <Text type="secondary">Phí tư vấn:</Text>
-                    <br />
-                    <Text strong style={{ color: '#667eea', fontSize: 18 }}>
+                  
+                  <div className="doctor-info-item">
+                    <span className="doctor-info-label">Phí tư vấn</span>
+                    <div className="doctor-info-value doctor-fee">
                       {selectedDoctor.consultationFee?.toLocaleString() || 0} VNĐ
-                    </Text>
+                    </div>
                   </div>
-                  <div>
-                    <Text type="secondary">Đánh giá:</Text>
-                    <br />
-                    <Rate disabled value={selectedDoctor.ratingScore || 0} />
+                  
+                  <div className="doctor-info-item">
+                    <span className="doctor-info-label">Đánh giá</span>
+                    <div>
+                      <Rate disabled value={selectedDoctor.ratingScore || 0} style={{ fontSize: 16 }} />
+                    </div>
                   </div>
                 </div>
               ) : (
-                <div style={{ textAlign: 'center', padding: 20 }}>
-                  <Text type="secondary">Vui lòng chọn bác sĩ để xem thông tin</Text>
+                <div className="doctor-placeholder">
+                  <Text type="secondary">Chọn bác sĩ để xem thông tin chi tiết</Text>
                 </div>
               )}
             </Card>
 
-            <Card title="Hướng dẫn" style={{ borderRadius: 16, marginTop: 16 }}>
-              <ul style={{ paddingLeft: 20, margin: 0 }}>
-                <li style={{ marginBottom: 8 }}>Chọn bác sĩ phù hợp</li>
-                <li style={{ marginBottom: 8 }}>Chọn ngày và giờ khám</li>
-                <li style={{ marginBottom: 8 }}>Điền thông tin liên hệ</li>
-                <li>Chờ bác sĩ xác nhận</li>
+            <Card className="guide-card" bordered={false}>
+              <div className="ant-card-head">
+                <div className="ant-card-head-title">Hướng dẫn</div>
+              </div>
+              <ul className="guide-list">
+                <li>Chọn bác sĩ phù hợp với chuyên khoa</li>
+                <li>Chọn ngày và giờ khám thuận tiện</li>
+                <li>Điền đầy đủ thông tin liên hệ</li>
+                <li>Chờ bác sĩ xác nhận lịch hẹn</li>
               </ul>
             </Card>
           </Col>

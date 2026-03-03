@@ -35,7 +35,14 @@ public class CMSController {
     
     @PutMapping("/admin/site-settings")
     public ResponseEntity<SiteSettings> updateSiteSettings(@RequestBody SiteSettings settings) {
-        return ResponseEntity.ok(cmsService.updateSiteSettings(settings));
+        System.out.println("=== Updating Site Settings ===");
+        System.out.println("Received settings: " + settings);
+        System.out.println("doctors_hero_title: " + settings.getDoctorsHeroTitle());
+        System.out.println("doctors_hero_subtitle: " + settings.getDoctorsHeroSubtitle());
+        System.out.println("doctors_hero_background: " + settings.getDoctorsHeroBackground());
+        SiteSettings updated = cmsService.updateSiteSettings(settings);
+        System.out.println("Updated settings: " + updated);
+        return ResponseEntity.ok(updated);
     }
     
     @GetMapping("/test")

@@ -1,0 +1,253 @@
+/* Appointment Page - Modern Professional Design */
+.appointment-page {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 80px 24px 60px;
+}
+
+.appointment-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.appointment-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.appointment-header h2 {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+}
+
+.appointment-header p {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+/* Form Card */
+.appointment-form-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+}
+
+.appointment-form-card .ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 0 0 16px 0;
+  margin-bottom: 24px;
+}
+
+.appointment-form-card .ant-card-head-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* Form Inputs */
+.appointment-form .ant-form-item-label > label {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.appointment-form .ant-input,
+.appointment-form .ant-input-number,
+.appointment-form .ant-picker,
+.appointment-form .ant-select-selector {
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+}
+
+.appointment-form .ant-input:hover,
+.appointment-form .ant-picker:hover,
+.appointment-form .ant-select-selector:hover {
+  border-color: #0066FF;
+}
+
+.appointment-form .ant-input:focus,
+.appointment-form .ant-picker-focused,
+.appointment-form .ant-select-focused .ant-select-selector {
+  border-color: #0066FF;
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.1);
+}
+
+/* Submit Button */
+.appointment-submit-btn {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  background: #0066FF;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.appointment-submit-btn:hover {
+  background: #0052CC;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+}
+
+/* Doctor Info Card */
+.doctor-info-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 100px;
+  margin-bottom: 24px;
+}
+
+.doctor-info-card .ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 0 0 12px 0;
+  margin-bottom: 16px;
+}
+
+.doctor-info-card .ant-card-head-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.doctor-avatar-section {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.doctor-avatar-section .ant-avatar {
+  border: 2px solid #0066FF;
+  box-shadow: 0 2px 8px rgba(0, 102, 255, 0.2);
+}
+
+.doctor-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 10px 0 4px;
+}
+
+.doctor-specialty {
+  color: #0066FF;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.doctor-info-item {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.doctor-info-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.doctor-info-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.doctor-info-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.doctor-fee {
+  color: #0066FF;
+  font-size: 18px;
+}
+
+.doctor-placeholder {
+  text-align: center;
+  padding: 30px 20px;
+  color: #999;
+}
+
+/* Guide Card */
+.guide-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.guide-card .ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 0 0 16px 0;
+  margin-bottom: 16px;
+}
+
+.guide-card .ant-card-head-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.guide-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.guide-list li {
+  padding: 10px 0 10px 28px;
+  position: relative;
+  color: #333;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.guide-list li:before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #0066FF;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Time Slot Option */
+.time-slot-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .doctor-info-card {
+    position: static;
+    margin-top: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .appointment-page {
+    padding: 80px 16px 40px;
+  }
+
+  .appointment-header h2 {
+    font-size: 28px;
+  }
+
+  .appointment-form-card {
+    padding: 24px 20px;
+  }
+
+  .doctor-info-card {
+    padding: 20px;
+  }
+}

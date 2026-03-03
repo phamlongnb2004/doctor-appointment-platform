@@ -98,6 +98,7 @@ function AdminCMSPage() {
   const [galleryImages, setGalleryImages] = useState([]); // For multiple images
   const [currentColor, setCurrentColor] = useState('#1890ff');
   const [currentTextColor, setCurrentTextColor] = useState('#FFFFFF');
+  const [doctorsHeroBackgroundPreview, setDoctorsHeroBackgroundPreview] = useState(''); // For doctors hero background
   const [imagePreview, setImagePreview] = useState(''); // For doctor-articles image preview
   const [uploadedImage, setUploadedImage] = useState(null); // For doctor-articles uploaded file
   const [siteSettings, setSiteSettings] = useState({
@@ -248,6 +249,7 @@ function AdminCMSPage() {
       setSiteSettings(siteSettingsRes.data || siteSettings);
       setLogoPreview(siteSettingsRes.data?.logoUrl || '');
       setStatisticsBackgroundPreview(siteSettingsRes.data?.statisticsBackgroundImage || '');
+      setDoctorsHeroBackgroundPreview(siteSettingsRes.data?.doctorsHeroBackground || '');
       setNewsCategories(newsCategoriesRes.data || []);
       setMembershipBenefits(membershipBenefitsRes.data || []);
       setNewsSections(newsSectionsRes.data || []);
@@ -4190,6 +4192,9 @@ function AdminCMSPage() {
             <Menu.Item key="footer-settings" icon={<SettingOutlined />}>
               Footer
             </Menu.Item>
+            <Menu.Item key="doctors-page-settings" icon={<UserOutlined />}>
+              Trang Bác sĩ
+            </Menu.Item>
             <Menu.Item key="site-settings" icon={<SettingOutlined />}>
               Thông tin Website
             </Menu.Item>
@@ -4825,16 +4830,14 @@ function AdminCMSPage() {
                       setLoading(true);
                       // Clean data - ensure all fields are strings, not null/undefined
                       const dataToSave = {
+                        ...siteSettings, // Keep all existing fields
                         siteName: String(values.siteName || 'KHAMNOW'),
                         siteTagline: String(values.siteTagline || ''),
                         logoUrl: String(logoPreview || ''),
                         hotline: String(values.hotline || '19005656'),
                         email: String(values.email || ''),
                         address: String(values.address || ''),
-                        statisticsBackgroundImage: String(statisticsBackgroundPreview || ''),
-                        facebookUrl: '',
-                        youtubeUrl: '',
-                        zaloUrl: ''
+                        statisticsBackgroundImage: String(statisticsBackgroundPreview || '')
                       };
                       console.log('Saving site settings:', JSON.stringify(dataToSave, null, 2));
                       const response = await cmsAPI.updateSiteSettings(dataToSave);
@@ -5189,6 +5192,143 @@ function AdminCMSPage() {
                 <Form.Item>
                   <Button type="primary" htmlType="submit">
                     Lưu cài đặt
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Card>
+          )}
+
+          {/* Doctors Page Settings Tab */}
+          {currentTab === 'doctors-page-settings' && (
+            <Card 
+              className="admin-cms-card"
+              title={
+                <div>
+                  <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Cài đặt Trang Bác sĩ</div>
+                  <div style={{ fontSize: 12, color: '#8c8c8c', fontWeight: 400 }}>
+                    <UserOutlined /> Cấu hình hero section trang danh sách bác sĩ
+                  </div>
+                </div>
+              }
+            >
+              <Form
+                layout="vertical"
+                initialValues={{
+                  doctorsHeroTitle: siteSettings.doctorsHeroTitle || 'Đặt lịch khám bác sĩ',
+                  doctorsHeroSubtitle: siteSettings.doctorsHeroSubtitle || 'Tìm kiếm và đặt lịch khám với hơn 200 bác sĩ chuyên khoa hàng đầu'
+                }}
+                key={JSON.stringify(siteSettings)}
+                onFinish={async (values) => {
+                  try {
+                    setLoading(true);
+                    const dataToSave = {
+                      ...siteSettings,
+                      doctorsHeroTitle: values.doctorsHeroTitle,
+                      doctorsHeroSubtitle: values.doctorsHeroSubtitle,
+                      doctorsHeroBackground: doctorsHeroBackgroundPreview || ''
+                    };
+                    console.log('Saving doctors page settings:', dataToSave);
+                    console.log('doctorsHeroBackgroundPreview:', doctorsHeroBackgroundPreview);
+                    await cmsAPI.updateSiteSettings(dataToSave);
+                    message.success('Cập nhật thành công!');
+                    fetchAllData();
+                  } catch (error) {
+                    console.error('Error updating doctors page settings:', error);
+                    message.error('Lỗi khi cập nhật: ' + error.message);
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+              >
+                <Form.Item
+                  label="Tiêu đề Hero Section"
+                  name="doctorsHeroTitle"
+                  rules={[{ required: true, message: 'Vui lòng nhập tiêu đề!' }]}
+                >
+                  <Input placeholder="Đặt lịch khám bác sĩ" />
+                </Form.Item>
+
+                <Form.Item
+                  label="Mô tả Hero Section"
+                  name="doctorsHeroSubtitle"
+                  rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
+                >
+                  <TextArea 
+                    rows={2} 
+                    placeholder="Tìm kiếm và đặt lịch khám với hơn 200 bác sĩ chuyên khoa hàng đầu" 
+                  />
+                </Form.Item>
+
+                <Form.Item label="Ảnh nền Hero Section">
+                  <Upload
+                    showUploadList={false}
+                    accept="image/*"
+                    customRequest={async ({ file, onSuccess, onError }) => {
+                      try {
+                        setUploading(true);
+                        const formData = new FormData();
+                        formData.append('image', file);
+                        const response = await axios.post(`${API_BASE_URL}/images/articles`, formData, {
+                          headers: {
+                            'Content-Type': 'multipart/form-data',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                          }
+                        });
+                        const bgUrl = response.data.url || response.data.imageUrl || response.data;
+                        console.log('Doctors hero background uploaded:', bgUrl);
+                        setDoctorsHeroBackgroundPreview(bgUrl);
+                        message.success('Upload ảnh nền thành công! Nhớ click "Lưu thay đổi" để áp dụng.');
+                        onSuccess();
+                      } catch (error) {
+                        console.error('Upload error:', error);
+                        message.error('Lỗi khi upload: ' + error.message);
+                        onError(error);
+                      } finally {
+                        setUploading(false);
+                      }
+                    }}
+                  >
+                    <Button icon={<UploadOutlined />} loading={uploading}>
+                      {doctorsHeroBackgroundPreview ? 'Thay đổi ảnh nền' : 'Upload ảnh nền'}
+                    </Button>
+                  </Upload>
+                  <div style={{ marginTop: 8 }}>
+                    {doctorsHeroBackgroundPreview ? (
+                      <div>
+                        <img 
+                          key={doctorsHeroBackgroundPreview}
+                          src={doctorsHeroBackgroundPreview} 
+                          alt="Doctors Hero Background" 
+                          style={{ 
+                            width: '100%',
+                            maxWidth: 600,
+                            height: 200, 
+                            objectFit: 'cover', 
+                            borderRadius: 8, 
+                            border: '2px solid #1890ff',
+                            display: 'block'
+                          }} 
+                        />
+                        <div style={{ fontSize: 11, color: '#52c41a', marginTop: 4 }}>
+                          ✓ Ảnh nền đã upload
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 12, color: '#8c8c8c' }}>
+                        Chưa có ảnh nền (sẽ dùng gradient mặc định)
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ marginTop: 4, fontSize: 12, color: '#8c8c8c' }}>
+                    Ảnh nền cho hero section trang danh sách bác sĩ<br/>
+                    Khuyến nghị: Ảnh ngang, kích thước 1920x400px<br/>
+                    Nếu không upload ảnh, sẽ hiển thị gradient xanh mặc định
+                  </div>
+                </Form.Item>
+
+                <Form.Item>
+                  <Button type="primary" htmlType="submit" loading={loading}>
+                    Lưu thay đổi
                   </Button>
                 </Form.Item>
               </Form>
@@ -5645,6 +5785,9 @@ function AdminCMSPage() {
           </Menu.Item>
           <Menu.Item key="footer-settings" icon={<SettingOutlined />}>
             Footer
+          </Menu.Item>
+          <Menu.Item key="doctors-page-settings" icon={<UserOutlined />}>
+            Trang Bác sĩ
           </Menu.Item>
           <Menu.Item key="site-settings" icon={<SettingOutlined />}>
             Thông tin Website

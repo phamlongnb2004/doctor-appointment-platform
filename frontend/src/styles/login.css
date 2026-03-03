@@ -1,0 +1,269 @@
+/* Professional Login Page - Clean Corporate Design */
+
+.login-container {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+/* Left Panel - Branding */
+.login-left {
+  flex: 1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dark overlay for better text readability */
+.login-left::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 0;
+}
+
+.login-brand {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: white;
+}
+
+.brand-icon {
+  margin-bottom: 24px;
+  display: inline-block;
+}
+
+.login-brand h1 {
+  font-size: 48px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  color: white;
+  letter-spacing: 2px;
+}
+
+.login-brand p {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-weight: 300;
+}
+
+/* Right Panel - Form */
+.login-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  background: white;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 440px;
+}
+
+.login-header {
+  margin-bottom: 40px;
+}
+
+.login-header .ant-typography {
+  margin-bottom: 8px;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.login-header .ant-typography-secondary {
+  color: #666;
+  font-size: 15px;
+}
+
+/* Form Styling */
+.login-box .ant-form-item-label > label {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.login-box .ant-input,
+.login-box .ant-input-password {
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  font-size: 15px;
+}
+
+.login-box .ant-input-lg,
+.login-box .ant-input-password-large {
+  padding: 12px 16px;
+  height: 48px;
+  line-height: 24px;
+}
+
+.login-box .ant-input-affix-wrapper {
+  padding: 12px 16px;
+  height: 48px;
+  line-height: 24px;
+  align-items: center;
+}
+
+.login-box .ant-input-affix-wrapper > input.ant-input {
+  height: 24px;
+  line-height: 24px;
+  padding: 0;
+}
+
+.login-box .ant-input:hover,
+.login-box .ant-input-password:hover .ant-input,
+.login-box .ant-input-affix-wrapper:hover {
+  border-color: #0066FF;
+}
+
+.login-box .ant-input:focus,
+.login-box .ant-input-password:focus .ant-input,
+.login-box .ant-input-focused,
+.login-box .ant-input-password .ant-input:focus,
+.login-box .ant-input-affix-wrapper:focus,
+.login-box .ant-input-affix-wrapper-focused {
+  border-color: #0066FF;
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.1);
+}
+
+.login-box .ant-input-prefix {
+  color: #999;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.login-box .ant-input-suffix {
+  display: flex;
+  align-items: center;
+}
+
+/* Primary Button */
+.login-box .ant-btn-primary {
+  background: #0066FF;
+  border-color: #0066FF;
+  border-radius: 8px;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 102, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.login-box .ant-btn-primary:hover {
+  background: #0052CC;
+  border-color: #0052CC;
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.login-box .ant-btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Checkbox */
+.login-box .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #0066FF;
+  border-color: #0066FF;
+}
+
+.login-box .ant-checkbox-wrapper:hover .ant-checkbox-inner {
+  border-color: #0066FF;
+}
+
+/* Links */
+.login-box .ant-typography a,
+.login-box a.ant-typography {
+  color: #0066FF;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.login-box .ant-typography a:hover,
+.login-box a.ant-typography:hover {
+  color: #0052CC;
+}
+
+/* Footer */
+.login-footer {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.login-footer .ant-typography {
+  color: #666;
+}
+
+.login-back {
+  text-align: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.login-back a {
+  color: #666;
+  font-size: 14px;
+}
+
+.login-back a:hover {
+  color: #0066FF;
+}
+
+/* Form Validation */
+.login-box .ant-form-item-has-error .ant-input,
+.login-box .ant-form-item-has-error .ant-input-password .ant-input {
+  border-color: #ff4d4f;
+}
+
+.login-box .ant-form-item-has-error .ant-input:focus,
+.login-box .ant-form-item-has-error .ant-input-password .ant-input:focus {
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .login-left {
+    display: none;
+  }
+  
+  .login-right {
+    flex: 1;
+    padding: 40px 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .login-right {
+    padding: 24px 16px;
+  }
+  
+  .login-box {
+    max-width: 100%;
+  }
+  
+  .login-header {
+    margin-bottom: 32px;
+  }
+  
+  .login-brand h1 {
+    font-size: 36px;
+  }
+  
+  .login-brand p {
+    font-size: 16px;
+  }
+}

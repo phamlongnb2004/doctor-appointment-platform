@@ -76,4 +76,14 @@ public class SiteSettings {
     
     @Column(name = "bank_account_name", length = 255)
     private String bankAccountName; // Tên chủ tài khoản
+    
+    // Doctor List Page Hero Section
+    @Column(name = "doctors_hero_title", length = 255)
+    private String doctorsHeroTitle; // Tiêu đề trang doctors
+    
+    @Column(name = "doctors_hero_subtitle", length = 500)
+    private String doctorsHeroSubtitle; // Mô tả trang doctors
+    
+    @Column(name = "doctors_hero_background", length = 500)
+    private String doctorsHeroBackground; // URL ảnh nền hero section
 }

@@ -37,6 +37,9 @@ function AboutPage() {
     window.scrollTo(0, 0);
     fetchAboutData();
     
+    // Add class to html to hide scrollbar
+    document.documentElement.classList.add('about-page-active');
+    
     // Reset all sections animation state
     sectionsRef.current.forEach(section => {
       if (section) {
@@ -90,6 +93,8 @@ function AboutPage() {
     }, 100);
     
     return () => {
+      // Remove class from html when leaving page
+      document.documentElement.classList.remove('about-page-active');
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(timeoutId);
       observer.disconnect();

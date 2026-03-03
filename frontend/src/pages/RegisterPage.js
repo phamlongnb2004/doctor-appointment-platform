@@ -1,170 +1,133 @@
 import React, { useState } from 'react';
-import { Tabs, Form, Input, Button, Typography, Divider, Row, Col, message, Checkbox } from 'antd';
-import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, SafetyOutlined, MedicineBoxOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Typography, message } from 'antd';
+import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../services/api';
-import useFallingFlowers from '../hooks/useFallingFlowers';
-import '../styles/animations.css';
+import loginBackground from '../assets/login-background.jpg';
+import '../styles/login.css';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text, Link } = Typography;
 
 function RegisterPage() {
-  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const flowerContainerRef = useFallingFlowers({ maxPetals: 50 });
 
-  const handleRegister = async (values) => {
+  const onFinishRegister = async (values) => {
     setLoading(true);
     try {
-      // Only allow PATIENT registration
-      const userData = {
-        ...values,
+      await userAPI.register({
+        email: values.email,
+        password: values.password,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        phone: values.phone,
         role: 'PATIENT'
-      };
-      await userAPI.register(userData);
+      });
       message.success('Đăng ký thành công! Vui lòng đăng nhập.');
       navigate('/login');
     } catch (error) {
-      message.error(error.response?.data?.message || 'Đăng ký thất bại!');
+      message.error(error.response?.data?.error || 'Đăng ký thất bại!');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '40px 20px',
-      position: 'relative'
-    }}>
-      {/* Flower Animation Container */}
-      <div ref={flowerContainerRef} id="hoamaitet" />
-      
-      <div style={{ maxWidth: 500, width: '100%', position: 'relative', zIndex: 1 }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <MedicineBoxOutlined style={{ fontSize: 64, color: '#fff' }} />
-          <Title level={2} style={{ color: '#fff', marginTop: 16, marginBottom: 8 }}>
-            Doctor Appointment
-          </Title>
-          <Paragraph style={{ color: 'rgba(255,255,255,0.7)' }}>
-            Đăng ký để đặt lịch khám bác sĩ
-          </Paragraph>
+    <div className="login-container">
+      <div className="login-left" style={{ backgroundImage: `url(${loginBackground})` }}>
+        <div className="login-brand">
+          <div className="brand-icon">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <rect width="48" height="48" rx="12" fill="#0066FF"/>
+              <path d="M24 14v20M14 24h20" stroke="white" strokeWidth="3" strokeLinecap="round"/>
+            </svg>
+          </div>
+          <h1>KHAMNOW</h1>
+          <p>Hệ thống quản lý khám bệnh trực tuyến</p>
         </div>
+      </div>
 
-        {/* Register Card */}
-        <div className="glass-card" style={{ 
-          background: 'rgba(255,255,255,0.95)',
-          borderRadius: 20,
-          padding: '40px 32px',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-        }}>
-          <Title level={4} style={{ textAlign: 'center', marginBottom: 24 }}>Đăng Ký Tài Khoản</Title>
-          
-          <Form form={form} layout="vertical" onFinish={handleRegister} size="large">
-            <Row gutter={16}>
-              <Col xs={24} sm={12}>
-                <Form.Item
-                  name="firstName"
-                  rules={[{ required: true, message: 'Vui lòng nhập họ!' }]}
-                >
-                  <Input prefix={<UserOutlined />} placeholder="Họ" />
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={12}>
-                <Form.Item
-                  name="lastName"
-                  rules={[{ required: true, message: 'Vui lòng nhập tên!' }]}
-                >
-                  <Input prefix={<UserOutlined />} placeholder="Tên" />
-                </Form.Item>
-              </Col>
-            </Row>
+      <div className="login-right">
+        <div className="login-box">
+          <div className="login-header">
+            <Title level={3}>Tạo tài khoản</Title>
+            <Text type="secondary">Điền thông tin để tạo tài khoản mới</Text>
+          </div>
 
-            <Form.Item
-              name="email"
-              rules={[
-                { required: true, message: 'Vui lòng nhập email!' },
-                { type: 'email', message: 'Email không hợp lệ!' }
-              ]}
+          <Form name="register" onFinish={onFinishRegister} layout="vertical">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <Form.Item 
+                label="Họ" 
+                name="firstName" 
+                rules={[{ required: true, message: 'Nhập họ!' }]}
+              >
+                <Input prefix={<UserOutlined />} placeholder="Họ" size="large" />
+              </Form.Item>
+
+              <Form.Item 
+                label="Tên" 
+                name="lastName" 
+                rules={[{ required: true, message: 'Nhập tên!' }]}
+              >
+                <Input placeholder="Tên" size="large" />
+              </Form.Item>
+            </div>
+
+            <Form.Item 
+              label="Email" 
+              name="email" 
+              rules={[{ required: true, message: 'Nhập email!', type: 'email' }]}
             >
-              <Input prefix={<MailOutlined />} placeholder="Email" />
+              <Input prefix={<MailOutlined />} placeholder="your@email.com" size="large" />
             </Form.Item>
 
-            <Form.Item
-              name="phone"
-              rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
+            <Form.Item 
+              label="Số điện thoại" 
+              name="phone" 
+              rules={[{ required: true, message: 'Nhập số điện thoại!' }]}
             >
-              <Input prefix={<PhoneOutlined />} placeholder="Số điện thoại" />
+              <Input prefix={<PhoneOutlined />} placeholder="0123456789" size="large" />
             </Form.Item>
 
-            <Form.Item
-              name="password"
-              rules={[
-                { required: true, message: 'Vui lòng nhập mật khẩu!' },
-                { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' }
-              ]}
+            <Form.Item 
+              label="Mật khẩu" 
+              name="password" 
+              rules={[{ required: true, message: 'Nhập mật khẩu!', min: 6 }]}
             >
-              <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu" />
+              <Input.Password prefix={<LockOutlined />} placeholder="Tối thiểu 6 ký tự" size="large" />
             </Form.Item>
 
-            <Form.Item
-              name="confirmPassword"
-              dependencies={['password']}
+            <Form.Item 
+              label="Xác nhận mật khẩu" 
+              name="confirmPassword" 
+              dependencies={['password']} 
               rules={[
-                { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+                { required: true, message: 'Xác nhận mật khẩu!' },
                 ({ getFieldValue }) => ({
                   validator(_, value) {
-                    if (!value || getFieldValue('password') === value) {
-                      return Promise.resolve();
-                    }
+                    if (!value || getFieldValue('password') === value) return Promise.resolve();
                     return Promise.reject(new Error('Mật khẩu không khớp!'));
-                  },
-                }),
+                  }
+                })
               ]}
             >
-              <Input.Password prefix={<LockOutlined />} placeholder="Xác nhận mật khẩu" />
-            </Form.Item>
-
-            <Form.Item name="agreement" valuePropName="checked" rules={[
-              { validator: (_, value) => value ? Promise.resolve() : Promise.reject('Vui lòng đồng ý với điều khoản!') }
-            ]}>
-              <Checkbox>
-                Tôi đồng ý với <a href="#" onClick={(e) => e.preventDefault()}>điều khoản sử dụng</a>
-              </Checkbox>
+              <Input.Password prefix={<LockOutlined />} placeholder="Nhập lại mật khẩu" size="large" />
             </Form.Item>
 
             <Form.Item>
-              <Button 
-                type="primary" 
-                htmlType="submit" 
-                loading={loading} 
-                block 
-                style={{ 
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  border: 'none',
-                  height: 48,
-                  fontSize: 16,
-                  fontWeight: 600
-                }}
-              >
-                Đăng Ký Ngay
+              <Button type="primary" htmlType="submit" loading={loading} block size="large">
+                Đăng ký
               </Button>
             </Form.Item>
+
+            <div className="login-footer">
+              <Text type="secondary">Đã có tài khoản? </Text>
+              <Link onClick={() => navigate('/login')}>Đăng nhập</Link>
+            </div>
           </Form>
 
-          <Divider plain>hoặc</Divider>
-
-          <div style={{ textAlign: 'center' }}>
-            <Text type="secondary">Đã có tài khoản? </Text>
-            <Button type="link" onClick={() => navigate('/login')} style={{ padding: 0 }}>
-              Đăng nhập ngay
-            </Button>
+          <div className="login-back">
+            <Link onClick={() => navigate('/')}>← Quay về trang chủ</Link>
           </div>
         </div>
       </div>
