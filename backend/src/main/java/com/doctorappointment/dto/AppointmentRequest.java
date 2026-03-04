@@ -44,7 +44,7 @@ public class AppointmentRequest {
 
     public LocalDateTime getAppointmentDateTimeAsLocal() {
         return appointmentDateTime != null
-                ? LocalDateTime.ofInstant(appointmentDateTime, ZoneId.systemDefault())
+                ? LocalDateTime.ofInstant(appointmentDateTime, ZoneId.of("Asia/Ho_Chi_Minh"))
                 : null;
     }
 }

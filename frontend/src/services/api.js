@@ -56,6 +56,10 @@ export const userAPI = {
     });
   },
   
+  changePassword: (id, passwordData) => {
+    return api.post(`/users/${id}/change-password`, passwordData);
+  },
+  
   // Admin only endpoints
   getUserStats: () => api.get('/users/stats'),
   getAllDoctors: () => api.get('/users/doctors'),
@@ -73,6 +77,7 @@ export const userAPI = {
 export const doctorAPI = {
   getAllDoctors: () => api.get('/doctors'),
   getDoctorById: (id) => api.get(`/doctors/${id}`),
+  getDoctorByUserId: (userId) => api.get(`/doctors/user/${userId}`),
   getActiveDoctors: () => api.get('/doctors/active/all'),
   getDoctorsBySpecialization: (specialization) =>
     api.get(`/doctors/specialization/${specialization}`),
@@ -91,6 +96,7 @@ export const appointmentAPI = {
   getAppointmentsByStatus: (status) => api.get(`/appointments/status/${status}`),
   updateAppointment: (id, appointmentData) => api.put(`/appointments/${id}`, appointmentData),
   updateAppointmentStatus: (id, status) => api.put(`/appointments/${id}/status`, { status }),
+  confirmAppointment: (id) => api.put(`/appointments/${id}/confirm`),
   cancelAppointment: (id) => api.put(`/appointments/${id}/cancel`),
   deleteAppointment: (id) => api.delete(`/appointments/${id}`),
 };
@@ -104,6 +110,16 @@ export const reviewAPI = {
   getReviewsByPatient: (patientId) => api.get(`/reviews/patient/${patientId}`),
   updateReview: (id, reviewData) => api.put(`/reviews/${id}`, reviewData),
   deleteReview: (id) => api.delete(`/reviews/${id}`),
+};
+
+// Notification API
+export const notificationAPI = {
+  getUserNotifications: (userId) => api.get(`/notifications/user/${userId}`),
+  getUnreadNotifications: (userId) => api.get(`/notifications/user/${userId}/unread`),
+  getUnreadCount: (userId) => api.get(`/notifications/user/${userId}/unread-count`),
+  markAsRead: (id) => api.put(`/notifications/${id}/read`),
+  markAllAsRead: (userId) => api.put(`/notifications/user/${userId}/read-all`),
+  deleteNotification: (id) => api.delete(`/notifications/${id}`),
 };
 
 export default api;

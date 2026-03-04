@@ -8,6 +8,7 @@ import RegisterPage from './pages/RegisterPage';
 import DoctorListPage from './pages/DoctorListPage';
 import DoctorDetailPage from './pages/DoctorDetailPage';
 import AppointmentPage from './pages/AppointmentPage';
+import AppointmentsListPage from './pages/AppointmentsListPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminDashboard from './pages/AdminDashboard';
 import ChatPage from './pages/ChatPage';
@@ -67,8 +68,12 @@ function AppContent({ user, isAuthenticated, handleLogin, handleLogout, handleUs
           
           {/* Protected Routes */}
           <Route
-            path="/appointments"
+            path="/appointment"
             element={isAuthenticated ? <AppointmentPage user={user} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/appointments"
+            element={isAuthenticated ? <AppointmentsListPage user={user} /> : <Navigate to="/login" />}
           />
           <Route
             path="/profile"

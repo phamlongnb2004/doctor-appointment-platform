@@ -12,9 +12,10 @@ import {
   MenuOutlined,
   CloseOutlined,
   RightOutlined,
-  ShoppingCartOutlined
+  ShoppingCartOutlined,
+  BellOutlined
 } from '@ant-design/icons';
-import { userAPI } from '../services/api';
+import { userAPI, notificationAPI } from '../services/api';
 import webSocketService from '../services/websocket';
 import cmsAPI from '../services/cmsApi';
 import { useCart } from '../contexts/CartContext';
@@ -28,10 +29,19 @@ function HeaderComponent({ user, onLogout }) {
   const [siteSettings, setSiteSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [displayedCount, setDisplayedCount] = useState(5); // Show 5 initially
 
   useEffect(() => {
     fetchSiteSettings();
-  }, []);
+    if (user) {
+      fetchNotifications();
+      // Poll for new notifications every 30 seconds
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   // Helper function to check if menu item is active
   const isActive = (path) => {
@@ -57,6 +67,54 @@ function HeaderComponent({ user, onLogout }) {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchNotifications = async () => {
+    if (!user) return;
+    try {
+      const response = await notificationAPI.getUnreadCount(user.id);
+      setUnreadCount(response.data.count || 0);
+      
+      // Fetch ALL recent notifications (not just unread) for dropdown
+      const notifResponse = await notificationAPI.getUserNotifications(user.id);
+      setNotifications(notifResponse.data); // Store all notifications
+      setDisplayedCount(5); // Reset to show 5 when fetching new data
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
+  const handleLoadMore = () => {
+    setDisplayedCount(prev => Math.min(prev + 5, notifications.length));
+  };
+
+  const handleNotificationClick = async (notification) => {
+    try {
+      // Mark as read if not already read
+      if (!notification.isRead) {
+        await notificationAPI.markAsRead(notification.id);
+        // Update unread count
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+      
+      // Navigate to related content
+      if (notification.relatedType === 'APPOINTMENT' && notification.relatedId) {
+        navigate(`/appointments`);
+      }
+    } catch (error) {
+      console.error('Error handling notification:', error);
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await notificationAPI.markAllAsRead(user.id);
+      fetchNotifications();
+      message.success('Đã đánh dấu tất cả là đã đọc');
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+      message.error('Có lỗi xảy ra');
     }
   };
 
@@ -89,6 +147,11 @@ function HeaderComponent({ user, onLogout }) {
       icon: <UserOutlined />,
       label: 'Hồ sơ của tôi',
       onClick: () => navigate('/profile'),
+    },
+    {
+      key: 'book-appointment',
+      label: 'Đặt lịch khám',
+      onClick: () => navigate('/appointment'),
     },
     {
       key: 'appointments',
@@ -127,6 +190,87 @@ function HeaderComponent({ user, onLogout }) {
     label: 'Đăng xuất',
     onClick: handleLogout,
   });
+
+  // Notification menu items
+  const displayedNotifications = notifications.slice(0, displayedCount);
+  const hasMore = displayedCount < notifications.length;
+  
+  const notificationMenuItems = notifications.length > 0 ? [
+    ...displayedNotifications.map((notif) => ({
+      key: `notif-${notif.id}`,
+      label: (
+        <div 
+          onClick={() => handleNotificationClick(notif)} 
+          style={{ 
+            width: 320,
+            backgroundColor: notif.isRead ? 'transparent' : '#e6f7ff',
+            padding: '12px',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            transition: 'background 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            if (notif.isRead) e.currentTarget.style.backgroundColor = '#f5f5f5';
+          }}
+          onMouseLeave={(e) => {
+            if (notif.isRead) e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        >
+          <div style={{ 
+            fontWeight: notif.isRead ? 500 : 600, 
+            fontSize: 13, 
+            marginBottom: 4,
+            color: notif.isRead ? '#595959' : '#262626'
+          }}>
+            {notif.title}
+          </div>
+          <div style={{ fontSize: 12, color: '#8c8c8c', marginBottom: 4 }}>{notif.message}</div>
+          <div style={{ fontSize: 11, color: '#bfbfbf' }}>
+            {new Date(notif.createdAt).toLocaleString('vi-VN')}
+          </div>
+        </div>
+      ),
+    })),
+    ...(hasMore ? [{
+      key: 'load-more',
+      label: (
+        <div 
+          style={{ 
+            textAlign: 'center', 
+            color: '#1890ff', 
+            cursor: 'pointer',
+            padding: '8px 0',
+            fontWeight: 500
+          }} 
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            handleLoadMore();
+          }}
+        >
+          Xem thêm ({notifications.length - displayedCount} thông báo)
+        </div>
+      ),
+    }] : []),
+    { type: 'divider' },
+    {
+      key: 'mark-all-read',
+      label: (
+        <div style={{ textAlign: 'center', color: '#1890ff', cursor: 'pointer', padding: '4px 0' }} onClick={handleMarkAllRead}>
+          Đánh dấu tất cả là đã đọc
+        </div>
+      ),
+    },
+  ] : [
+    {
+      key: 'no-notifications',
+      label: (
+        <div style={{ textAlign: 'center', color: '#8c8c8c', padding: '20px 0', width: 320 }}>
+          Không có thông báo
+        </div>
+      ),
+    },
+  ];
 
   // Don't render until settings are loaded
   if (loading || !siteSettings) {
@@ -255,6 +399,36 @@ function HeaderComponent({ user, onLogout }) {
                 }}
               />
             </Badge>
+
+            {/* Notification Bell */}
+            {user && (
+              <Dropdown 
+                menu={{ 
+                  items: notificationMenuItems,
+                  style: { 
+                    maxHeight: 500, 
+                    overflowY: 'auto',
+                    padding: 0
+                  }
+                }} 
+                trigger={['click']} 
+                placement="bottomRight"
+                overlayStyle={{ maxHeight: 500 }}
+              >
+                <Badge count={unreadCount} offset={[-2, 2]} size="small">
+                  <Button
+                    icon={<BellOutlined />}
+                    style={{
+                      border: '1px solid #d9d9d9',
+                      borderRadius: 4,
+                      height: 26,
+                      padding: '0 8px',
+                      fontSize: 14
+                    }}
+                  />
+                </Badge>
+              </Dropdown>
+            )}
 
             {/* Post Article Button */}
             {canPostArticle && (

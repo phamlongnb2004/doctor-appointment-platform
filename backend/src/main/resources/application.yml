@@ -8,6 +8,7 @@ spring:
       write-dates-as-timestamps: false
     deserialization:
       fail-on-unknown-properties: false
+    time-zone: Asia/Ho_Chi_Minh
 
   datasource:
     url: jdbc:mysql://localhost:3306/doctor_appointment_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useUnicode=true

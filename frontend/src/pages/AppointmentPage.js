@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Input, Button, DatePicker, Select, Row, Col, Typography, message, Avatar, Rate, Space } from 'antd';
-import { UserOutlined, CalendarOutlined, ClockCircleOutlined, CheckCircleOutlined, PhoneOutlined, MailOutlined } from '@ant-design/icons';
+import { Card, Form, Input, Button, DatePicker, Select, Row, Col, Typography, message, Avatar, Rate } from 'antd';
+import { UserOutlined, CalendarOutlined, ClockCircleOutlined, PhoneOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { doctorAPI, appointmentAPI } from '../services/api';
 import '../styles/appointment.css';
@@ -44,22 +44,62 @@ function AppointmentPage({ user }) {
       navigate('/login');
       return;
     }
+    
+    // Validate time slot
+    if (!values.time) {
+      message.error('Vui lòng chọn khung giờ khám!');
+      return;
+    }
+    
     setSubmitLoading(true);
     try {
+      // Parse time slot to get hour
+      const timeSlot = values.time; // e.g., "08:00 - 09:00"
+      const startTime = timeSlot.split(' - ')[0]; // "08:00"
+      const [hour, minute] = startTime.split(':');
+      
+      if (!hour || !minute) {
+        message.error('Khung giờ không hợp lệ!');
+        setSubmitLoading(false);
+        return;
+      }
+      
+      // Combine date and time - create new date object
+      const selectedDate = values.date.toDate(); // Convert to native Date
+      const [hourNum, minuteNum] = [parseInt(hour), parseInt(minute)];
+      
+      // Create new Date with correct time
+      const appointmentDateTime = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate(),
+        hourNum,
+        minuteNum,
+        0,
+        0
+      );
+      
+      console.log('Time slot selected:', timeSlot);
+      console.log('Parsed hour:', hourNum, 'minute:', minuteNum);
+      console.log('Selected date:', selectedDate);
+      console.log('Appointment DateTime:', appointmentDateTime);
+      console.log('ISO String:', appointmentDateTime.toISOString());
+      
       const appointmentData = {
         patientId: user.id,
         doctorId: values.doctor,
-        appointmentDate: values.date.format('YYYY-MM-DD'),
-        timeSlot: values.time,
-        notes: values.notes || '',
-        status: 'PENDING'
+        appointmentDateTime: appointmentDateTime.toISOString(),
+        reason: values.notes || '',
+        notes: values.notes || ''
       };
+      
       await appointmentAPI.createAppointment(appointmentData);
       message.success('Đặt lịch thành công! Vui lòng chờ bác sĩ xác nhận.');
       form.resetFields();
       setSelectedDoctor(null);
     } catch (error) {
-      message.error(error.response?.data?.message || 'Đặt lịch thất bại!');
+      console.error('Error creating appointment:', error);
+      message.error(error.response?.data?.error || 'Đặt lịch thất bại!');
     } finally {
       setSubmitLoading(false);
     }
@@ -80,7 +120,7 @@ function AppointmentPage({ user }) {
 
         <Row gutter={[24, 24]}>
           <Col xs={24} lg={16}>
-            <Card className="appointment-form-card" bordered={false}>
+            <Card className="appointment-form-card" variant="outlined">
               <div className="ant-card-head">
                 <div className="ant-card-head-title">Thông tin đặt lịch</div>
               </div>
@@ -203,7 +243,7 @@ function AppointmentPage({ user }) {
           </Col>
 
           <Col xs={24} lg={8}>
-            <Card className="doctor-info-card" bordered={false}>
+            <Card className="doctor-info-card" variant="outlined">
               <div className="ant-card-head">
                 <div className="ant-card-head-title">Thông tin bác sĩ</div>
               </div>
@@ -247,7 +287,7 @@ function AppointmentPage({ user }) {
               )}
             </Card>
 
-            <Card className="guide-card" bordered={false}>
+            <Card className="guide-card" variant="outlined">
               <div className="ant-card-head">
                 <div className="ant-card-head-title">Hướng dẫn</div>
               </div>

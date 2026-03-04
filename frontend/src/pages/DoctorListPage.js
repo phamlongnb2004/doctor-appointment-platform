@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Button, Input, Select, Avatar, Spin } from 'antd';
-import { UserOutlined, SearchOutlined, PhoneOutlined, StarOutlined, CalendarOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { UserOutlined, SearchOutlined, StarOutlined, CalendarOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { doctorAPI } from '../services/api';
 import ChatButton from '../components/ChatButton';
@@ -152,10 +152,11 @@ function DoctorListPage() {
               <Button 
                 size="large"
                 block
-                icon={<PhoneOutlined />}
+                icon={<CalendarOutlined />}
                 className="doctors-action-btn doctors-action-btn-primary"
+                onClick={() => navigate('/appointment')}
               >
-                Hotline: 1900-1234
+                Đặt lịch khám nhanh
               </Button>
             </Col>
           </Row>

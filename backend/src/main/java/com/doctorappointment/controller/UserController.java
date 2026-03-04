@@ -508,4 +508,42 @@ public class UserController {
                 "timestamp", java.time.LocalDateTime.now().toString()
         ));
     }
+
+    /**
+     * Change password endpoint
+     */
+    @PostMapping("/{id}/change-password")
+    public ResponseEntity<?> changePassword(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> passwordRequest) {
+        try {
+            String currentPassword = passwordRequest.get("currentPassword");
+            String newPassword = passwordRequest.get("newPassword");
+
+            if (currentPassword == null || newPassword == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng nhập đầy đủ thông tin"));
+            }
+
+            if (newPassword.length() < 6) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu mới phải có ít nhất 6 ký tự"));
+            }
+
+            User user = userService.getUserById(id)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+            // Verify current password
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu hiện tại không đúng"));
+            }
+
+            // Update password
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userService.updateUser(id, user);
+
+            return ResponseEntity.ok(Map.of("message", "Đổi mật khẩu thành công"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Đổi mật khẩu thất bại: " + e.getMessage()));
+        }
+    }
 }

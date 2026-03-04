@@ -84,6 +84,16 @@ public class AppointmentController {
         }
     }
 
+    @PutMapping("/{id}/confirm")
+    public ResponseEntity<?> confirmAppointment(@PathVariable Long id) {
+        try {
+            Appointment updatedAppointment = appointmentService.updateAppointmentStatus(id, AppointmentStatus.CONFIRMED);
+            return ResponseEntity.ok(updatedAppointment);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PutMapping("/{id}/cancel")
     public ResponseEntity<?> cancelAppointment(@PathVariable Long id) {
         try {

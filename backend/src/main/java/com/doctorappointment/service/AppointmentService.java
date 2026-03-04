@@ -20,6 +20,7 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
     private final DoctorRepository doctorRepository;
+    private final NotificationService notificationService;
 
     public Appointment createAppointment(AppointmentRequest request) {
         User patient = userRepository.findById(request.getPatientId())
@@ -40,7 +41,19 @@ public class AppointmentService {
                 .notes(request.getNotes())
                 .status(AppointmentStatus.PENDING)
                 .build();
-        return appointmentRepository.save(appointment);
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+        
+        // Create notification for doctor
+        notificationService.createNotification(
+            doctor.getUser().getId(),
+            "APPOINTMENT_BOOKED",
+            "Lịch hẹn mới",
+            "Bệnh nhân " + patient.getFirstName() + " " + patient.getLastName() + " đã đặt lịch khám",
+            savedAppointment.getId(),
+            "APPOINTMENT"
+        );
+        
+        return savedAppointment;
     }
 
     public Optional<Appointment> getAppointmentById(Long id) {
@@ -69,8 +82,24 @@ public class AppointmentService {
 
     public Appointment updateAppointmentStatus(Long id, AppointmentStatus status) {
         return appointmentRepository.findById(id).map(appointment -> {
+            AppointmentStatus oldStatus = appointment.getStatus();
             appointment.setStatus(status);
-            return appointmentRepository.save(appointment);
+            Appointment updatedAppointment = appointmentRepository.save(appointment);
+            
+            // Create notification for patient when doctor confirms
+            if (status == AppointmentStatus.CONFIRMED && oldStatus != AppointmentStatus.CONFIRMED) {
+                notificationService.createNotification(
+                    appointment.getPatient().getId(),
+                    "APPOINTMENT_CONFIRMED",
+                    "Lịch hẹn đã được xác nhận",
+                    "Bác sĩ " + appointment.getDoctor().getUser().getFirstName() + " " + 
+                    appointment.getDoctor().getUser().getLastName() + " đã xác nhận lịch khám của bạn",
+                    updatedAppointment.getId(),
+                    "APPOINTMENT"
+                );
+            }
+            
+            return updatedAppointment;
         }).orElseThrow(() -> new RuntimeException("Appointment not found"));
     }
 

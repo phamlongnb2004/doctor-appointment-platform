@@ -1,5 +1,6 @@
 package com.doctorappointment.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -19,6 +20,7 @@ public class Appointment {
     private Doctor doctor;
 
     @Column(nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime appointmentDateTime;
 
     @Column(nullable = false)
