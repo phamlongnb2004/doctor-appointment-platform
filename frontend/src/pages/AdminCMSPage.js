@@ -2798,7 +2798,7 @@ function AdminCMSPage() {
               name="name"
               label="Tên section (slug)"
               rules={[{ required: true, message: 'Vui lòng nhập tên section' }]}
-              extra="Ví dụ: featured, medlatec, health (không dấu, viết thường)"
+              extra="Ví dụ: featured, khamnow, health (không dấu, viết thường)"
             >
               <Input placeholder="featured" />
             </Form.Item>
@@ -4951,7 +4951,7 @@ function AdminCMSPage() {
                   label="Email"
                   name="email"
                 >
-                  <Input placeholder="info@medlatec.vn" />
+                  <Input placeholder="info@khamnow.vn" />
                 </Form.Item>
 
                 <Form.Item

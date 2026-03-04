@@ -5,7 +5,7 @@ import cmsAPI from '../services/cmsApi';
 
 function Footer() {
   const [siteSettings, setSiteSettings] = useState({
-    siteName: 'MEDLATEC',
+    siteName: 'KHAMNOW',
     hotline: '19005656',
     email: '',
     address: '',
@@ -14,7 +14,7 @@ function Footer() {
     footerFacebookUrl: '',
     footerYoutubeUrl: '',
     footerZaloUrl: '',
-    footerCopyrightText: 'Copyright © 2024 MEDLATEC. All rights reserved.'
+    footerCopyrightText: 'Copyright © 2024 KHAMNOW. All rights reserved.'
   });
 
   useEffect(() => {

@@ -25,7 +25,7 @@ function CheckoutPage() {
     bankId: 'MB',
     bankName: 'MB Bank',
     accountNo: '0123456789',
-    accountName: 'MEDLATEC'
+    accountName: 'KHAMNOW'
   });
   
   // Address data (API v2 - sau sát nhập tỉnh, chỉ còn Province → Ward)
@@ -75,7 +75,7 @@ function CheckoutPage() {
             bankId: settings.bankId,
             bankName: settings.bankName || 'MB Bank',
             accountNo: settings.bankAccountNo,
-            accountName: settings.bankAccountName || 'MEDLATEC'
+            accountName: settings.bankAccountName || 'KHAMNOW'
           });
         }
       } catch (error) {
@@ -129,7 +129,7 @@ function CheckoutPage() {
     const template = 'compact'; // Template QR
     
     // Nội dung chuyển khoản
-    const description = `MEDLATEC ${orderNumber}`;
+    const description = `KHAMNOW ${orderNumber}`;
     
     // Tạo URL QR code sử dụng VietQR API
     const qrUrl = `https://img.vietqr.io/image/${bankInfo.bankId}-${bankInfo.accountNo}-${template}.png?amount=${amount}&addInfo=${encodeURIComponent(description)}&accountName=${encodeURIComponent(bankInfo.accountName)}`;
@@ -656,7 +656,7 @@ function CheckoutPage() {
             <div>
               <span style={{ color: '#8c8c8c' }}>Nội dung:</span>
               <span style={{ fontWeight: 600, marginLeft: 8, color: '#1890ff' }}>
-                MEDLATEC {orderData?.orderNumber}
+                KHAMNOW {orderData?.orderNumber}
               </span>
             </div>
           </div>

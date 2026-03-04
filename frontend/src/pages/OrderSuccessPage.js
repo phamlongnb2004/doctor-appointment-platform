@@ -322,7 +322,7 @@ function OrderSuccessPage() {
               Hotline: 19005656
             </div>
             <div style={{ color: '#8c8c8c' }}>
-              Email: support@medlatec.vn
+              Email: support@khamnow.vn
             </div>
           </div>
         </Card>
