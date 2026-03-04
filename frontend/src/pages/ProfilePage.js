@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, Form, Input, Button, message, Avatar, Upload, Divider, Tag, Row, Col, Typography, Spin, Modal } from 'antd';
+import { Card, Form, Input, Button, message, Avatar, Upload, Divider, Tag, Row, Col, Typography, Spin, Modal, Select } from 'antd';
 import { UploadOutlined, UserOutlined, PictureOutlined, CameraOutlined, MedicineBoxOutlined, CalendarOutlined, LockOutlined } from '@ant-design/icons';
-import { userAPI, appointmentAPI } from '../services/api';
+import { userAPI, appointmentAPI, doctorAPI } from '../services/api';
 import useFallingFlowers from '../hooks/useFallingFlowers';
 import '../styles/animations.css';
 
 const { Title, Text, Paragraph } = Typography;
+const { Option } = Select;
 
 function ProfilePage({ user, onUserUpdate }) {
   const [form] = Form.useForm();
@@ -19,13 +20,41 @@ function ProfilePage({ user, onUserUpdate }) {
   const [appointmentsLoading, setAppointmentsLoading] = useState(true);
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [specialties, setSpecialties] = useState([]);
+  const [doctorInfo, setDoctorInfo] = useState(null);
   const flowerContainerRef = useFallingFlowers(15);
 
   useEffect(() => {
     if (user) {
       fetchAppointments();
+      fetchSpecialties();
+      if (user.role === 'DOCTOR') {
+        fetchDoctorInfo();
+      }
     }
   }, [user]);
+
+  const fetchSpecialties = async () => {
+    try {
+      const response = await doctorAPI.getSpecialties();
+      setSpecialties(response.data || []);
+    } catch (error) {
+      console.error('Error fetching specialties:', error);
+    }
+  };
+
+  const fetchDoctorInfo = async () => {
+    try {
+      const response = await doctorAPI.getDoctorByUserId(user.id);
+      setDoctorInfo(response.data);
+      // Set specialization in form
+      form.setFieldsValue({
+        specialization: response.data.specialization
+      });
+    } catch (error) {
+      console.error('Error fetching doctor info:', error);
+    }
+  };
 
   const fetchAppointments = async () => {
     setAppointmentsLoading(true);
@@ -48,12 +77,27 @@ function ProfilePage({ user, onUserUpdate }) {
     setLoading(true);
     try {
       await userAPI.updateUser(user.id, values);
+      
+      // If user is doctor and specialization changed, update doctor info
+      if (user.role === 'DOCTOR' && doctorInfo && values.specialization) {
+        await doctorAPI.updateDoctor(doctorInfo.id, {
+          ...doctorInfo,
+          specialization: values.specialization
+        });
+      }
+      
       message.success('Cập nhật thông tin thành công!');
       if (onUserUpdate) {
         onUserUpdate({ ...user, ...values });
       }
+      
+      // Refresh doctor info if needed
+      if (user.role === 'DOCTOR') {
+        fetchDoctorInfo();
+      }
     } catch (error) {
-      message.error('Cập nhật thất bại!');
+      console.error('Error updating profile:', error);
+      message.error('Cập nhật thông tin thất bại!');
     } finally {
       setLoading(false);
     }
@@ -319,6 +363,31 @@ function ProfilePage({ user, onUserUpdate }) {
                 <Form.Item label="Số điện thoại" name="phone">
                   <Input className="input-beautiful" placeholder="Nhập số điện thoại" />
                 </Form.Item>
+                
+                {/* Specialty selection for doctors */}
+                {user?.role === 'DOCTOR' && (
+                  <Form.Item 
+                    label="Chuyên khoa" 
+                    name="specialization"
+                    rules={[{ required: true, message: 'Vui lòng chọn chuyên khoa!' }]}
+                  >
+                    <Select 
+                      placeholder="Chọn chuyên khoa"
+                      size="large"
+                      showSearch
+                      filterOption={(input, option) =>
+                        (option?.label || '').toLowerCase().indexOf(input.toLowerCase()) >= 0
+                      }
+                    >
+                      {specialties.map(specialty => (
+                        <Option key={specialty.id} value={specialty.name} label={specialty.name}>
+                          {specialty.name}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                )}
+                
                 <Form.Item label="Vai trò">
                   <Tag color={getRoleTagColor(user?.role)} style={{ fontSize: 14, padding: '4px 12px' }}>
                     {getRoleDisplayName(user?.role)}

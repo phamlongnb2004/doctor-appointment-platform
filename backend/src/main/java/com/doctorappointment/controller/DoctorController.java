@@ -1,6 +1,8 @@
 package com.doctorappointment.controller;
 
 import com.doctorappointment.model.Doctor;
+import com.doctorappointment.model.Specialty;
+import com.doctorappointment.repository.SpecialtyRepository;
 import com.doctorappointment.service.DoctorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class DoctorController {
     private final DoctorService doctorService;
+    private final SpecialtyRepository specialtyRepository;
 
     @PostMapping
     public ResponseEntity<?> createDoctor(@RequestBody Doctor doctor) {
@@ -57,6 +60,11 @@ public class DoctorController {
     @GetMapping("/specialization/{specialization}")
     public ResponseEntity<List<Doctor>> getDoctorsBySpecialization(@PathVariable String specialization) {
         return ResponseEntity.ok(doctorService.getDoctorsBySpecialization(specialization));
+    }
+
+    @GetMapping("/specialties")
+    public ResponseEntity<List<Specialty>> getAllSpecialties() {
+        return ResponseEntity.ok(specialtyRepository.findByIsActiveTrueOrderByDisplayOrderAsc());
     }
 
     @PutMapping("/{id}")

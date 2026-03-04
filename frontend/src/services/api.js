@@ -81,6 +81,7 @@ export const doctorAPI = {
   getActiveDoctors: () => api.get('/doctors/active/all'),
   getDoctorsBySpecialization: (specialization) =>
     api.get(`/doctors/specialization/${specialization}`),
+  getSpecialties: () => api.get('/doctors/specialties'),
   createDoctor: (doctorData) => api.post('/doctors', doctorData),
   updateDoctor: (id, doctorData) => api.put(`/doctors/${id}`, doctorData),
   deleteDoctor: (id) => api.delete(`/doctors/${id}`),
