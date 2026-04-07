@@ -7,8 +7,8 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
-    show-sql: true
+      ddl-auto: validate  # Changed from create - tables already exist
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -16,6 +16,11 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+        format_sql: true
+        use_sql_comments: true
+        # Disable foreign key constraints during table creation
+        hbm2ddl:
+          auto: create
         # Dialect will be auto-detected, no need to specify
         connection:
           characterEncoding: utf-8
