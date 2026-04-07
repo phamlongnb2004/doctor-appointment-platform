@@ -220,18 +220,9 @@ function CheckoutPage() {
       const order = response.data;
       setOrderData(order);
 
-      // Nếu chọn chuyển khoản ngân hàng, hiển thị QR code
-      if (paymentMethod === 'BANK_TRANSFER' || paymentMethod === 'MOMO') {
-        const qrUrl = generateQRCode(order.orderNumber, order.finalAmount);
-        setQrCodeUrl(qrUrl);
-        setQrModalVisible(true);
-        setCheckingPayment(true);
-        message.info('Vui lòng quét mã QR để thanh toán');
-      } else {
-        // COD - chuyển thẳng đến trang success
-        message.success('Đặt hàng thành công!');
-        navigate(`/order-success/${order.orderNumber}`);
-      }
+      // COD - chuyển thẳng đến trang success
+      message.success('Đặt hàng thành công!');
+      navigate(`/order-success/${order.orderNumber}`);
     } catch (error) {
       console.error('Checkout error:', error);
       message.error('Lỗi khi đặt hàng. Vui lòng thử lại!');
@@ -450,27 +441,11 @@ function CheckoutPage() {
                       </div>
                     </Radio>
                   </div>
-                  <div style={{ marginBottom: 16 }}>
+                  <div>
                     <Radio value="SEPAY" style={{ fontSize: 16 }}>
                       <strong>🏦 Thanh toán qua SePay</strong>
                       <div style={{ color: '#8c8c8c', fontSize: 14, marginTop: 4 }}>
                         Thanh toán an toàn qua cổng SePay (Chuyển khoản ngân hàng, Ví điện tử)
-                      </div>
-                    </Radio>
-                  </div>
-                  <div style={{ marginBottom: 16 }}>
-                    <Radio value="BANK_TRANSFER" style={{ fontSize: 16 }}>
-                      <strong>Chuyển khoản ngân hàng (QR Code)</strong>
-                      <div style={{ color: '#8c8c8c', fontSize: 14, marginTop: 4 }}>
-                        Chuyển khoản trực tiếp vào tài khoản ngân hàng
-                      </div>
-                    </Radio>
-                  </div>
-                  <div>
-                    <Radio value="MOMO" style={{ fontSize: 16 }}>
-                      <strong>Ví MoMo (QR Code)</strong>
-                      <div style={{ color: '#8c8c8c', fontSize: 14, marginTop: 4 }}>
-                        Thanh toán qua ví điện tử MoMo
                       </div>
                     </Radio>
                   </div>
