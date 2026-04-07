@@ -50,10 +50,11 @@ public class SePayService {
             
             requestData.put("errorUrl", errorUrl);
             requestData.put("merchantId", sePayConfig.getMerchantId());
-            requestData.put("operation", "PURCHASE"); // QUAN TRỌNG: Thiếu field này
+            requestData.put("operation", "PURCHASE");
             requestData.put("orderAmount", order.getFinalAmount().setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
             requestData.put("orderDescription", "Thanh toan don hang " + order.getOrderNumber());
             requestData.put("orderInvoiceNumber", order.getOrderNumber());
+            requestData.put("paymentMethod", "BANK_TRANSFER"); // Theo tài liệu Node.js SDK
             requestData.put("successUrl", successUrl);
             
             // Generate signature

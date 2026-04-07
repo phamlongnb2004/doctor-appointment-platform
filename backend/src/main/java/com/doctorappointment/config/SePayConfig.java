@@ -15,7 +15,7 @@ public class SePayConfig {
     @Value("${sepay.env:sandbox}")
     private String environment;
     
-    @Value("${sepay.checkout-url:https://sandbox.sepay.vn/v1/checkout/init}")
+    @Value("${sepay.checkout-url:https://pay.sepay.vn/v1/checkout/init}")
     private String checkoutUrl;
     
     @Value("${sepay.ipn-url}")

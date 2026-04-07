@@ -85,6 +85,7 @@ function SePayCheckoutPage() {
         <input type="hidden" name="orderAmount" value={sePayResponse.orderAmount} />
         <input type="hidden" name="currency" value={sePayResponse.currency} />
         <input type="hidden" name="orderDescription" value={sePayResponse.orderDescription} />
+        <input type="hidden" name="paymentMethod" value={sePayResponse.paymentMethod} />
         <input type="hidden" name="successUrl" value={sePayResponse.successUrl} />
         <input type="hidden" name="errorUrl" value={sePayResponse.errorUrl} />
         <input type="hidden" name="cancelUrl" value={sePayResponse.cancelUrl} />

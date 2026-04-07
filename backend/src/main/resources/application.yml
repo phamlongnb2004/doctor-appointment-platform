@@ -86,7 +86,7 @@ sepay:
   merchant-id: SP-TEST-PT873684
   secret-key: spsk_test_YtN9NC2N9adiW58jM8CUnBNd95pVtZUK
   env: sandbox
-  checkout-url: https://sandbox.sepay.vn/v1/checkout/init
+  checkout-url: https://pay.sepay.vn/v1/checkout/init
   ipn-url: http://localhost:8080/api/orders/sepay/ipn
 
 logging:

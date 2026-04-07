@@ -7,7 +7,8 @@ Thanh toán SePay bị lỗi 500 khi submit form
 So sánh với tài liệu chính thức của SePay, phát hiện các lỗi sau:
 
 1. **Thiếu field `operation`**: Theo tài liệu SePay, field này là BẮT BUỘC với giá trị `'PURCHASE'`
-2. **Sai tên field**: Tài liệu SePay sử dụng **camelCase** nhưng code đang dùng **snake_case**
+2. **Thiếu field `paymentMethod`**: Theo tài liệu Node.js SDK mới nhất, field này là BẮT BUỘC với giá trị `'BANK_TRANSFER'`
+3. **Sai tên field**: Tài liệu SePay sử dụng **camelCase** nhưng code đang dùng **snake_case**
    - ❌ `order_invoice_number` → ✅ `orderInvoiceNumber`
    - ❌ `order_amount` → ✅ `orderAmount`
    - ❌ `order_description` → ✅ `orderDescription`
@@ -18,15 +19,15 @@ So sánh với tài liệu chính thức của SePay, phát hiện các lỗi sa
    - ❌ `customer_name` → ✅ `customerName`
    - ❌ `customer_email` → ✅ `customerEmail`
    - ❌ `customer_phone` → ✅ `customerPhone`
-3. **Xóa field không cần thiết**: `payment_method` không có trong tài liệu SePay
+   - ❌ `payment_method` → ✅ `paymentMethod`
 4. **IPN format sai**: IPN từ SePay trả về nested JSON với structure khác
 
 ## Các file đã sửa
 
 ### 1. Backend - SePayService.java
 - ✅ Thêm field `operation: "PURCHASE"`
+- ✅ Thêm field `paymentMethod: "BANK_TRANSFER"` (theo tài liệu Node.js SDK mới nhất)
 - ✅ Đổi tất cả field names từ snake_case sang camelCase
-- ✅ Xóa field `payment_method`
 
 ### 2. Backend - OrderController.java
 - ✅ Cập nhật IPN callback để xử lý đúng format JSON từ SePay
@@ -38,6 +39,7 @@ So sánh với tài liệu chính thức của SePay, phát hiện các lỗi sa
 ### 3. Frontend - SePayCheckoutPage.js
 - ✅ Cập nhật form HTML để submit với camelCase field names
 - ✅ Thêm field `operation`
+- ✅ Thêm field `paymentMethod`
 
 ## Format IPN từ SePay
 
@@ -103,9 +105,11 @@ curl -X POST http://localhost:8080/api/orders/sepay/ipn \
 
 ## Tham khảo
 - Tài liệu SePay: https://docs.sepay.vn
+- Tài liệu Node.js SDK: https://docs.sepay.vn/nodejs-sdk
 - Các field bắt buộc cho checkout:
   - `merchantId` (string)
   - `operation` (string) - "PURCHASE"
+  - `paymentMethod` (string) - "BANK_TRANSFER"
   - `orderInvoiceNumber` (string)
   - `orderAmount` (integer)
   - `currency` (string) - "VND"
