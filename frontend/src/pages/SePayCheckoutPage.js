@@ -79,27 +79,27 @@ function SePayCheckoutPage() {
         action={sePayResponse.checkout_url}
         style={{ display: 'none' }}
       >
-        <input type="hidden" name="merchantId" value={sePayResponse.merchantId} />
+        <input type="hidden" name="merchant" value={sePayResponse.merchant} />
         <input type="hidden" name="operation" value={sePayResponse.operation} />
-        <input type="hidden" name="orderInvoiceNumber" value={sePayResponse.orderInvoiceNumber} />
-        <input type="hidden" name="orderAmount" value={sePayResponse.orderAmount} />
+        <input type="hidden" name="order_invoice_number" value={sePayResponse.order_invoice_number} />
+        <input type="hidden" name="order_amount" value={sePayResponse.order_amount} />
         <input type="hidden" name="currency" value={sePayResponse.currency} />
-        <input type="hidden" name="orderDescription" value={sePayResponse.orderDescription} />
-        <input type="hidden" name="paymentMethod" value={sePayResponse.paymentMethod} />
-        <input type="hidden" name="successUrl" value={sePayResponse.successUrl} />
-        <input type="hidden" name="errorUrl" value={sePayResponse.errorUrl} />
-        <input type="hidden" name="cancelUrl" value={sePayResponse.cancelUrl} />
+        <input type="hidden" name="order_description" value={sePayResponse.order_description} />
+        <input type="hidden" name="payment_method" value={sePayResponse.payment_method} />
+        <input type="hidden" name="success_url" value={sePayResponse.success_url} />
+        <input type="hidden" name="error_url" value={sePayResponse.error_url} />
+        <input type="hidden" name="cancel_url" value={sePayResponse.cancel_url} />
         <input type="hidden" name="signature" value={sePayResponse.signature} />
         
         {/* Optional fields */}
-        {sePayResponse.customerName && (
-          <input type="hidden" name="customerName" value={sePayResponse.customerName} />
+        {sePayResponse.customer_name && (
+          <input type="hidden" name="customer_name" value={sePayResponse.customer_name} />
         )}
-        {sePayResponse.customerEmail && (
-          <input type="hidden" name="customerEmail" value={sePayResponse.customerEmail} />
+        {sePayResponse.customer_email && (
+          <input type="hidden" name="customer_email" value={sePayResponse.customer_email} />
         )}
-        {sePayResponse.customerPhone && (
-          <input type="hidden" name="customerPhone" value={sePayResponse.customerPhone} />
+        {sePayResponse.customer_phone && (
+          <input type="hidden" name="customer_phone" value={sePayResponse.customer_phone} />
         )}
       </form>
     </div>

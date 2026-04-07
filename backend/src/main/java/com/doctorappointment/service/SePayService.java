@@ -32,30 +32,30 @@ public class SePayService {
     public Map<String, Object> createCheckoutFormData(Order order, String successUrl, String errorUrl, String cancelUrl) {
         try {
             // Prepare request data theo thứ tự alphabet để tạo signature
-            // Sử dụng camelCase theo tài liệu SePay
+            // Sử dụng snake_case theo tài liệu Node.js SDK
             Map<String, Object> requestData = new LinkedHashMap<>();
-            requestData.put("cancelUrl", cancelUrl);
+            requestData.put("cancel_url", cancelUrl);
             requestData.put("currency", "VND");
             
             // Optional customer info
             if (order.getCustomerEmail() != null) {
-                requestData.put("customerEmail", order.getCustomerEmail());
+                requestData.put("customer_email", order.getCustomerEmail());
             }
             if (order.getCustomerName() != null) {
-                requestData.put("customerName", order.getCustomerName());
+                requestData.put("customer_name", order.getCustomerName());
             }
             if (order.getCustomerPhone() != null) {
-                requestData.put("customerPhone", order.getCustomerPhone());
+                requestData.put("customer_phone", order.getCustomerPhone());
             }
             
-            requestData.put("errorUrl", errorUrl);
-            requestData.put("merchantId", sePayConfig.getMerchantId());
+            requestData.put("error_url", errorUrl);
+            requestData.put("merchant", sePayConfig.getMerchantId()); // Không phải merchant_id
             requestData.put("operation", "PURCHASE");
-            requestData.put("orderAmount", order.getFinalAmount().setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
-            requestData.put("orderDescription", "Thanh toan don hang " + order.getOrderNumber());
-            requestData.put("orderInvoiceNumber", order.getOrderNumber());
-            requestData.put("paymentMethod", "BANK_TRANSFER"); // Theo tài liệu Node.js SDK
-            requestData.put("successUrl", successUrl);
+            requestData.put("order_amount", order.getFinalAmount().setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+            requestData.put("order_description", "Thanh toan don hang " + order.getOrderNumber());
+            requestData.put("order_invoice_number", order.getOrderNumber());
+            requestData.put("payment_method", "BANK_TRANSFER");
+            requestData.put("success_url", successUrl);
             
             // Generate signature
             String signature = generateSignature(requestData);

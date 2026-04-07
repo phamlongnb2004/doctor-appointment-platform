@@ -80,7 +80,7 @@ sepay:
   merchant-id: ${SEPAY_MERCHANT_ID:YOUR_MERCHANT_ID}
   secret-key: ${SEPAY_SECRET_KEY:YOUR_MERCHANT_SECRET_KEY}
   env: ${SEPAY_ENV:sandbox}
-  checkout-url: ${SEPAY_CHECKOUT_URL:https://pay.sepay.vn/v1/checkout/init}
+  checkout-url: ${SEPAY_CHECKOUT_URL:https://pay-sandbox.sepay.vn/v1/checkout/init}
   ipn-url: ${SEPAY_IPN_URL:https://doctor-appointment-backend-mq2p.onrender.com/api/orders/sepay/ipn}
 
 logging:
