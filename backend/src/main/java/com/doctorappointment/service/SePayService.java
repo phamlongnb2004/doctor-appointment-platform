@@ -48,6 +48,7 @@ public class SePayService {
             
             // Log data trước khi tính signature
             System.out.println("=== SEPAY DATA BEFORE SIGNATURE ===");
+            System.out.println("Secret Key (first 10 chars): " + sePayConfig.getSecretKey().substring(0, Math.min(10, sePayConfig.getSecretKey().length())) + "...");
             requestData.forEach((key, value) -> System.out.println(key + " = " + value));
             
             // Generate signature TRƯỚC KHI thêm customer info
@@ -116,6 +117,10 @@ public class SePayService {
             // Nối các field bằng dấu PHẨY (không phải &)
             String dataString = String.join(",", signedParts);
             
+            // Log data string để debug
+            System.out.println("=== SIGNATURE CALCULATION ===");
+            System.out.println("Data String: " + dataString);
+            
             // Generate HMAC-SHA256
             Mac sha256Hmac = Mac.getInstance("HmacSHA256");
             SecretKeySpec secretKey = new SecretKeySpec(
@@ -127,7 +132,11 @@ public class SePayService {
             byte[] hash = sha256Hmac.doFinal(dataString.getBytes(StandardCharsets.UTF_8));
             
             // Encode Base64 (KHÔNG phải hex)
-            return Base64.getEncoder().encodeToString(hash);
+            String signature = Base64.getEncoder().encodeToString(hash);
+            System.out.println("Signature: " + signature);
+            System.out.println("=============================");
+            
+            return signature;
             
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             throw new RuntimeException("Error generating signature", e);

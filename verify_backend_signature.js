@@ -5,19 +5,18 @@ const crypto = require('crypto');
 
 const SECRET_KEY = 'spsk_test_YtN9NC2N9adiW58jM8CUnBNd95pVtZUK';
 
-// Paste data từ backend logs vào đây
-// Format: merchant = xxx, operation = xxx, ...
+// Data từ backend logs
 const backendData = {
   merchant: 'SP-TEST-PT873684',
   operation: 'PURCHASE',
   payment_method: 'BANK_TRANSFER',
-  order_amount: 20000,  // Thay bằng số từ backend
+  order_amount: 20000,
   currency: 'VND',
-  order_invoice_number: 'ORD202604072151340340',  // Thay bằng order number từ backend
-  order_description: 'Thanh toan don hang ORD202604072151340340',  // Thay bằng description từ backend
-  success_url: 'https://doctor-appointment-frontend-ujug.onrender.com/order-success/ORD202604072151340340',
-  error_url: 'https://doctor-appointment-frontend-ujug.onrender.com/checkout?error=payment_failed&order=ORD202604072151340340',
-  cancel_url: 'https://doctor-appointment-frontend-ujug.onrender.com/checkout?cancelled=true&order=ORD202604072151340340'
+  order_invoice_number: 'ORD202604072210016617',
+  order_description: 'Thanh toan don hang ORD202604072210016617',
+  success_url: 'https://doctor-appointment-frontend-ujug.onrender.com/order-success/ORD202604072210016617',
+  error_url: 'https://doctor-appointment-frontend-ujug.onrender.com/checkout?error=payment_failed&order=ORD202604072210016617',
+  cancel_url: 'https://doctor-appointment-frontend-ujug.onrender.com/checkout?cancelled=true&order=ORD202604072210016617'
 };
 
 console.log('=== VERIFY BACKEND SIGNATURE ===\n');
@@ -70,12 +69,9 @@ console.log('4. Expected Signature (Node.js):');
 console.log(`   ${expectedSignature}`);
 console.log('');
 
-console.log('5. So sánh với signature từ backend:');
-console.log('   Paste signature từ backend logs vào đây để so sánh');
-console.log('');
-
-// Nếu muốn so sánh với signature cụ thể
-const backendSignature = '3KNaohRaKH6kpOx84tMp0+Ps3RhftGZMAZLLFSELkeQ=';  // Thay bằng signature từ backend
+// Signature từ backend logs
+const backendSignature = 'PMXDf/tqmbwaD/QFxntS6cCsDVsJ2XV0HeusTwcbjAw=';
+console.log('5. So sánh:');
 console.log(`   Backend:  ${backendSignature}`);
 console.log(`   Expected: ${expectedSignature}`);
 console.log(`   Match: ${backendSignature === expectedSignature ? 'YES ✓' : 'NO ✗'}`);
