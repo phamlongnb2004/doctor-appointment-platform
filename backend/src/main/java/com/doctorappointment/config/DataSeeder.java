@@ -26,11 +26,32 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) {
         System.out.println("=== DataSeeder starting ===");
         try {
-            // Wait a bit for Hibernate to finish creating tables
-            Thread.sleep(2000);
+            // Wait longer for Hibernate to finish creating tables
+            System.out.println("Waiting 5 seconds for Hibernate to create tables...");
+            Thread.sleep(5000);
             
-            // Always create admin user if not exists
-            createAdminIfNotExists();
+            // Retry logic for admin creation
+            int maxRetries = 3;
+            int retryCount = 0;
+            boolean success = false;
+            
+            while (!success && retryCount < maxRetries) {
+                try {
+                    createAdminIfNotExists();
+                    success = true;
+                } catch (Exception e) {
+                    retryCount++;
+                    System.out.println("Retry " + retryCount + "/" + maxRetries + " - Error: " + e.getMessage());
+                    if (retryCount < maxRetries) {
+                        Thread.sleep(3000); // Wait 3 seconds before retry
+                    }
+                }
+            }
+            
+            if (!success) {
+                System.out.println("Failed to create admin after " + maxRetries + " retries");
+                return;
+            }
 
             // Create sample doctors if no doctors exist
             System.out.println("Doctor count: " + doctorRepository.count());

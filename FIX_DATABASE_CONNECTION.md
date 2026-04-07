@@ -1,13 +1,13 @@
 # 🔧 Fix Database Connection Error trên Render
 
-## ❌ Lỗi hiện tại:
+## ❌ Lỗi hiện tại (Cập nhật):
 ```
-Communications link failure
-Can not read response from server
+HHH90000025: MySQL8Dialect does not need to be specified explicitly
+Driver com.mysql.cj.jdbc.Driver claims to not accept jdbcUrl, postgresql://...
 ```
 
 ## ✅ Nguyên nhân:
-Backend không thể kết nối đến MySQL database vì thiếu environment variables.
+Có biến môi trường ẩn hoặc cache đang set MySQL dialect mặc dù đã dùng PostgreSQL URL.
 
 ## 📋 Các bước khắc phục:
 
@@ -90,14 +90,22 @@ spring:
 
 Truy cập Backend Service trên Render → Environment:
 
-**Nếu dùng PostgreSQL:**
+**QUAN TRỌNG: Thêm biến PORT**
 ```
+PORT=8080
 SPRING_DATASOURCE_URL=<internal_database_url>
 SPRING_DATASOURCE_USERNAME=<username>
 SPRING_DATASOURCE_PASSWORD=<password>
+SPRING_PROFILES_ACTIVE=prod
 APP_BASE_URL=https://doctor-appointment-backend-mq2p.onrender.com
 FRONTEND_URL=https://doctor-appointment-frontend-ujug.onrender.com
 ```
+
+**XÓA các biến sau (nếu có):**
+- `SPRING_DATASOURCE_DRIVER`
+- `HIBERNATE_DIALECT`
+- `SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT`
+- `SPRING_JPA_DATABASE_PLATFORM`
 
 **Thêm các biến SePay (từ trước):**
 ```

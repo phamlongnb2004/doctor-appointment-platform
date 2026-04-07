@@ -12,6 +12,10 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: public
+        jdbc:
+          lob:
+            non_contextual_creation: true
         # Dialect will be auto-detected, no need to specify
         connection:
           characterEncoding: utf-8
