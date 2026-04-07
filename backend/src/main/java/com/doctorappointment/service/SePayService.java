@@ -46,7 +46,11 @@ public class SePayService {
             requestData.put("error_url", errorUrl);
             requestData.put("cancel_url", cancelUrl);
             
-            // Optional customer info (không dùng cho signature)
+            // Generate signature TRƯỚC KHI thêm customer info
+            String signature = generateSignature(requestData);
+            requestData.put("signature", signature);
+            
+            // Optional customer info (thêm SAU signature, không dùng cho signature)
             if (order.getCustomerEmail() != null) {
                 requestData.put("customer_email", order.getCustomerEmail());
             }
@@ -57,12 +61,16 @@ public class SePayService {
                 requestData.put("customer_phone", order.getCustomerPhone());
             }
             
-            // Generate signature từ các field đã có
-            String signature = generateSignature(requestData);
-            requestData.put("signature", signature);
-            
             // Thêm checkout URL
             requestData.put("checkout_url", sePayConfig.getCheckoutUrl());
+            
+            // Log để debug
+            System.out.println("=== SEPAY CHECKOUT DATA ===");
+            System.out.println("Merchant: " + sePayConfig.getMerchantId());
+            System.out.println("Order: " + order.getOrderNumber());
+            System.out.println("Amount: " + order.getFinalAmount());
+            System.out.println("Signature: " + signature);
+            System.out.println("===========================");
             
             return requestData;
             
