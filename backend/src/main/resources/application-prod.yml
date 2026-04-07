@@ -3,7 +3,7 @@ spring:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
-    # Driver will be auto-detected from URL
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -11,6 +11,7 @@ spring:
     show-sql: false
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         # Dialect will be auto-detected, no need to specify
         connection:
           characterEncoding: utf-8
