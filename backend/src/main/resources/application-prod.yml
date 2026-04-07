@@ -7,7 +7,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate  # Changed from create - tables already exist
+      ddl-auto: update  # Update schema without dropping tables
     show-sql: false
     properties:
       hibernate:
@@ -18,10 +18,6 @@ spring:
             non_contextual_creation: true
         format_sql: true
         use_sql_comments: true
-        # Disable foreign key constraints during table creation
-        hbm2ddl:
-          auto: create
-        # Dialect will be auto-detected, no need to specify
         connection:
           characterEncoding: utf-8
           CharSet: utf-8
@@ -84,7 +80,7 @@ sepay:
   merchant-id: ${SEPAY_MERCHANT_ID:YOUR_MERCHANT_ID}
   secret-key: ${SEPAY_SECRET_KEY:YOUR_MERCHANT_SECRET_KEY}
   env: ${SEPAY_ENV:sandbox}
-  checkout-url: ${SEPAY_CHECKOUT_URL:https://sandbox.sepay.vn/v1/checkout/init}
+  checkout-url: ${SEPAY_CHECKOUT_URL:https://pay.sepay.vn/v1/checkout/init}
   ipn-url: ${SEPAY_IPN_URL:https://doctor-appointment-backend-mq2p.onrender.com/api/orders/sepay/ipn}
 
 logging:
