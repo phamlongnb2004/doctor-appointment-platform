@@ -72,20 +72,21 @@ function SePayCheckoutPage() {
         </div>
       </div>
 
-      {/* Hidden form để submit đến SePay theo tài liệu - sử dụng camelCase */}
+      {/* Hidden form để submit đến SePay - THỨ TỰ QUAN TRỌNG! */}
       <form 
         ref={formRef}
         method="POST" 
         action={sePayResponse.checkout_url}
         style={{ display: 'none' }}
       >
+        {/* Thứ tự phải giống backend để signature đúng */}
         <input type="hidden" name="merchant" value={sePayResponse.merchant} />
         <input type="hidden" name="operation" value={sePayResponse.operation} />
-        <input type="hidden" name="order_invoice_number" value={sePayResponse.order_invoice_number} />
+        <input type="hidden" name="payment_method" value={sePayResponse.payment_method} />
         <input type="hidden" name="order_amount" value={sePayResponse.order_amount} />
         <input type="hidden" name="currency" value={sePayResponse.currency} />
+        <input type="hidden" name="order_invoice_number" value={sePayResponse.order_invoice_number} />
         <input type="hidden" name="order_description" value={sePayResponse.order_description} />
-        <input type="hidden" name="payment_method" value={sePayResponse.payment_method} />
         <input type="hidden" name="success_url" value={sePayResponse.success_url} />
         <input type="hidden" name="error_url" value={sePayResponse.error_url} />
         <input type="hidden" name="cancel_url" value={sePayResponse.cancel_url} />
