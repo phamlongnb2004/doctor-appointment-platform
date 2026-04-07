@@ -26,57 +26,47 @@ public class SePayService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     /**
-     * Tạo checkout URL từ SePay API
+     * Tạo form data để submit đến SePay (theo tài liệu SePay)
+     * Trả về Map chứa các field cần thiết để tạo form HTML
      */
-    public Map<String, Object> createCheckout(Order order, String successUrl, String errorUrl, String cancelUrl) {
+    public Map<String, Object> createCheckoutFormData(Order order, String successUrl, String errorUrl, String cancelUrl) {
         try {
-            // Prepare request data
+            // Prepare request data theo thứ tự alphabet để tạo signature
+            // Sử dụng camelCase theo tài liệu SePay
             Map<String, Object> requestData = new LinkedHashMap<>();
-            requestData.put("merchant_id", sePayConfig.getMerchantId());
-            requestData.put("payment_method", "BANK_TRANSFER");
-            requestData.put("order_invoice_number", order.getOrderNumber());
-            requestData.put("order_amount", order.getFinalAmount().setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+            requestData.put("cancelUrl", cancelUrl);
             requestData.put("currency", "VND");
-            requestData.put("order_description", "Thanh toan don hang " + order.getOrderNumber());
-            requestData.put("success_url", successUrl);
-            requestData.put("error_url", errorUrl);
-            requestData.put("cancel_url", cancelUrl);
             
             // Optional customer info
-            if (order.getCustomerName() != null) {
-                requestData.put("customer_name", order.getCustomerName());
-            }
             if (order.getCustomerEmail() != null) {
-                requestData.put("customer_email", order.getCustomerEmail());
+                requestData.put("customerEmail", order.getCustomerEmail());
+            }
+            if (order.getCustomerName() != null) {
+                requestData.put("customerName", order.getCustomerName());
             }
             if (order.getCustomerPhone() != null) {
-                requestData.put("customer_phone", order.getCustomerPhone());
+                requestData.put("customerPhone", order.getCustomerPhone());
             }
+            
+            requestData.put("errorUrl", errorUrl);
+            requestData.put("merchantId", sePayConfig.getMerchantId());
+            requestData.put("operation", "PURCHASE"); // QUAN TRỌNG: Thiếu field này
+            requestData.put("orderAmount", order.getFinalAmount().setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+            requestData.put("orderDescription", "Thanh toan don hang " + order.getOrderNumber());
+            requestData.put("orderInvoiceNumber", order.getOrderNumber());
+            requestData.put("successUrl", successUrl);
             
             // Generate signature
             String signature = generateSignature(requestData);
             requestData.put("signature", signature);
             
-            // Call SePay API
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
+            // Thêm checkout URL
+            requestData.put("checkout_url", sePayConfig.getCheckoutUrl());
             
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestData, headers);
-            
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                sePayConfig.getCheckoutUrl(),
-                request,
-                Map.class
-            );
-            
-            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                return response.getBody();
-            } else {
-                throw new RuntimeException("Failed to create checkout: " + response.getStatusCode());
-            }
+            return requestData;
             
         } catch (Exception e) {
-            throw new RuntimeException("Error creating SePay checkout", e);
+            throw new RuntimeException("Error creating SePay checkout form data", e);
         }
     }
     

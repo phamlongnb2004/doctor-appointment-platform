@@ -105,7 +105,7 @@ public class OrderController {
     }
     
     /**
-     * Tạo checkout SePay - gọi API và trả về checkout URL
+     * Tạo checkout SePay - trả về form data để frontend submit
      */
     @PostMapping("/sepay/checkout")
     public ResponseEntity<Map<String, Object>> createSePayCheckout(
@@ -115,70 +115,74 @@ public class OrderController {
         // Tạo đơn hàng trước
         OrderResponse order = orderService.createOrder(userId, request);
         
-        // Tạo checkout qua SePay API
+        // Tạo form data để submit đến SePay
         String successUrl = frontendUrl + "/order-success/" + order.getOrderNumber();
         String errorUrl = frontendUrl + "/checkout?error=payment_failed&order=" + order.getOrderNumber();
         String cancelUrl = frontendUrl + "/checkout?cancelled=true&order=" + order.getOrderNumber();
         
-        Map<String, Object> sePayResponse = sePayService.createCheckout(
+        Map<String, Object> formData = sePayService.createCheckoutFormData(
             orderService.getOrderEntity(order.getId()),
             successUrl,
             errorUrl,
             cancelUrl
         );
         
-        // Response từ SePay sẽ có dạng:
-        // {
-        //   "status": "success",
-        //   "checkout_url": "https://pay.sepay.vn/checkout/xxx",
-        //   "order_invoice_number": "ORD123",
-        //   ...
-        // }
+        // Thêm thông tin đơn hàng vào response
+        formData.put("order_id", order.getId());
+        formData.put("order_number", order.getOrderNumber());
         
-        return ResponseEntity.ok(sePayResponse);
+        return ResponseEntity.ok(formData);
     }
     
     /**
      * IPN callback từ SePay (nhận JSON data)
+     * Format theo tài liệu: https://docs.sepay.vn
      */
     @PostMapping("/sepay/ipn")
-    public ResponseEntity<Map<String, String>> sePayIpn(@RequestBody Map<String, Object> ipnData) {
+    public ResponseEntity<Map<String, Object>> sePayIpn(@RequestBody Map<String, Object> ipnData) {
         try {
-            // Verify signature
-            if (!sePayService.verifyIpnSignature(ipnData)) {
-                return ResponseEntity.badRequest().body(Map.of(
-                    "status", "error",
-                    "message", "Invalid signature"
-                ));
+            // Log IPN data để debug
+            System.out.println("Received SePay IPN: " + ipnData);
+            
+            // Kiểm tra notification_type
+            String notificationType = (String) ipnData.get("notification_type");
+            
+            if ("ORDER_PAID".equals(notificationType)) {
+                // Lấy thông tin order từ nested object
+                @SuppressWarnings("unchecked")
+                Map<String, Object> orderData = (Map<String, Object>) ipnData.get("order");
+                
+                if (orderData != null) {
+                    String orderInvoiceNumber = (String) orderData.get("order_invoice_number");
+                    String orderStatus = (String) orderData.get("order_status");
+                    
+                    // Kiểm tra order_status = "CAPTURED" (thanh toán thành công)
+                    if ("CAPTURED".equals(orderStatus)) {
+                        orderService.confirmPayment(orderInvoiceNumber);
+                        
+                        return ResponseEntity.ok(Map.of(
+                            "success", true,
+                            "message", "Payment confirmed for order: " + orderInvoiceNumber
+                        ));
+                    }
+                }
             }
             
-            String orderNumber = ipnData.get("order_invoice_number").toString();
-            String status = ipnData.get("status").toString();
-            
-            // Xử lý theo status
-            if ("SUCCESS".equals(status) || "PAID".equals(status)) {
-                orderService.confirmPayment(orderNumber);
-                return ResponseEntity.ok(Map.of(
-                    "status", "success",
-                    "message", "Payment confirmed"
-                ));
-            } else if ("FAILED".equals(status)) {
-                // Có thể cập nhật trạng thái đơn hàng thành failed
-                return ResponseEntity.ok(Map.of(
-                    "status", "success",
-                    "message", "Payment failed notification received"
-                ));
-            }
-            
+            // Trả về 200 để SePay biết đã nhận được IPN
             return ResponseEntity.ok(Map.of(
-                "status", "success",
+                "success", true,
                 "message", "IPN received"
             ));
             
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "status", "error",
-                "message", e.getMessage()
+            // Log lỗi
+            System.err.println("Error processing SePay IPN: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Vẫn trả về 200 để tránh SePay retry liên tục
+            return ResponseEntity.ok(Map.of(
+                "success", false,
+                "message", "Error: " + e.getMessage()
             ));
         }
     }
