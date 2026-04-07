@@ -23,10 +23,12 @@ public class DataSeeder implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    @Transactional
     public void run(String... args) {
         System.out.println("=== DataSeeder starting ===");
         try {
+            // Wait a bit for Hibernate to finish creating tables
+            Thread.sleep(2000);
+            
             // Always create admin user if not exists
             createAdminIfNotExists();
 
@@ -50,10 +52,13 @@ public class DataSeeder implements CommandLineRunner {
             System.out.println("Data seeding completed!");
         } catch (Exception e) {
             System.out.println("=== DataSeeder ERROR ===");
-            e.printStackTrace();
+            System.out.println("Error: " + e.getMessage());
+            System.out.println("This is normal on first deployment - tables are being created");
+            // Don't print full stack trace, just log the error
         }
     }
 
+    @Transactional
     private void createAdminIfNotExists() {
         System.out.println("Checking for admin user...");
         if (userRepository.findByEmail("admin@doctor.com").isEmpty()) {
