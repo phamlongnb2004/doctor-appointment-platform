@@ -57,6 +57,7 @@ app:
   upload:
     path: /tmp/uploads
   base-url: ${APP_BASE_URL:https://doctor-appointment-backend-mq2p.onrender.com}
+  frontend-url: ${FRONTEND_URL:https://doctor-appointment-frontend-ujug.onrender.com}
 
 cloudinary:
   enabled: ${CLOUDINARY_ENABLED:true}
@@ -68,6 +69,13 @@ sendgrid:
   api-key: ${SENDGRID_API_KEY:}
   from-email: ${SENDGRID_FROM_EMAIL:noreply@medlatec.com}
   from-name: ${SENDGRID_FROM_NAME:MEDLATEC}
+
+sepay:
+  merchant-id: ${SEPAY_MERCHANT_ID:YOUR_MERCHANT_ID}
+  secret-key: ${SEPAY_SECRET_KEY:YOUR_MERCHANT_SECRET_KEY}
+  env: ${SEPAY_ENV:sandbox}
+  checkout-url: ${SEPAY_CHECKOUT_URL:https://sandbox.sepay.vn/v1/checkout/init}
+  ipn-url: ${SEPAY_IPN_URL:https://doctor-appointment-backend-mq2p.onrender.com/api/orders/sepay/ipn}
 
 logging:
   level:
