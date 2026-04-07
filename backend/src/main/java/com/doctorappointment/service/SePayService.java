@@ -46,6 +46,10 @@ public class SePayService {
             requestData.put("error_url", errorUrl);
             requestData.put("cancel_url", cancelUrl);
             
+            // Log data trước khi tính signature
+            System.out.println("=== SEPAY DATA BEFORE SIGNATURE ===");
+            requestData.forEach((key, value) -> System.out.println(key + " = " + value));
+            
             // Generate signature TRƯỚC KHI thêm customer info
             String signature = generateSignature(requestData);
             requestData.put("signature", signature);
@@ -70,6 +74,7 @@ public class SePayService {
             System.out.println("Order: " + order.getOrderNumber());
             System.out.println("Amount: " + order.getFinalAmount());
             System.out.println("Signature: " + signature);
+            System.out.println("Checkout URL: " + sePayConfig.getCheckoutUrl());
             System.out.println("===========================");
             
             return requestData;
