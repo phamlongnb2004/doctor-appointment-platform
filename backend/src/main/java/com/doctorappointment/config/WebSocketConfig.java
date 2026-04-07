@@ -33,11 +33,19 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // SockJS fallback is enabled for browsers that don't support WebSocket
         // Note: Since context-path is /api, the endpoint should be /ws (not /api/ws)
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("http://localhost:3000", "http://localhost:5173")
+                .setAllowedOriginPatterns(
+                    "http://localhost:3000", 
+                    "http://localhost:5173",
+                    "https://doctor-appointment-frontend-ujug.onrender.com"
+                )
                 .withSockJS();
 
         // Also register without SockJS for native WebSocket clients
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("http://localhost:3000", "http://localhost:5173");
+                .setAllowedOriginPatterns(
+                    "http://localhost:3000", 
+                    "http://localhost:5173",
+                    "https://doctor-appointment-frontend-ujug.onrender.com"
+                );
     }
 }
