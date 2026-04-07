@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, Form, Input, Button, message, Avatar, Upload, Divider, Tag, Row, Col, Typography, Spin, Modal, Select } from 'antd';
+import { Card, Form, Input, Button, message, Avatar, Upload, Divider, Tag, Row, Col, Typography, Spin, Modal, Select, InputNumber } from 'antd';
 import { UploadOutlined, UserOutlined, PictureOutlined, CameraOutlined, MedicineBoxOutlined, CalendarOutlined, LockOutlined } from '@ant-design/icons';
 import { userAPI, appointmentAPI, doctorAPI } from '../services/api';
 import useFallingFlowers from '../hooks/useFallingFlowers';
@@ -47,9 +47,10 @@ function ProfilePage({ user, onUserUpdate }) {
     try {
       const response = await doctorAPI.getDoctorByUserId(user.id);
       setDoctorInfo(response.data);
-      // Set specialization in form
+      // Set specialization and consultation fee in form
       form.setFieldsValue({
-        specialization: response.data.specialization
+        specialization: response.data.specialization,
+        consultationFee: response.data.consultationFee
       });
     } catch (error) {
       console.error('Error fetching doctor info:', error);
@@ -78,12 +79,16 @@ function ProfilePage({ user, onUserUpdate }) {
     try {
       await userAPI.updateUser(user.id, values);
       
-      // If user is doctor and specialization changed, update doctor info
-      if (user.role === 'DOCTOR' && doctorInfo && values.specialization) {
-        await doctorAPI.updateDoctor(doctorInfo.id, {
-          ...doctorInfo,
-          specialization: values.specialization
-        });
+      // If user is doctor and specialization or consultation fee changed, update doctor info
+      if (user.role === 'DOCTOR' && doctorInfo) {
+        const doctorUpdate = { ...doctorInfo };
+        if (values.specialization) {
+          doctorUpdate.specialization = values.specialization;
+        }
+        if (values.consultationFee !== undefined) {
+          doctorUpdate.consultationFee = values.consultationFee;
+        }
+        await doctorAPI.updateDoctor(doctorInfo.id, doctorUpdate);
       }
       
       message.success('Cập nhật thông tin thành công!');
@@ -366,26 +371,48 @@ function ProfilePage({ user, onUserUpdate }) {
                 
                 {/* Specialty selection for doctors */}
                 {user?.role === 'DOCTOR' && (
-                  <Form.Item 
-                    label="Chuyên khoa" 
-                    name="specialization"
-                    rules={[{ required: true, message: 'Vui lòng chọn chuyên khoa!' }]}
-                  >
-                    <Select 
-                      placeholder="Chọn chuyên khoa"
-                      size="large"
-                      showSearch
-                      filterOption={(input, option) =>
-                        (option?.label || '').toLowerCase().indexOf(input.toLowerCase()) >= 0
-                      }
+                  <>
+                    <Form.Item 
+                      label="Chuyên khoa" 
+                      name="specialization"
+                      rules={[{ required: true, message: 'Vui lòng chọn chuyên khoa!' }]}
                     >
-                      {specialties.map(specialty => (
-                        <Option key={specialty.id} value={specialty.name} label={specialty.name}>
-                          {specialty.name}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
+                      <Select 
+                        placeholder="Chọn chuyên khoa"
+                        size="large"
+                        showSearch
+                        filterOption={(input, option) =>
+                          (option?.label || '').toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }
+                      >
+                        {specialties.map(specialty => (
+                          <Option key={specialty.id} value={specialty.name} label={specialty.name}>
+                            {specialty.name}
+                          </Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                    
+                    <Form.Item 
+                      label="Giá khám (VNĐ)" 
+                      name="consultationFee"
+                      rules={[
+                        { required: true, message: 'Vui lòng nhập giá khám!' },
+                        { type: 'number', min: 0, message: 'Giá khám phải lớn hơn 0!' }
+                      ]}
+                    >
+                      <InputNumber 
+                        className="input-beautiful" 
+                        placeholder="Nhập giá khám (VD: 200000)"
+                        size="large"
+                        style={{ width: '100%' }}
+                        formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                        parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                        min={0}
+                        step={10000}
+                      />
+                    </Form.Item>
+                  </>
                 )}
                 
                 <Form.Item label="Vai trò">

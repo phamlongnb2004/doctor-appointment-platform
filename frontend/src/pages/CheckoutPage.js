@@ -191,6 +191,25 @@ function CheckoutPage() {
       console.log('User ID:', user?.id);
       console.log('Session ID:', sessionId);
 
+      // Nếu chọn SEPAY, gọi API riêng
+      if (paymentMethod === 'SEPAY') {
+        const params = user ? { userId: user.id } : {};
+        const response = await axios.post(
+          `${API_BASE_URL}/orders/sepay/checkout`,
+          checkoutData,
+          { params }
+        );
+
+        const sePayResponse = response.data;
+        
+        // Chuyển đến trang SePay checkout với response data
+        navigate('/sepay-checkout', { 
+          state: { sePayResponse }
+        });
+        return;
+      }
+
+      // Các phương thức thanh toán khác (COD, BANK_TRANSFER, MOMO)
       const params = user ? { userId: user.id } : {};
       const response = await axios.post(
         `${API_BASE_URL}/orders/checkout`,
@@ -432,8 +451,16 @@ function CheckoutPage() {
                     </Radio>
                   </div>
                   <div style={{ marginBottom: 16 }}>
+                    <Radio value="SEPAY" style={{ fontSize: 16 }}>
+                      <strong>🏦 Thanh toán qua SePay</strong>
+                      <div style={{ color: '#8c8c8c', fontSize: 14, marginTop: 4 }}>
+                        Thanh toán an toàn qua cổng SePay (Chuyển khoản ngân hàng, Ví điện tử)
+                      </div>
+                    </Radio>
+                  </div>
+                  <div style={{ marginBottom: 16 }}>
                     <Radio value="BANK_TRANSFER" style={{ fontSize: 16 }}>
-                      <strong>Chuyển khoản ngân hàng</strong>
+                      <strong>Chuyển khoản ngân hàng (QR Code)</strong>
                       <div style={{ color: '#8c8c8c', fontSize: 14, marginTop: 4 }}>
                         Chuyển khoản trực tiếp vào tài khoản ngân hàng
                       </div>
@@ -441,7 +468,7 @@ function CheckoutPage() {
                   </div>
                   <div>
                     <Radio value="MOMO" style={{ fontSize: 16 }}>
-                      <strong>Ví MoMo</strong>
+                      <strong>Ví MoMo (QR Code)</strong>
                       <div style={{ color: '#8c8c8c', fontSize: 14, marginTop: 4 }}>
                         Thanh toán qua ví điện tử MoMo
                       </div>

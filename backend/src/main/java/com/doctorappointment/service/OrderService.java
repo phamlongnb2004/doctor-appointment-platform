@@ -291,4 +291,12 @@ public class OrderService {
         response.setSubtotal(item.getSubtotal());
         return response;
     }
+    
+    /**
+     * Get Order entity (for internal use)
+     */
+    public Order getOrderEntity(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+    }
 }

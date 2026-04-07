@@ -3,7 +3,9 @@ package com.doctorappointment.controller;
 import com.doctorappointment.dto.CheckoutRequest;
 import com.doctorappointment.dto.OrderResponse;
 import com.doctorappointment.service.OrderService;
+import com.doctorappointment.service.SePayService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +18,12 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+    
+    @Autowired
+    private SePayService sePayService;
+    
+    @Value("${app.frontend-url:http://localhost:3000}")
+    private String frontendUrl;
 
     @GetMapping("/test")
     public ResponseEntity<String> test() {
@@ -93,6 +101,85 @@ public class OrderController {
             return ResponseEntity.ok("Webhook received");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error processing webhook");
+        }
+    }
+    
+    /**
+     * Tạo checkout SePay - gọi API và trả về checkout URL
+     */
+    @PostMapping("/sepay/checkout")
+    public ResponseEntity<Map<String, Object>> createSePayCheckout(
+            @RequestParam(required = false) Long userId,
+            @RequestBody CheckoutRequest request) {
+        
+        // Tạo đơn hàng trước
+        OrderResponse order = orderService.createOrder(userId, request);
+        
+        // Tạo checkout qua SePay API
+        String successUrl = frontendUrl + "/order-success/" + order.getOrderNumber();
+        String errorUrl = frontendUrl + "/checkout?error=payment_failed&order=" + order.getOrderNumber();
+        String cancelUrl = frontendUrl + "/checkout?cancelled=true&order=" + order.getOrderNumber();
+        
+        Map<String, Object> sePayResponse = sePayService.createCheckout(
+            orderService.getOrderEntity(order.getId()),
+            successUrl,
+            errorUrl,
+            cancelUrl
+        );
+        
+        // Response từ SePay sẽ có dạng:
+        // {
+        //   "status": "success",
+        //   "checkout_url": "https://pay.sepay.vn/checkout/xxx",
+        //   "order_invoice_number": "ORD123",
+        //   ...
+        // }
+        
+        return ResponseEntity.ok(sePayResponse);
+    }
+    
+    /**
+     * IPN callback từ SePay (nhận JSON data)
+     */
+    @PostMapping("/sepay/ipn")
+    public ResponseEntity<Map<String, String>> sePayIpn(@RequestBody Map<String, Object> ipnData) {
+        try {
+            // Verify signature
+            if (!sePayService.verifyIpnSignature(ipnData)) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", "Invalid signature"
+                ));
+            }
+            
+            String orderNumber = ipnData.get("order_invoice_number").toString();
+            String status = ipnData.get("status").toString();
+            
+            // Xử lý theo status
+            if ("SUCCESS".equals(status) || "PAID".equals(status)) {
+                orderService.confirmPayment(orderNumber);
+                return ResponseEntity.ok(Map.of(
+                    "status", "success",
+                    "message", "Payment confirmed"
+                ));
+            } else if ("FAILED".equals(status)) {
+                // Có thể cập nhật trạng thái đơn hàng thành failed
+                return ResponseEntity.ok(Map.of(
+                    "status", "success",
+                    "message", "Payment failed notification received"
+                ));
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                "status", "success",
+                "message", "IPN received"
+            ));
+            
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "status", "error",
+                "message", e.getMessage()
+            ));
         }
     }
 }

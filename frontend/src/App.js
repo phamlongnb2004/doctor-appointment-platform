@@ -24,6 +24,8 @@ import CheckoutPage from './pages/CheckoutPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import MyOrdersPage from './pages/MyOrdersPage';
 import PaymentTestPage from './pages/PaymentTestPage';
+import SePayCheckoutPage from './pages/SePayCheckoutPage';
+import SePayTestPage from './pages/SePayTestPage';
 import NotFoundPage from './pages/NotFoundPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -53,12 +55,14 @@ function AppContent({ user, isAuthenticated, handleLogin, handleLogout, handleUs
           <Route path="/services/:slug" element={<ServiceDetailPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/sepay-checkout" element={<SePayCheckoutPage />} />
           <Route path="/order-success/:orderNumber" element={<OrderSuccessPage />} />
           <Route 
             path="/my-orders" 
             element={isAuthenticated ? <MyOrdersPage /> : <Navigate to="/login" />} 
           />
           <Route path="/payment-test" element={<PaymentTestPage />} />
+          <Route path="/sepay-test" element={<SePayTestPage />} />
           <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/doctors" element={<DoctorListPage />} />
@@ -306,11 +310,6 @@ function App() {
       </div>
     );
   }
-
-  const isAdmin = user?.role === 'ADMIN';
-  const isDoctor = user?.role === 'DOCTOR';
-  const isConsultant = user?.role === 'CONSULTANT';
-  const canChat = isAuthenticated && (isAdmin || isDoctor || isConsultant || user?.role === 'PATIENT');
 
   return (
     <Router>

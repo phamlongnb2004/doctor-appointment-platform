@@ -38,6 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth
                         .requestMatchers("/test/**").permitAll()
+                        .requestMatchers("/orders/sepay/ipn").permitAll() // Allow SePay IPN callback
                         .requestMatchers("/users/online/**").hasAnyRole("ADMIN", "CONSULTANT")
                         .requestMatchers("/users/stats").hasAnyRole("ADMIN", "CONSULTANT")
                         .requestMatchers("/users/doctors").hasAnyRole("ADMIN", "CONSULTANT")
