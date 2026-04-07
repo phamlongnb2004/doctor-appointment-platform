@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 
-@Component
+// @Component  // TEMPORARILY DISABLED - Let Hibernate create tables first
 @RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
 
