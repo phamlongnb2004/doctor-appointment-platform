@@ -74,23 +74,29 @@ public class SePayService {
     /**
      * Tạo chữ ký HMAC-SHA256 theo đúng cách của SePay SDK
      * Chỉ ký các field cụ thể, nối bằng dấu phẩy, encode Base64
+     * QUAN TRỌNG: Thứ tự field phải theo thứ tự xuất hiện trong data (Object.keys)
      */
     private String generateSignature(Map<String, Object> data) {
         try {
-            // Danh sách các field cần ký theo thứ tự của SDK
-            String[] signedFieldNames = {
+            // Danh sách các field được phép sign
+            Set<String> allowedSignedFields = new HashSet<>(Arrays.asList(
                 "merchant", "env", "operation", "payment_method", "order_amount",
                 "currency", "order_invoice_number", "order_description", "customer_id",
                 "agreement_id", "agreement_name", "agreement_type",
                 "agreement_payment_frequency", "agreement_amount_per_payment",
                 "success_url", "error_url", "cancel_url", "order_id"
-            };
+            ));
             
-            // Chỉ lấy các field có trong data và nằm trong danh sách signedFieldNames
+            // Lấy các field theo thứ tự xuất hiện trong data (giống Object.keys trong JS)
+            // LinkedHashMap giữ nguyên thứ tự insert
             List<String> signedParts = new ArrayList<>();
-            for (String fieldName : signedFieldNames) {
-                if (data.containsKey(fieldName) && data.get(fieldName) != null) {
-                    signedParts.add(fieldName + "=" + data.get(fieldName));
+            for (Map.Entry<String, Object> entry : data.entrySet()) {
+                String fieldName = entry.getKey();
+                Object value = entry.getValue();
+                
+                // Chỉ lấy field nằm trong allowedSignedFields và không null
+                if (allowedSignedFields.contains(fieldName) && value != null) {
+                    signedParts.add(fieldName + "=" + value);
                 }
             }
             
