@@ -45,6 +45,13 @@
             <version>8.0.33</version>
         </dependency>
 
+        <!-- PostgreSQL Driver (for Render deployment) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- H2 Database (cho chạy không cần MySQL) -->
         <dependency>
             <groupId>com.h2database</groupId>
