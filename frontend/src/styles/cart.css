@@ -36,3 +36,19 @@
     margin-top: 12px;
   }
 }
+
+/* Checkout Button */
+.checkout-button.ant-btn-primary {
+  background: #003a70 !important;
+  border-color: #003a70 !important;
+}
+
+.checkout-button.ant-btn-primary:hover {
+  background: #00508f !important;
+  border-color: #00508f !important;
+}
+
+.checkout-button.ant-btn-primary:active {
+  background: #002a50 !important;
+  border-color: #002a50 !important;
+}

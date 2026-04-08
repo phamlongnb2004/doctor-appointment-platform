@@ -282,8 +282,11 @@ function CartPage() {
                     height: 50,
                     fontSize: 16,
                     fontWeight: 600,
-                    marginBottom: 12
+                    marginBottom: 12,
+                    background: '#003a70 !important',
+                    borderColor: '#003a70 !important'
                   }}
+                  className="checkout-button"
                 >
                   Thanh toán
                 </Button>
@@ -298,22 +301,69 @@ function CartPage() {
                   Tiếp tục mua sắm
                 </Button>
 
-                {/* Info Box */}
+                {/* Benefits Box */}
                 <div style={{ 
                   marginTop: 24,
-                  padding: 16,
-                  background: '#f5f5f5',
-                  borderRadius: 8
+                  padding: 20,
+                  background: 'linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%)',
+                  borderRadius: 12,
+                  border: '1px solid #e6eeff'
                 }}>
-                  <div style={{ fontSize: 13, color: '#595959', lineHeight: 1.6 }}>
-                    <div style={{ fontWeight: 600, marginBottom: 8 }}>
-                      🎁 Ưu đãi đặc biệt
+                  <div style={{ 
+                    fontSize: 15, 
+                    fontWeight: 600, 
+                    color: '#003a70',
+                    marginBottom: 16,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8
+                  }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                      <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                    Quyền lợi của bạn
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                      <div style={{ 
+                        width: 6, 
+                        height: 6, 
+                        borderRadius: '50%', 
+                        background: '#0066CC',
+                        marginTop: 6,
+                        flexShrink: 0
+                      }}/>
+                      <span style={{ fontSize: 14, color: '#262626', lineHeight: 1.5 }}>
+                        Miễn phí vận chuyển toàn quốc
+                      </span>
                     </div>
-                    <ul style={{ margin: 0, paddingLeft: 20 }}>
-                      <li>Miễn phí vận chuyển toàn quốc</li>
-                      <li>Hỗ trợ đổi trả trong 7 ngày</li>
-                      <li>Tích điểm thành viên</li>
-                    </ul>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                      <div style={{ 
+                        width: 6, 
+                        height: 6, 
+                        borderRadius: '50%', 
+                        background: '#0066CC',
+                        marginTop: 6,
+                        flexShrink: 0
+                      }}/>
+                      <span style={{ fontSize: 14, color: '#262626', lineHeight: 1.5 }}>
+                        Hỗ trợ đổi trả trong 7 ngày
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                      <div style={{ 
+                        width: 6, 
+                        height: 6, 
+                        borderRadius: '50%', 
+                        background: '#0066CC',
+                        marginTop: 6,
+                        flexShrink: 0
+                      }}/>
+                      <span style={{ fontSize: 14, color: '#262626', lineHeight: 1.5 }}>
+                        Tích điểm thành viên
+                      </span>
+                    </div>
                   </div>
                 </div>
               </Card>

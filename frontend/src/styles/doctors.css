@@ -171,14 +171,15 @@
 }
 
 .doctors-action-btn-primary {
-  background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
+  background: #003a70 !important;
   border: none;
   color: #fff;
 }
 
 .doctors-action-btn-primary:hover {
+  background: #002952 !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 58, 112, 0.3);
 }
 
 /* Results Header */

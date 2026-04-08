@@ -437,7 +437,7 @@ function HeaderComponent({ user, onLogout }) {
                 icon={<EditOutlined />}
                 onClick={() => navigate(isDoctor ? '/doctor/articles' : '/admin/cms')}
                 style={{
-                  background: '#722ed1',
+                  background: '#003a70',
                   color: '#fff',
                   border: 'none',
                   borderRadius: 4,

@@ -569,11 +569,14 @@ function CheckoutPage() {
                   htmlType="submit"
                   loading={loading}
                   icon={<CheckCircleOutlined />}
+                  className="place-order-button"
                   style={{ 
                     height: 50,
                     fontSize: 16,
                     fontWeight: 600,
-                    marginTop: 24
+                    marginTop: 24,
+                    background: '#003a70 !important',
+                    borderColor: '#003a70 !important'
                   }}
                 >
                   Đặt hàng
