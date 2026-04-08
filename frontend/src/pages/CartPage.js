@@ -51,12 +51,16 @@ function CartPage() {
       {/* Breadcrumb */}
       <div style={{ background: '#f5f5f5', padding: '16px 24px' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto' }}>
-          <Breadcrumb>
-            <Breadcrumb.Item>
-              <Link to="/"><HomeOutlined /> Trang chủ</Link>
-            </Breadcrumb.Item>
-            <Breadcrumb.Item>Giỏ hàng</Breadcrumb.Item>
-          </Breadcrumb>
+          <Breadcrumb
+            items={[
+              {
+                title: <Link to="/"><HomeOutlined /> Trang chủ</Link>
+              },
+              {
+                title: 'Giỏ hàng'
+              }
+            ]}
+          />
         </div>
       </div>
 

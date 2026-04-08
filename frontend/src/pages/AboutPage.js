@@ -259,13 +259,15 @@ function AboutPage() {
                   <Card 
                     className="value-card"
                     hoverable
-                    bodyStyle={{
-                      padding: '32px 24px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      textAlign: 'center',
-                      height: '100%'
+                    styles={{
+                      body: {
+                        padding: '32px 24px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        textAlign: 'center',
+                        height: '100%'
+                      }
                     }}
                     style={{ 
                       animationDelay: `${index * 0.1}s`,
@@ -439,21 +441,21 @@ function AboutPage() {
             </Title>
           </div>
           <div className="timeline-wrapper">
-            <Timeline mode="alternate">
-              {milestones.map((milestone, index) => (
-                <Timeline.Item
-                  key={index}
-                  dot={<RiseOutlined style={{ fontSize: 20 }} />}
-                  color="#1890ff"
-                >
+            <Timeline 
+              mode="alternate"
+              items={milestones.map((milestone, index) => ({
+                key: index,
+                dot: <RiseOutlined style={{ fontSize: 20 }} />,
+                color: "#1890ff",
+                children: (
                   <Card className="timeline-card" hoverable>
                     <div className="timeline-year">{milestone.year}</div>
                     <Title level={4}>{milestone.title}</Title>
                     <Paragraph>{milestone.description}</Paragraph>
                   </Card>
-                </Timeline.Item>
-              ))}
-            </Timeline>
+                )
+              }))}
+            />
           </div>
         </div>
       </div>

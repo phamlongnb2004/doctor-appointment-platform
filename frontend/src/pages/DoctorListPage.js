@@ -15,6 +15,7 @@ function DoctorListPage() {
   const [selectedSpecialization, setSelectedSpecialization] = useState(null);
   const [specializations, setSpecializations] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [heroLoading, setHeroLoading] = useState(true);
   const [heroContent, setHeroContent] = useState({
     title: 'Đặt lịch khám bác sĩ',
     subtitle: 'Tìm kiếm và đặt lịch khám với hơn 200 bác sĩ chuyên khoa hàng đầu',
@@ -23,6 +24,18 @@ function DoctorListPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Load cached hero content from localStorage first
+    const cachedHeroContent = localStorage.getItem('doctorsHeroContent');
+    if (cachedHeroContent) {
+      try {
+        const parsed = JSON.parse(cachedHeroContent);
+        setHeroContent(parsed);
+        setHeroLoading(false);
+      } catch (e) {
+        console.error('Error parsing cached hero content:', e);
+      }
+    }
+    
     fetchDoctors();
     fetchSiteSettings();
     const userData = {
@@ -48,19 +61,20 @@ function DoctorListPage() {
       console.log('Site settings response:', data);
       console.log('doctorsHeroBackground:', data.doctorsHeroBackground);
       if (data) {
-        setHeroContent({
+        const newHeroContent = {
           title: data.doctorsHeroTitle || 'Đặt lịch khám bác sĩ',
           subtitle: data.doctorsHeroSubtitle || 'Tìm kiếm và đặt lịch khám với hơn 200 bác sĩ chuyên khoa hàng đầu',
           background: data.doctorsHeroBackground
-        });
-        console.log('Hero content set:', {
-          title: data.doctorsHeroTitle,
-          subtitle: data.doctorsHeroSubtitle,
-          background: data.doctorsHeroBackground
-        });
+        };
+        setHeroContent(newHeroContent);
+        // Cache to localStorage for instant load next time
+        localStorage.setItem('doctorsHeroContent', JSON.stringify(newHeroContent));
+        console.log('Hero content set:', newHeroContent);
       }
     } catch (error) {
       console.error('Error fetching site settings:', error);
+    } finally {
+      setHeroLoading(false);
     }
   };
 
@@ -108,12 +122,13 @@ function DoctorListPage() {
       <div 
         className="doctors-hero"
         style={{
-          background: heroContent.background 
+          backgroundImage: !heroLoading && heroContent.background 
             ? `linear-gradient(135deg, rgba(0, 58, 112, 0.7) 0%, rgba(0, 58, 112, 0.7) 100%), url(${heroContent.background})`
-            : 'linear-gradient(135deg, #0066FF 0%, #0052CC 100%)',
+            : 'linear-gradient(135deg, rgba(0, 58, 112, 0.85) 0%, rgba(0, 58, 112, 0.85) 100%)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
+          backgroundRepeat: 'no-repeat',
+          transition: 'background-image 0.3s ease-in-out'
         }}
       >
         <div className="doctors-hero-content">

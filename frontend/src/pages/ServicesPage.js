@@ -99,12 +99,16 @@ function ServicesPage() {
       {/* Breadcrumb */}
       <div className="services-breadcrumb">
         <div className="container">
-          <Breadcrumb>
-            <Breadcrumb.Item>
-              <Link to="/"><HomeOutlined /> Trang chủ</Link>
-            </Breadcrumb.Item>
-            <Breadcrumb.Item>Dịch vụ y tế</Breadcrumb.Item>
-          </Breadcrumb>
+          <Breadcrumb
+            items={[
+              {
+                title: <Link to="/"><HomeOutlined /> Trang chủ</Link>
+              },
+              {
+                title: 'Dịch vụ y tế'
+              }
+            ]}
+          />
         </div>
       </div>
 
@@ -116,7 +120,7 @@ function ServicesPage() {
             <div className="services-sidebar-wrapper">
               <Card 
                 className="services-category-card"
-                bordered={false}
+                variant="borderless"
               >
                 <div className="category-header">
                   <Title level={4} style={{ margin: 0, color: '#003a70' }}>
@@ -166,7 +170,7 @@ function ServicesPage() {
                     <Card
                       hoverable
                       className="service-card-professional"
-                      bordered={false}
+                      variant="borderless"
                       cover={
                         <div className="service-card-cover">
                           {/* Discount Badge */}

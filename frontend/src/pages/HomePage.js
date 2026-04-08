@@ -299,7 +299,7 @@ function HomePage() {
                   boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                   background: '#e6f7ff'
                 }}
-                bodyStyle={{ padding: '32px 24px' }}
+                styles={{ body: { padding: '32px 24px' } }}
               >
                 <Title level={4} style={{ color: '#13c2c2', marginBottom: 16, fontSize: 20 }}>
                   Đặt lịch nhanh
@@ -408,11 +408,13 @@ function HomePage() {
                         transition: 'all 0.3s ease',
                         background: '#fff'
                       }}
-                      bodyStyle={{ 
-                        padding: '32px 24px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        height: '100%'
+                      styles={{ 
+                        body: {
+                          padding: '32px 24px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          height: '100%'
+                        }
                       }}
                     >
                       {/* Icon */}

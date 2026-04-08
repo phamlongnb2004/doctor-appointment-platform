@@ -348,7 +348,7 @@ function ProfilePage({ user, onUserUpdate }) {
         {/* Form Section */}
         <Row gutter={24} style={{ marginTop: 24 }}>
           <Col xs={24} lg={16}>
-            <Card title="Thông tin cá nhân" bordered={false} style={{ borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+            <Card title="Thông tin cá nhân" variant="borderless" style={{ borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
               <Form form={form} onFinish={onFinish} layout="vertical" initialValues={user}>
                 <Row gutter={16}>
                   <Col xs={24} sm={12}>
@@ -431,7 +431,7 @@ function ProfilePage({ user, onUserUpdate }) {
 
           <Col xs={24} lg={8}>
             {/* Stats Card */}
-            <Card bordered={false} style={{ borderRadius: 16, marginBottom: 24, background: 'linear-gradient(135deg, #003a70 0%, #0066cc 100%)', color: '#fff', boxShadow: '0 4px 16px rgba(0,58,112,0.2)' }}>
+            <Card variant="borderless" style={{ borderRadius: 16, marginBottom: 24, background: 'linear-gradient(135deg, #003a70 0%, #0066cc 100%)', color: '#fff', boxShadow: '0 4px 16px rgba(0,58,112,0.2)' }}>
               <Row gutter={16}>
                 <Col span={8} style={{ textAlign: 'center' }}>
                   <Title level={3} style={{ color: '#fff', margin: 0 }}>{completedCount}</Title>
@@ -449,7 +449,7 @@ function ProfilePage({ user, onUserUpdate }) {
             </Card>
 
             {/* Appointment History */}
-            <Card title="Lịch sử khám" bordered={false} style={{ borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+            <Card title="Lịch sử khám" variant="borderless" style={{ borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
               {appointmentsLoading ? (
                 <div style={{ textAlign: 'center', padding: 20 }}>
                   <Spin />
@@ -486,7 +486,7 @@ function ProfilePage({ user, onUserUpdate }) {
             </Card>
 
             {/* Security */}
-            <Card title="Bảo mật" bordered={false} style={{ borderRadius: 16, marginTop: 24, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+            <Card title="Bảo mật" variant="borderless" style={{ borderRadius: 16, marginTop: 24, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
               <p style={{ color: '#666', marginBottom: 16 }}>Thay đổi mật khẩu để bảo vệ tài khoản</p>
               <Button 
                 block 
