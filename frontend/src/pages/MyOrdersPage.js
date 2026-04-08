@@ -52,11 +52,11 @@ function MyOrdersPage() {
 
   const getStatusColor = (status) => {
     const colorMap = {
-      'PENDING': 'orange',
-      'CONFIRMED': 'blue',
-      'PROCESSING': 'cyan',
-      'COMPLETED': 'green',
-      'CANCELLED': 'red'
+      'PENDING': '#faad14',      // Vàng
+      'CONFIRMED': '#1890ff',    // Xanh dương
+      'PROCESSING': '#13c2c2',   // Xanh cyan
+      'COMPLETED': '#52c41a',    // Xanh lá
+      'CANCELLED': '#ff4d4f'     // Đỏ
     };
     return colorMap[status] || 'default';
   };
@@ -109,7 +109,7 @@ function MyOrdersPage() {
       dataIndex: 'finalAmount',
       key: 'finalAmount',
       render: (amount) => (
-        <strong style={{ color: '#f5222d' }}>
+        <strong style={{ color: '#003a70', fontSize: 15 }}>
           {amount?.toLocaleString('vi-VN')} ₫
         </strong>
       )

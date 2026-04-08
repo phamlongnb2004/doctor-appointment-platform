@@ -14,7 +14,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api
 
 function CheckoutPage() {
   const navigate = useNavigate();
-  const { cart, loading: cartLoading } = useCart();
+  const { cart, loading: cartLoading, refreshCart } = useCart();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('COD');
@@ -52,6 +52,33 @@ function CheckoutPage() {
       // Save current path to redirect back after login
       localStorage.setItem('redirect_after_login', '/checkout');
       navigate('/login');
+      return;
+    }
+
+    // Check if user cancelled payment
+    const urlParams = new URLSearchParams(window.location.search);
+    const cancelled = urlParams.get('cancelled');
+    const orderNumber = urlParams.get('order');
+    
+    if (cancelled === 'true' && orderNumber) {
+      // Cancel the order
+      axios.put(`${API_BASE_URL}/orders/cancel-by-number/${orderNumber}`, {}, {
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      })
+      .then(() => {
+        message.error('Đơn hàng đã bị hủy do bạn đã hủy thanh toán');
+        // Clear URL parameters and redirect to my orders
+        setTimeout(() => {
+          navigate('/my-orders', { replace: true });
+        }, 2000);
+      })
+      .catch(error => {
+        console.error('Error cancelling order:', error);
+        message.error('Không thể hủy đơn hàng');
+        navigate('/checkout', { replace: true });
+      });
     }
   }, [navigate]);
 
@@ -145,7 +172,8 @@ function CheckoutPage() {
 
       const order = response.data;
 
-      // COD - chuyển thẳng đến trang success
+      // COD - refresh cart và chuyển thẳng đến trang success
+      await refreshCart();
       message.success('Đặt hàng thành công!');
       navigate(`/order-success/${order.orderNumber}`);
     } catch (error) {

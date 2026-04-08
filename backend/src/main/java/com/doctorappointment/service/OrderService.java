@@ -113,11 +113,11 @@ public class OrderService {
         
         orderItemRepository.saveAll(order.getItems());
 
-        // DON'T clear cart immediately - only clear when payment is confirmed
-        // User might cancel the order and want to keep items in cart
-        // cartItemRepository.deleteAll(cart.getItems());
-        // cart.getItems().clear();
-        // cartRepository.save(cart);
+        // Clear cart for COD orders immediately after order creation
+        // For online payment methods, cart will be cleared after payment confirmation
+        if ("COD".equals(order.getPaymentMethod())) {
+            clearCartForOrder(order);
+        }
 
         return mapToOrderResponse(order);
     }
@@ -229,6 +229,24 @@ public class OrderService {
     public OrderResponse cancelOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+        
+        // Only allow cancellation if order is still PENDING
+        if (!"PENDING".equals(order.getStatus())) {
+            throw new RuntimeException("Cannot cancel order with status: " + order.getStatus());
+        }
+        
+        order.setStatus("CANCELLED");
+        order.setCancelledAt(LocalDateTime.now());
+        order.setPaymentStatus("CANCELLED");
+        
+        order = orderRepository.save(order);
+        return mapToOrderResponse(order);
+    }
+
+    @Transactional
+    public OrderResponse cancelOrderByNumber(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new RuntimeException("Order not found with number: " + orderNumber));
         
         // Only allow cancellation if order is still PENDING
         if (!"PENDING".equals(order.getStatus())) {

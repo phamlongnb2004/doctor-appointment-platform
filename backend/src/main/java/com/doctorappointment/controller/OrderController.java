@@ -86,6 +86,12 @@ public class OrderController {
         return ResponseEntity.ok(order);
     }
 
+    @PutMapping("/cancel-by-number/{orderNumber}")
+    public ResponseEntity<OrderResponse> cancelOrderByNumber(@PathVariable String orderNumber) {
+        OrderResponse order = orderService.cancelOrderByNumber(orderNumber);
+        return ResponseEntity.ok(order);
+    }
+
     @PostMapping("/webhook/payment")
     public ResponseEntity<String> paymentWebhook(@RequestBody Map<String, Object> payload) {
         // Webhook để nhận thông báo thanh toán từ ngân hàng

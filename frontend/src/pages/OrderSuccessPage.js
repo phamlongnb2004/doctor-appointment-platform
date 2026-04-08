@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, Button, Result, Spin, Descriptions, Timeline } from 'antd';
 import { CheckCircleOutlined, HomeOutlined, FileTextOutlined } from '@ant-design/icons';
+import { useCart } from '../contexts/CartContext';
 import axios from 'axios';
 import '../styles/order.css';
 
@@ -11,11 +12,14 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api
 function OrderSuccessPage() {
   const { orderNumber } = useParams();
   const navigate = useNavigate();
+  const { refreshCart } = useCart();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchOrder();
+    // Refresh cart to ensure it's cleared after successful order
+    refreshCart();
   }, [orderNumber]);
 
   const fetchOrder = async () => {
