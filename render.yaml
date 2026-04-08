@@ -20,7 +20,7 @@ services:
         value: 8080
       - key: APP_BASE_URL
         sync: false
-      - key: FRONTEND_URL
+      - key: APP_FRONTEND_URL
         value: https://doctor-appointment-frontend-ujug.onrender.com
 
   # Frontend Service
