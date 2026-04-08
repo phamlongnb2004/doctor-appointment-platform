@@ -814,12 +814,23 @@
   height: 44px !important;
   font-weight: 600 !important;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  color: #fff !important;
 }
 
 .admin-modal .ant-btn-primary:hover {
   background: #059669 !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+  color: #fff !important;
+}
+
+/* Fix button text color in tables */
+.ant-table .ant-btn-primary {
+  color: #fff !important;
+}
+
+.ant-table .ant-btn-primary:hover {
+  color: #fff !important;
 }
 
 /* ========================================
@@ -1084,4 +1095,21 @@
   .ant-card-body {
     padding: 12px !important;
   }
+}
+
+/* Force white text color for primary buttons in admin dashboard */
+.admin-content .ant-btn-primary,
+.admin-content .ant-btn-primary:hover,
+.admin-content .ant-btn-primary:focus,
+.admin-content .ant-btn-primary:active,
+.admin-content .ant-table .ant-btn-primary,
+.admin-content .ant-table .ant-btn-primary:hover,
+.admin-content .ant-table .ant-btn-primary:focus,
+.admin-content .ant-table .ant-btn-primary:active {
+  color: #ffffff !important;
+}
+
+/* Specific fix for confirm button in orders table */
+.admin-content .ant-table .ant-btn-primary span {
+  color: #ffffff !important;
 }

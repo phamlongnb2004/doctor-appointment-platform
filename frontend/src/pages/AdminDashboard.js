@@ -17,7 +17,10 @@ function AdminDashboard({ user, onLogout }) {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
-  const [selectedKey, setSelectedKey] = useState('overview');
+  const [selectedKey, setSelectedKey] = useState(() => {
+    // Restore last active tab from localStorage
+    return localStorage.getItem('adminActiveTab') || 'overview';
+  });
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -177,6 +180,8 @@ function AdminDashboard({ user, onLogout }) {
 
   const handleMenuClick = ({ key }) => {
     setSelectedKey(key);
+    // Save active tab to localStorage
+    localStorage.setItem('adminActiveTab', key);
     setMobileMenuVisible(false); // Close mobile menu after selection
     if (key === 'logout') {
       onLogout();
@@ -1125,7 +1130,7 @@ function AdminDashboard({ user, onLogout }) {
                                 message.error('Có lỗi xảy ra!');
                               }
                             }}
-                            style={{ borderRadius: 8 }}
+                            style={{ borderRadius: 8, color: '#fff !important' }}
                           >
                             Xác nhận
                           </Button>
@@ -1265,7 +1270,7 @@ function AdminDashboard({ user, onLogout }) {
                       <Text strong style={{ fontSize: 16 }}>Người dùng gần đây</Text>
                     </div>
                   }
-                  extra={<Button type="link" onClick={() => setSelectedKey('users')}>Xem tất cả</Button>}
+                  extra={<Button type="link" onClick={() => { setSelectedKey('users'); localStorage.setItem('adminActiveTab', 'users'); }}>Xem tất cả</Button>}
                 >
                   <Table
                     dataSource={userTableData.slice(0, 5)}
@@ -1288,7 +1293,7 @@ function AdminDashboard({ user, onLogout }) {
                       <Text strong style={{ fontSize: 16 }}>Lịch hẹn gần đây</Text>
                     </div>
                   }
-                  extra={<Button type="link" onClick={() => setSelectedKey('appointments')}>Xem tất cả</Button>}
+                  extra={<Button type="link" onClick={() => { setSelectedKey('appointments'); localStorage.setItem('adminActiveTab', 'appointments'); }}>Xem tất cả</Button>}
                 >
                   <Table
                     dataSource={appointmentTableData.slice(0, 5)}

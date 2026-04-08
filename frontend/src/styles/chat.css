@@ -226,6 +226,13 @@
   border-radius: 20px;
   height: 40px;
   min-width: 80px;
+  color: #fff !important;
+}
+
+.send-button:hover,
+.send-button:focus,
+.send-button:active {
+  color: #fff !important;
 }
 
 /* No Chat Selected */

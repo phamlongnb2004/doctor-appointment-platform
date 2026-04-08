@@ -41,7 +41,7 @@ function DoctorListPage() {
 
   const fetchSiteSettings = async () => {
     try {
-      const apiUrl = `${process.env.REACT_APP_API_URL}/api/cms/site-settings`;
+      const apiUrl = `${process.env.REACT_APP_API_URL}/cms/site-settings`;
       console.log('Fetching site settings from:', apiUrl);
       const response = await fetch(apiUrl);
       const data = await response.json();
@@ -109,7 +109,7 @@ function DoctorListPage() {
         className="doctors-hero"
         style={{
           background: heroContent.background 
-            ? `linear-gradient(135deg, rgba(0, 102, 255, 0.9) 0%, rgba(0, 82, 204, 0.9) 100%), url(${heroContent.background})`
+            ? `linear-gradient(135deg, rgba(0, 58, 112, 0.7) 0%, rgba(0, 58, 112, 0.7) 100%), url(${heroContent.background})`
             : 'linear-gradient(135deg, #0066FF 0%, #0052CC 100%)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',

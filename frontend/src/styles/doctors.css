@@ -11,6 +11,9 @@
   padding: 120px 24px 80px;
   position: relative;
   overflow: hidden;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
 }
 
 .doctors-hero::before {
