@@ -1210,13 +1210,7 @@ function AdminCMSPage() {
       title: 'Tác giả', 
       dataIndex: 'author', 
       key: 'author',
-      width: '12%'
-    },
-    { 
-      title: 'Bác sĩ', 
-      key: 'doctor',
-      render: (_, record) => record.doctor ? `Dr. ${record.doctor.user?.firstName} ${record.doctor.user?.lastName}` : 'N/A',
-      width: '12%'
+      width: '15%'
     },
     { 
       title: 'Trạng thái duyệt', 
@@ -1231,7 +1225,7 @@ function AdminCMSPage() {
         const s = statusMap[status] || { color: 'default', text: status };
         return <Tag color={s.color}>{s.text}</Tag>;
       },
-      width: '10%'
+      width: '12%'
     },
     { 
       title: 'Nổi bật', 
