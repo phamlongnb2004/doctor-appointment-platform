@@ -42,8 +42,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 465
-    username: doctor.appointment.platform@gmail.com
-    password: scnv gwyd ibxp zuzh
+    username: ${MAIL_USERNAME:doctor.appointment.platform@gmail.com}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -83,8 +83,8 @@ sendgrid:
   from-name: MEDLATEC
 
 sepay:
-  merchant-id: SP-TEST-PT873684
-  secret-key: spsk_test_YtN9NC2N9adiW58jM8CUnBNd95pVtZUK
+  merchant-id: ${SEPAY_MERCHANT_ID:SP-TEST-PT873684}
+  secret-key: ${SEPAY_SECRET_KEY}
   env: sandbox
   checkout-url: https://pay-sandbox.sepay.vn/v1/checkout/init
   ipn-url: http://localhost:8080/api/orders/sepay/ipn

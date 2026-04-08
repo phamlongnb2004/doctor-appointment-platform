@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -37,17 +38,19 @@ public class SecurityConfig {
                 // Remove CORS from Security - let CorsConfig filter handle it
                 .authorizeHttpRequests(auth -> {
                     auth
-                        .requestMatchers("/test/**").permitAll()
-                        .requestMatchers("/orders/sepay/ipn").permitAll() // Allow SePay IPN callback
-                        .requestMatchers("/users/online/**").hasAnyRole("ADMIN", "CONSULTANT")
-                        .requestMatchers("/users/stats").hasAnyRole("ADMIN", "CONSULTANT")
-                        .requestMatchers("/users/doctors").hasAnyRole("ADMIN", "CONSULTANT")
-                        .requestMatchers("/users/patients").hasAnyRole("ADMIN", "CONSULTANT")
-                        .requestMatchers("/chat/**").hasAnyRole("ADMIN", "DOCTOR", "CONSULTANT", "PATIENT")
-                        .requestMatchers("/users/debug/**").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll() // H2 Console
+                        .requestMatchers(new AntPathRequestMatcher("/test/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/orders/sepay/ipn")).permitAll() // Allow SePay IPN callback
+                        .requestMatchers(new AntPathRequestMatcher("/users/online/**")).hasAnyRole("ADMIN", "CONSULTANT")
+                        .requestMatchers(new AntPathRequestMatcher("/users/stats")).hasAnyRole("ADMIN", "CONSULTANT")
+                        .requestMatchers(new AntPathRequestMatcher("/users/doctors")).hasAnyRole("ADMIN", "CONSULTANT")
+                        .requestMatchers(new AntPathRequestMatcher("/users/patients")).hasAnyRole("ADMIN", "CONSULTANT")
+                        .requestMatchers(new AntPathRequestMatcher("/chat/**")).hasAnyRole("ADMIN", "DOCTOR", "CONSULTANT", "PATIENT")
+                        .requestMatchers(new AntPathRequestMatcher("/users/debug/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/actuator/**")).permitAll()
                         .anyRequest().permitAll();
                 })
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // Allow H2 Console frames
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )

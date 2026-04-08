@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Row, Col, Card, Form, Input, Button, Radio, Breadcrumb, message, Spin, Modal, Image, Select } from 'antd';
-import { HomeOutlined, CheckCircleOutlined, QrcodeOutlined, CloseOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Form, Input, Button, Radio, Breadcrumb, message, Spin, Select } from 'antd';
+import { HomeOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { useCart } from '../contexts/CartContext';
 import axios from 'axios';
 import '../styles/checkout.css';
@@ -17,16 +17,6 @@ function CheckoutPage() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('COD');
-  const [qrModalVisible, setQrModalVisible] = useState(false);
-  const [qrCodeUrl, setQrCodeUrl] = useState('');
-  const [orderData, setOrderData] = useState(null);
-  const [checkingPayment, setCheckingPayment] = useState(false);
-  const [bankInfo, setBankInfo] = useState({
-    bankId: 'MB',
-    bankName: 'MB Bank',
-    accountNo: '0123456789',
-    accountName: 'KHAMNOW'
-  });
   
   // Address data (API v2 - sau sát nhập tỉnh, chỉ còn Province → Ward)
   const [provinces, setProvinces] = useState([]);
@@ -63,27 +53,6 @@ function CheckoutPage() {
       navigate('/login');
     }
   }, [navigate]);
-
-  // Fetch bank info from site settings
-  useEffect(() => {
-    const fetchBankInfo = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/cms/site-settings`);
-        const settings = response.data;
-        if (settings.bankId && settings.bankAccountNo) {
-          setBankInfo({
-            bankId: settings.bankId,
-            bankName: settings.bankName || 'MB Bank',
-            accountNo: settings.bankAccountNo,
-            accountName: settings.bankAccountName || 'KHAMNOW'
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching bank info:', error);
-      }
-    };
-    fetchBankInfo();
-  }, []);
 
   // Fetch provinces on mount (API v2)
   useEffect(() => {
@@ -122,50 +91,6 @@ function CheckoutPage() {
     const ward = wards.find(w => w.code === value);
     setSelectedWardData(ward);
   };
-
-  // Generate QR Code using VietQR API
-  const generateQRCode = (orderNumber, amount) => {
-    // Sử dụng thông tin ngân hàng từ CMS
-    const template = 'compact'; // Template QR
-    
-    // Nội dung chuyển khoản
-    const description = `KHAMNOW ${orderNumber}`;
-    
-    // Tạo URL QR code sử dụng VietQR API
-    const qrUrl = `https://img.vietqr.io/image/${bankInfo.bankId}-${bankInfo.accountNo}-${template}.png?amount=${amount}&addInfo=${encodeURIComponent(description)}&accountName=${encodeURIComponent(bankInfo.accountName)}`;
-    
-    return qrUrl;
-  };
-
-  // Check payment status periodically
-  useEffect(() => {
-    let intervalId;
-    
-    if (checkingPayment && orderData) {
-      intervalId = setInterval(async () => {
-        try {
-          const response = await axios.get(
-            `${API_BASE_URL}/orders/number/${orderData.orderNumber}`
-          );
-          
-          if (response.data.paymentStatus === 'PAID') {
-            setCheckingPayment(false);
-            setQrModalVisible(false);
-            message.success('Thanh toán thành công!');
-            navigate(`/order-success/${orderData.orderNumber}`);
-          }
-        } catch (error) {
-          console.error('Error checking payment status:', error);
-        }
-      }, 5000); // Check every 5 seconds
-    }
-    
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [checkingPayment, orderData, navigate]);
 
   const handleCheckout = async (values) => {
     try {
@@ -218,7 +143,6 @@ function CheckoutPage() {
       );
 
       const order = response.data;
-      setOrderData(order);
 
       // COD - chuyển thẳng đến trang success
       message.success('Đặt hàng thành công!');
@@ -228,40 +152,6 @@ function CheckoutPage() {
       message.error('Lỗi khi đặt hàng. Vui lòng thử lại!');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCancelPayment = async () => {
-    setQrModalVisible(false);
-    setCheckingPayment(false);
-    
-    // Cancel the order automatically
-    if (orderData && orderData.id) {
-      try {
-        await axios.put(
-          `${API_BASE_URL}/orders/${orderData.id}/cancel`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-          }
-        );
-        message.success('Đã hủy đơn hàng. Sản phẩm vẫn còn trong giỏ hàng.');
-        // Redirect to cart page
-        setTimeout(() => {
-          navigate('/cart');
-        }, 1000);
-      } catch (error) {
-        console.error('Error cancelling order:', error);
-        message.warning('Đã hủy thanh toán. Bạn có thể thanh toán sau trong mục "Đơn hàng của tôi"');
-        setTimeout(() => {
-          navigate('/my-orders');
-        }, 1000);
-      }
-    } else {
-      // If no order data, just go back to cart
-      navigate('/cart');
     }
   };
 
@@ -468,13 +358,14 @@ function CheckoutPage() {
                         width: 48,
                         height: 48,
                         borderRadius: 8,
-                        background: '#f5f5f5',
+                        background: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: 24
+                        fontSize: 20,
+                        color: '#fff'
                       }}>
-                        💵
+                        <i className="fas fa-money-bill-wave"></i>
                       </div>
                     </div>
                   </div>
@@ -552,13 +443,14 @@ function CheckoutPage() {
                         width: 48,
                         height: 48,
                         borderRadius: 8,
-                        background: '#f5f5f5',
+                        background: 'linear-gradient(135deg, #1890ff 0%, #40a9ff 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: 24
+                        fontSize: 20,
+                        color: '#fff'
                       }}>
-                        🏦
+                        <i className="fas fa-credit-card"></i>
                       </div>
                     </div>
                   </div>
@@ -705,148 +597,6 @@ function CheckoutPage() {
           </Row>
         </Form>
       </div>
-
-      {/* QR Code Payment Modal */}
-      <Modal
-        title={
-          <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 600 }}>
-            <QrcodeOutlined style={{ marginRight: 8, color: '#1890ff' }} />
-            Quét mã QR để thanh toán
-          </div>
-        }
-        open={qrModalVisible}
-        onCancel={handleCancelPayment}
-        footer={null}
-        width={500}
-        centered
-        closeIcon={<CloseOutlined />}
-      >
-        <div style={{ textAlign: 'center', padding: '20px 0' }}>
-          {/* QR Code */}
-          <div style={{ 
-            background: '#fff',
-            padding: 20,
-            borderRadius: 12,
-            marginBottom: 20,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-          }}>
-            <Image
-              src={qrCodeUrl}
-              alt="QR Code"
-              style={{ 
-                width: '100%',
-                maxWidth: 300,
-                margin: '0 auto'
-              }}
-              preview={false}
-            />
-          </div>
-
-          {/* Payment Info */}
-          <div style={{ 
-            background: '#f5f5f5',
-            padding: 16,
-            borderRadius: 8,
-            marginBottom: 16,
-            textAlign: 'left'
-          }}>
-            <div style={{ marginBottom: 12 }}>
-              <span style={{ color: '#8c8c8c' }}>Ngân hàng:</span>
-              <span style={{ fontWeight: 600, marginLeft: 8 }}>{bankInfo.bankName}</span>
-            </div>
-            <div style={{ marginBottom: 12 }}>
-              <span style={{ color: '#8c8c8c' }}>Số tài khoản:</span>
-              <span style={{ fontWeight: 600, marginLeft: 8 }}>{bankInfo.accountNo}</span>
-            </div>
-            <div style={{ marginBottom: 12 }}>
-              <span style={{ color: '#8c8c8c' }}>Chủ tài khoản:</span>
-              <span style={{ fontWeight: 600, marginLeft: 8 }}>{bankInfo.accountName}</span>
-            </div>
-            <div style={{ marginBottom: 12 }}>
-              <span style={{ color: '#8c8c8c' }}>Số tiền:</span>
-              <span style={{ fontWeight: 700, marginLeft: 8, color: '#f5222d', fontSize: 18 }}>
-                {orderData?.finalAmount?.toLocaleString('vi-VN')} ₫
-              </span>
-            </div>
-            <div>
-              <span style={{ color: '#8c8c8c' }}>Nội dung:</span>
-              <span style={{ fontWeight: 600, marginLeft: 8, color: '#1890ff' }}>
-                KHAMNOW {orderData?.orderNumber}
-              </span>
-            </div>
-          </div>
-
-          {/* Instructions */}
-          <div style={{ 
-            background: '#e6f7ff',
-            border: '1px solid #91d5ff',
-            padding: 16,
-            borderRadius: 8,
-            marginBottom: 16,
-            textAlign: 'left'
-          }}>
-            <div style={{ fontWeight: 600, marginBottom: 8, color: '#0050b3' }}>
-              📱 Hướng dẫn thanh toán:
-            </div>
-            <ol style={{ margin: 0, paddingLeft: 20, color: '#595959' }}>
-              <li>Mở ứng dụng ngân hàng của bạn</li>
-              <li>Chọn chức năng quét mã QR</li>
-              <li>Quét mã QR phía trên</li>
-              <li>Kiểm tra thông tin và xác nhận thanh toán</li>
-            </ol>
-          </div>
-
-          {/* Status */}
-          {checkingPayment && (
-            <div style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 12,
-              padding: 16,
-              background: '#fffbe6',
-              border: '1px solid #ffe58f',
-              borderRadius: 8,
-              marginBottom: 16
-            }}>
-              <Spin size="small" />
-              <span style={{ color: '#d48806', fontWeight: 500 }}>
-                Đang chờ xác nhận thanh toán...
-              </span>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div style={{ display: 'flex', gap: 12 }}>
-            <Button 
-              block
-              size="large"
-              onClick={handleCancelPayment}
-            >
-              Thanh toán sau
-            </Button>
-            <Button 
-              type="primary"
-              block
-              size="large"
-              onClick={() => {
-                message.info('Vui lòng chờ hệ thống tự động xác nhận thanh toán');
-              }}
-            >
-              Đã thanh toán
-            </Button>
-          </div>
-
-          <div style={{ 
-            marginTop: 16,
-            fontSize: 13,
-            color: '#8c8c8c',
-            textAlign: 'center'
-          }}>
-            💡 Hệ thống sẽ tự động xác nhận khi nhận được thanh toán
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 }

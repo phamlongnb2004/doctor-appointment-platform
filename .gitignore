@@ -34,3 +34,62 @@ backend/uploads/
 
 # Database
 *.sql.backup
+
+# H2 Database files (local dev)
+data/
+*.db
+*.mv.db
+*.trace.db
+
+# Database backups (should not be committed)
+database/backups/
+**/backups/*.sql
+
+# Sensitive configuration files
+backend/src/main/resources/application-render.yml
+backend/run-render.bat
+**/application-local.yml
+**/application-secret.yml
+
+# Python scripts with credentials
+*_credentials.py
+*_secrets.py
+backup_database.py
+restore_database.py
+restore_all_tables.py
+run_sql.py
+run_sql_on_render.bat
+verify_tables.py
+create_users_table.py
+fix_admin_password.py
+create_all_missing_tables.py
+ensure_cms_tables.py
+insert_cms_data.py
+init_h2_cms.py
+check_*.py
+test_sepay_*.py
+test_sepay_*.js
+test_sepay_*.html
+verify_*.js
+
+# Backup and temporary files
+*.bak
+*.tmp
+*.swp
+*~
+
+# Docker compose (may contain local configurations)
+docker-compose.yml
+docker-compose.override.yml
+
+# Internal documentation with sensitive info
+DEPLOYMENT_CHECKLIST.md
+FIX_*.md
+RENDER_*.md
+RUN_ON_RENDER_SHELL.md
+SEPAY_FIX_GUIDE.md
+SEPAY_INTEGRATION.md
+SEPAY_PAYMENT_FLOW.md
+SEPAY_SETUP_CHECKLIST.md
+SEPAY_TESTING_GUIDE.md
+SETUP_*.md
