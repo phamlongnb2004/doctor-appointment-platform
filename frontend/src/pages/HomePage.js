@@ -719,15 +719,39 @@ function HomePage() {
                       flexWrap: 'wrap'
                     }}>
                       <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                        {[...Array(5)].map((_, index) => (
-                          <StarFilled 
-                            key={index}
-                            style={{ 
-                              fontSize: 16,
-                              color: index < Math.round(doctor.ratingScore || 0) ? '#FFD700' : '#e8e8e8'
-                            }}
-                          />
-                        ))}
+                        {[...Array(5)].map((_, index) => {
+                          const rating = doctor.ratingScore || 0;
+                          const fillPercentage = Math.max(0, Math.min(1, rating - index));
+                          
+                          return (
+                            <div key={index} style={{ position: 'relative', display: 'inline-block' }}>
+                              {/* Background star (gray) */}
+                              <StarFilled 
+                                style={{ 
+                                  fontSize: 16,
+                                  color: '#e8e8e8'
+                                }}
+                              />
+                              {/* Foreground star (gold) with clip */}
+                              {fillPercentage > 0 && (
+                                <div style={{
+                                  position: 'absolute',
+                                  top: 0,
+                                  left: 0,
+                                  width: `${fillPercentage * 100}%`,
+                                  overflow: 'hidden'
+                                }}>
+                                  <StarFilled 
+                                    style={{ 
+                                      fontSize: 16,
+                                      color: '#FFD700'
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                       <span style={{ 
                         fontSize: 14, 
