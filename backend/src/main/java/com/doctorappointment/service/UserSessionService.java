@@ -135,9 +135,9 @@ public class UserSessionService {
 
     /**
      * Scheduled task to clean up expired sessions
-     * Runs every minute
+     * Runs every 10 minutes (optimized for free tier)
      */
-    @Scheduled(fixedRate = 60000) // Every minute
+    @Scheduled(fixedRate = 600000) // Every 10 minutes
     @Transactional
     public void cleanupExpiredSessions() {
         LocalDateTime threshold = LocalDateTime.now().minusMinutes(SESSION_TIMEOUT_MINUTES);
