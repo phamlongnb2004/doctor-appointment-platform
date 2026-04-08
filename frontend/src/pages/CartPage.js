@@ -1,8 +1,9 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Row, Col, Button, InputNumber, Empty, Spin, Breadcrumb, Card, message } from 'antd';
+import { Row, Col, Button, InputNumber, Empty, Spin, Breadcrumb, Card } from 'antd';
 import { HomeOutlined, DeleteOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { useCart } from '../contexts/CartContext';
+import defaultProductImage from '../assets/default-product.png';
 import '../styles/cart.css';
 
 function CartPage() {
@@ -121,7 +122,7 @@ function CartPage() {
                         height: 100, 
                         flexShrink: 0,
                         cursor: 'pointer',
-                        background: '#f5f5f5',
+                        background: '#ffffff',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -141,12 +142,22 @@ function CartPage() {
                             objectFit: 'cover'
                           }}
                           onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.parentElement.innerHTML = '<div style="font-size: 40px; opacity: 0.3;">🏥</div>';
+                            e.target.src = defaultProductImage;
+                            e.target.style.objectFit = 'contain';
+                            e.target.style.padding = '16px';
                           }}
                         />
                       ) : (
-                        <div style={{ fontSize: 40, opacity: 0.3 }}>🏥</div>
+                        <img 
+                          src={defaultProductImage}
+                          alt="Default product"
+                          style={{ 
+                            width: '70%', 
+                            height: '70%', 
+                            objectFit: 'contain',
+                            opacity: 0.6
+                          }}
+                        />
                       )}
                     </div>
 
@@ -167,7 +178,7 @@ function CartPage() {
                       <div style={{ 
                         fontSize: 18, 
                         fontWeight: 700, 
-                        color: '#f5222d',
+                        color: '#262626',
                         marginBottom: 12
                       }}>
                         {item.price?.toLocaleString('vi-VN')} ₫
@@ -206,7 +217,7 @@ function CartPage() {
                       <div style={{ fontSize: 14, color: '#8c8c8c', marginBottom: 4 }}>
                         Tạm tính
                       </div>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: '#1890ff' }}>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: '#0066CC' }}>
                         {item.subtotal?.toLocaleString('vi-VN')} ₫
                       </div>
                     </div>
@@ -255,7 +266,7 @@ function CartPage() {
                       fontSize: 18
                     }}>
                       <span style={{ fontWeight: 600 }}>Tổng cộng:</span>
-                      <span style={{ fontWeight: 700, color: '#f5222d' }}>
+                      <span style={{ fontWeight: 700, color: '#0066CC', fontSize: 20 }}>
                         {cart.totalAmount?.toLocaleString('vi-VN')} ₫
                       </span>
                     </div>
