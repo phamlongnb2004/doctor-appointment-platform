@@ -710,22 +710,38 @@ function HomePage() {
                       Chuyên khoa - {doctor.specialization}
                     </div>
                     
-                    <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ display: 'flex', gap: 2 }}>
+                    <div style={{ 
+                      marginBottom: 12, 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      gap: 6,
+                      flexWrap: 'wrap'
+                    }}>
+                      <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                         {[...Array(5)].map((_, index) => (
                           <StarFilled 
                             key={index}
                             style={{ 
-                              fontSize: 14,
+                              fontSize: 16,
                               color: index < Math.round(doctor.ratingScore || 0) ? '#FFD700' : '#e8e8e8'
                             }}
                           />
                         ))}
                       </div>
-                      <span style={{ fontSize: 13, color: '#666', fontWeight: 600 }}>
+                      <span style={{ 
+                        fontSize: 14, 
+                        color: '#262626', 
+                        fontWeight: 700,
+                        lineHeight: 1
+                      }}>
                         {(doctor.ratingScore || 0).toFixed(1)}
                       </span>
-                      <span style={{ fontSize: 12, color: '#999' }}>
+                      <span style={{ 
+                        fontSize: 13, 
+                        color: '#8c8c8c',
+                        lineHeight: 1
+                      }}>
                         ({doctor.reviewCount || 0} đánh giá)
                       </span>
                     </div>
