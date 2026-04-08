@@ -12,7 +12,17 @@ import java.util.Map;
 @RestController
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(
+    origins = {
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://doctor-appointment-platform-vaff.onrender.com",
+        "https://doctor-appointment-frontend-ujug.onrender.com",
+        "https://doctor-appointment-frontend.onrender.com"
+    },
+    allowedHeaders = "*",
+    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}
+)
 public class ReviewController {
     private final ReviewService reviewService;
 

@@ -629,10 +629,10 @@ function HomePage() {
                       border: '4px solid #13c2c2',
                       background: '#f0f9ff'
                     }}>
-                      {doctor.user?.profileImage ? (
+                      {doctor.profileImage ? (
                         <img
-                          src={doctor.user.profileImage}
-                          alt={`${doctor.user?.firstName} ${doctor.user?.lastName}`}
+                          src={doctor.profileImage}
+                          alt={`${doctor.firstName} ${doctor.lastName}`}
                           style={{
                             position: 'absolute',
                             left: 0,
@@ -660,7 +660,7 @@ function HomePage() {
                           fontWeight: 600,
                           zIndex: 1
                         }}>
-                          {doctor.user?.firstName?.charAt(0)}{doctor.user?.lastName?.charAt(0)}
+                          {doctor.firstName?.charAt(0)}{doctor.lastName?.charAt(0)}
                         </div>
                       )}
                       <span style={{
@@ -699,7 +699,7 @@ function HomePage() {
                           e.target.style.color = '#132432';
                         }}
                       >
-                        {doctor.user?.firstName} {doctor.user?.lastName}
+                        {doctor.firstName} {doctor.lastName}
                       </a>
                     </Title>
                     

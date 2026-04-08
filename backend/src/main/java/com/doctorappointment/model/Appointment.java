@@ -1,6 +1,7 @@
 package com.doctorappointment.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -13,10 +14,12 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
+    @JsonIgnoreProperties({"appointments", "password", "chatParticipants", "cartItems", "orders", "notifications", "userSessions"})
     private User patient;
 
     @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
+    @JsonIgnoreProperties({"appointments", "availability", "reviews", "articles"})
     private Doctor doctor;
 
     @Column(nullable = false)

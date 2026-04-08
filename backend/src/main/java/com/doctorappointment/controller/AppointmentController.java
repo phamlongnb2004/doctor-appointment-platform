@@ -8,13 +8,25 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/appointments")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(
+    origins = {
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://doctor-appointment-platform-vaff.onrender.com",
+        "https://doctor-appointment-frontend-ujug.onrender.com",
+        "https://doctor-appointment-frontend.onrender.com"
+    },
+    allowedHeaders = "*",
+    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}
+)
 public class AppointmentController {
     private final AppointmentService appointmentService;
 
@@ -111,6 +123,19 @@ public class AppointmentController {
             return ResponseEntity.ok(Map.of("message", "Appointment deleted successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/doctors/{doctorId}/available-slots")
+    public ResponseEntity<?> getAvailableSlots(
+            @PathVariable Long doctorId,
+            @RequestParam String date) {
+        try {
+            LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
+            List<String> availableSlots = appointmentService.getAvailableSlots(doctorId, localDate);
+            return ResponseEntity.ok(Map.of("availableSlots", availableSlots));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
 }

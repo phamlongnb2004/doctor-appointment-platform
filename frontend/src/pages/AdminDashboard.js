@@ -347,9 +347,9 @@ function AdminDashboard({ user, onLogout }) {
   const doctorTableData = doctors.map((d, index) => ({
     key: index,
     id: d.id,
-    userId: d.user?.id,
-    name: `${d.user?.firstName || ''} ${d.user?.lastName || ''}`,
-    email: d.user?.email || '',
+    userId: d.userId,
+    name: `${d.firstName || ''} ${d.lastName || ''}`,
+    email: d.email || '',
     specialization: d.specialization || '',
     experienceYears: d.experienceYears || 0,
     consultationFee: d.consultationFee || 0,
@@ -362,7 +362,7 @@ function AdminDashboard({ user, onLogout }) {
     id: a.id,
     patient: `${a.patient?.firstName || ''} ${a.patient?.lastName || ''}`,
     patientPhone: a.patient?.phone || '',
-    doctor: `${a.doctor?.user?.firstName || ''} ${a.doctor?.user?.lastName || ''}`,
+    doctor: `${a.doctor?.firstName || ''} ${a.doctor?.lastName || ''}`,
     specialization: a.doctor?.specialization || '',
     date: a.appointmentDate || '',
     time: a.timeSlot || '',
@@ -1368,11 +1368,11 @@ function AdminDashboard({ user, onLogout }) {
                         <List.Item.Meta
                           avatar={
                             <Avatar size={44} style={{ backgroundColor: '#2f54eb' }}>
-                              {doctor.user?.firstName?.charAt(0)}{doctor.user?.lastName?.charAt(0)}
+                              {doctor.firstName?.charAt(0)}{doctor.lastName?.charAt(0)}
                             </Avatar>
                           }
                           title={
-                            <Text strong>{doctor.user?.firstName} {doctor.user?.lastName}</Text>
+                            <Text strong>{doctor.firstName} {doctor.lastName}</Text>
                           }
                           description={
                             <div>

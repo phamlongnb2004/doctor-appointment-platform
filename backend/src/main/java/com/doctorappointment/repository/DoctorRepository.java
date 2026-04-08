@@ -13,8 +13,11 @@ import java.util.Optional;
 public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     List<Doctor> findBySpecializationContainingIgnoreCase(String specialization);
 
-    @Query("SELECT d FROM Doctor d WHERE d.user.active = true")
+    @Query("SELECT d FROM Doctor d JOIN FETCH d.user WHERE d.user.active = true")
     List<Doctor> findByUser_ActiveTrue();
 
     Optional<Doctor> findByUserId(Long userId);
+    
+    @Query("SELECT d FROM Doctor d LEFT JOIN FETCH d.user")
+    List<Doctor> findAllWithUser();
 }

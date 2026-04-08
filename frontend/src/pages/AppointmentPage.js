@@ -15,6 +15,9 @@ function AppointmentPage({ user }) {
   const [doctors, setDoctors] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,6 +39,38 @@ function AppointmentPage({ user }) {
   const handleDoctorChange = (doctorId) => {
     const doctor = doctors.find(d => d.id === doctorId);
     setSelectedDoctor(doctor);
+    // Reset time slot when doctor changes
+    form.setFieldsValue({ time: undefined });
+    // Fetch available slots if date is already selected
+    if (selectedDate && doctorId) {
+      fetchAvailableSlots(doctorId, selectedDate);
+    }
+  };
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    // Reset time slot when date changes
+    form.setFieldsValue({ time: undefined });
+    // Fetch available slots if doctor is already selected
+    const doctorId = form.getFieldValue('doctor');
+    if (doctorId && date) {
+      fetchAvailableSlots(doctorId, date);
+    }
+  };
+
+  const fetchAvailableSlots = async (doctorId, date) => {
+    setSlotsLoading(true);
+    try {
+      const dateStr = date.format('YYYY-MM-DD');
+      const response = await appointmentAPI.getAvailableSlots(doctorId, dateStr);
+      setAvailableSlots(response.data.availableSlots || []);
+    } catch (error) {
+      console.error('Error fetching available slots:', error);
+      message.error('Không thể tải khung giờ khám!');
+      setAvailableSlots([]);
+    } finally {
+      setSlotsLoading(false);
+    }
   };
 
   const onFinish = async (values) => {
@@ -105,11 +140,6 @@ function AppointmentPage({ user }) {
     }
   };
 
-  const timeSlots = [
-    '07:00 - 08:00', '08:00 - 09:00', '09:00 - 10:00', '10:00 - 11:00',
-    '13:00 - 14:00', '14:00 - 15:00', '15:00 - 16:00', '16:00 - 17:00'
-  ];
-
   return (
     <div className="appointment-page">
       <div className="appointment-container">
@@ -170,14 +200,25 @@ function AppointmentPage({ user }) {
                       rules={[{ required: true, message: 'Vui lòng chọn bác sĩ!' }]}
                     >
                       <Select 
-                        placeholder="Chọn bác sĩ" 
+                        placeholder="Tìm kiếm hoặc chọn bác sĩ..." 
                         size="large"
                         onChange={handleDoctorChange}
                         loading={loading}
+                        showSearch
+                        filterOption={(input, option) => {
+                          const searchText = input.toLowerCase();
+                          // Get the label from option props
+                          const label = option.label || '';
+                          return label.toLowerCase().includes(searchText);
+                        }}
                       >
                         {doctors.map((doctor) => (
-                          <Option key={doctor.id} value={doctor.id}>
-                            {doctor.user?.firstName} {doctor.user?.lastName} - {doctor.specialization}
+                          <Option 
+                            key={doctor.id} 
+                            value={doctor.id}
+                            label={`${doctor.firstName} ${doctor.lastName} - ${doctor.specialization}`}
+                          >
+                            {doctor.firstName} {doctor.lastName} - {doctor.specialization}
                           </Option>
                         ))}
                       </Select>
@@ -194,6 +235,7 @@ function AppointmentPage({ user }) {
                         style={{ width: '100%' }} 
                         placeholder="Chọn ngày khám"
                         disabledDate={(current) => current && current < new Date().setHours(0,0,0,0)}
+                        onChange={handleDateChange}
                       />
                     </Form.Item>
                   </Col>
@@ -204,8 +246,21 @@ function AppointmentPage({ user }) {
                   label="Khung giờ khám"
                   rules={[{ required: true, message: 'Vui lòng chọn khung giờ!' }]}
                 >
-                  <Select placeholder="Chọn khung giờ" size="large">
-                    {timeSlots.map((time) => (
+                  <Select 
+                    placeholder={
+                      !form.getFieldValue('doctor') || !selectedDate
+                        ? "Vui lòng chọn bác sĩ và ngày khám trước"
+                        : slotsLoading
+                        ? "Đang tải khung giờ..."
+                        : availableSlots.length === 0
+                        ? "Không có khung giờ trống"
+                        : "Chọn khung giờ"
+                    }
+                    size="large"
+                    loading={slotsLoading}
+                    disabled={!form.getFieldValue('doctor') || !selectedDate || slotsLoading}
+                  >
+                    {availableSlots.map((time) => (
                       <Option key={time} value={time}>
                         <div className="time-slot-option">
                           <ClockCircleOutlined />
@@ -252,11 +307,11 @@ function AppointmentPage({ user }) {
                   <div className="doctor-avatar-section">
                     <Avatar 
                       size={80} 
-                      src={selectedDoctor.user?.profileImage}
+                      src={selectedDoctor.profileImage}
                       icon={<UserOutlined />}
                     />
                     <div className="doctor-name">
-                      {selectedDoctor.user?.firstName} {selectedDoctor.user?.lastName}
+                      {selectedDoctor.firstName} {selectedDoctor.lastName}
                     </div>
                     <div className="doctor-specialty">{selectedDoctor.specialization}</div>
                   </div>

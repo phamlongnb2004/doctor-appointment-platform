@@ -50,6 +50,7 @@ import {
 import cmsAPI from '../services/cmsApi';
 import axios from 'axios';
 import ArticleCtaSection from '../components/ArticleCtaSection';
+import RichTextEditor from '../components/RichTextEditor';
 import '../styles/admin-cms.css';
 
 const { TabPane } = Tabs;
@@ -381,7 +382,27 @@ function AdminCMSPage() {
     setModalVisible(true);
   };
 
-  const handleEdit = (item) => {
+  const handleEdit = async (item) => {
+    // For doctor-articles, fetch full content first
+    if (currentTab === 'doctor-articles' && item.id) {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8080/api'}/cms/admin/news/${item.id}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.ok) {
+          const fullArticle = await response.json();
+          item = fullArticle; // Replace with full article data
+        } else {
+          message.warning('Không thể tải đầy đủ nội dung bài viết');
+        }
+      } catch (error) {
+        console.error('Error fetching article for edit:', error);
+        message.warning('Lỗi khi tải bài viết: ' + error.message);
+      }
+    }
+    
     setEditingItem(item);
     setSlugExists(false); // Reset slug validation
     setSlugSuggestion(''); // Reset slug suggestion
@@ -896,6 +917,26 @@ function AdminCMSPage() {
       message.error('Lỗi khi từ chối: ' + error.message);
     }
   };
+  
+  const handleViewArticle = async (articleId) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8080/api'}/cms/admin/news/${articleId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (response.ok) {
+        const fullArticle = await response.json();
+        setSelectedArticle(fullArticle);
+        setArticleDetailVisible(true);
+      } else {
+        message.error('Không thể tải chi tiết bài viết');
+      }
+    } catch (error) {
+      console.error('Error fetching article details:', error);
+      message.error('Lỗi khi tải bài viết: ' + error.message);
+    }
+  };
 
   const handleSubmit = async (values) => {
     try {
@@ -1310,10 +1351,7 @@ function AdminCMSPage() {
         <Space>
           <Button 
             icon={<EyeOutlined />} 
-            onClick={() => {
-              setSelectedArticle(record);
-              setArticleDetailVisible(true);
-            }}
+            onClick={() => handleViewArticle(record.id)}
             size="small"
           >
             Xem
@@ -2028,7 +2066,11 @@ function AdminCMSPage() {
               </Select>
             </Form.Item>
             <Form.Item name="content" label="Nội dung">
-              <TextArea rows={6} />
+              <RichTextEditor 
+                value={form.getFieldValue('content')}
+                onChange={(value) => form.setFieldsValue({ content: value })}
+                placeholder="Nhập nội dung bài viết..."
+              />
             </Form.Item>
             <Form.Item label="Hình ảnh đại diện">
               <Upload
@@ -5545,7 +5587,7 @@ function AdminCMSPage() {
               </div>
               {selectedArticle.doctor && (
                 <div style={{ marginBottom: 4 }}>
-                  <strong>Bác sĩ:</strong> Dr. {selectedArticle.doctor.user?.firstName} {selectedArticle.doctor.user?.lastName}
+                  <strong>Bác sĩ:</strong> Dr. {selectedArticle.doctor.firstName} {selectedArticle.doctor.lastName}
                   {selectedArticle.doctor.specialty && ` - ${selectedArticle.doctor.specialty}`}
                 </div>
               )}

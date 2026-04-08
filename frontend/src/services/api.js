@@ -100,6 +100,7 @@ export const appointmentAPI = {
   confirmAppointment: (id) => api.put(`/appointments/${id}/confirm`),
   cancelAppointment: (id) => api.put(`/appointments/${id}/cancel`),
   deleteAppointment: (id) => api.delete(`/appointments/${id}`),
+  getAvailableSlots: (doctorId, date) => api.get(`/appointments/doctors/${doctorId}/available-slots?date=${date}`),
 };
 
 // Review API

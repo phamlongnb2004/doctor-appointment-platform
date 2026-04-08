@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Typography, Button, Tabs, Avatar, Rate, Tag, DatePicker, Select, message, Spin, Space } from 'antd';
 import { UserOutlined, CalendarOutlined, ClockCircleOutlined, EnvironmentOutlined, StarOutlined, ArrowLeftOutlined, MessageOutlined } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doctorAPI } from '../services/api';
+import { doctorAPI, appointmentAPI } from '../services/api';
 import cmsAPI from '../services/cmsApi';
 import ChatButton from '../components/ChatButton';
 import useFallingFlowers from '../hooks/useFallingFlowers';
@@ -20,6 +20,8 @@ function DoctorDetailPage() {
   const [selectedTime, setSelectedTime] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [articles, setArticles] = useState([]);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
   const flowerContainerRef = useFallingFlowers(5);
 
   useEffect(() => {
@@ -58,17 +60,99 @@ function DoctorDetailPage() {
     }
   };
 
+  const fetchAvailableSlots = async (date) => {
+    if (!date || !id) return;
+    
+    setSlotsLoading(true);
+    try {
+      const dateStr = date.format('YYYY-MM-DD');
+      const response = await appointmentAPI.getAvailableSlots(id, dateStr);
+      setAvailableSlots(response.data.availableSlots || []);
+    } catch (error) {
+      console.error('Error fetching available slots:', error);
+      message.error('Không thể tải khung giờ khám!');
+      setAvailableSlots([]);
+    } finally {
+      setSlotsLoading(false);
+    }
+  };
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    setSelectedTime(null); // Reset time when date changes
+    if (date) {
+      fetchAvailableSlots(date);
+    } else {
+      setAvailableSlots([]);
+    }
+  };
+
   const timeSlots = [
     '07:00 - 08:00', '08:00 - 09:00', '09:00 - 10:00', '10:00 - 11:00',
     '13:00 - 14:00', '14:00 - 15:00', '15:00 - 16:00', '16:00 - 17:00'
   ];
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     if (!selectedDate || !selectedTime) {
       message.warning('Vui lòng chọn ngày và giờ khám!');
       return;
     }
-    navigate('/appointments', { state: { doctorId: doctor.id } });
+
+    if (!currentUser || !currentUser.id) {
+      message.warning('Vui lòng đăng nhập để đặt lịch!');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      // Parse time slot to get hour
+      const timeSlot = selectedTime; // e.g., "08:00 - 09:00"
+      const startTime = timeSlot.split(' - ')[0]; // "08:00"
+      const [hour, minute] = startTime.split(':');
+      
+      if (!hour || !minute) {
+        message.error('Khung giờ không hợp lệ!');
+        return;
+      }
+      
+      // Combine date and time
+      const selectedDateObj = selectedDate.toDate();
+      const [hourNum, minuteNum] = [parseInt(hour), parseInt(minute)];
+      
+      const appointmentDateTime = new Date(
+        selectedDateObj.getFullYear(),
+        selectedDateObj.getMonth(),
+        selectedDateObj.getDate(),
+        hourNum,
+        minuteNum,
+        0,
+        0
+      );
+      
+      const appointmentData = {
+        patientId: currentUser.id,
+        doctorId: doctor.id,
+        appointmentDateTime: appointmentDateTime.toISOString(),
+        reason: `Đặt lịch khám với ${doctor.firstName} ${doctor.lastName}`,
+        notes: ''
+      };
+      
+      await appointmentAPI.createAppointment(appointmentData);
+      message.success('Đặt lịch thành công! Vui lòng chờ bác sĩ xác nhận.');
+      
+      // Reset form
+      setSelectedDate(null);
+      setSelectedTime(null);
+      setAvailableSlots([]);
+      
+      // Navigate to appointments list
+      setTimeout(() => {
+        navigate('/appointments-list');
+      }, 1500);
+    } catch (error) {
+      console.error('Error creating appointment:', error);
+      message.error(error.response?.data?.error || 'Đặt lịch thất bại!');
+    }
   };
 
   if (loading) {
@@ -105,12 +189,12 @@ function DoctorDetailPage() {
             <Card style={{ borderRadius: 16, textAlign: 'center' }}>
               <Avatar
                 size={200}
-                src={doctor.user?.profileImage}
+                src={doctor.profileImage}
                 icon={<UserOutlined />}
                 style={{ border: '5px solid #667eea' }}
               />
               <Title level={3} style={{ marginTop: 16, marginBottom: 4 }}>
-                {doctor.user?.firstName} {doctor.user?.lastName}
+                {doctor.firstName} {doctor.lastName}
               </Title>
               <Tag color="blue" style={{ marginBottom: 16 }}>{doctor.specialization}</Tag>
               
@@ -129,10 +213,10 @@ function DoctorDetailPage() {
                   <ChatButton
                     currentUser={currentUser}
                     targetUser={{
-                      id: doctor.user?.id,
-                      email: doctor.user?.email,
-                      firstName: doctor.user?.firstName,
-                      lastName: doctor.user?.lastName,
+                      id: doctor.userId,
+                      email: doctor.email,
+                      firstName: doctor.firstName,
+                      lastName: doctor.lastName,
                       role: 'DOCTOR'
                     }}
                     type="primary"
@@ -184,10 +268,10 @@ function DoctorDetailPage() {
                         <Col xs={24} md={12}>
                           <Title level={5}>Thông tin liên hệ</Title>
                           <Paragraph>
-                            <EnvironmentOutlined /> Địa chỉ: {doctor.user?.address || 'Chưa cập nhật'}
+                            <EnvironmentOutlined /> Địa chỉ: Chưa cập nhật
                           </Paragraph>
                           <Paragraph>
-                            <CalendarOutlined /> Email: {doctor.user?.email || 'Chưa cập nhật'}
+                            <CalendarOutlined /> Email: {doctor.email || 'Chưa cập nhật'}
                           </Paragraph>
                         </Col>
                         <Col xs={24} md={12}>
@@ -211,7 +295,7 @@ function DoctorDetailPage() {
                               size="large"
                               style={{ width: '100%' }}
                               placeholder="Chọn ngày khám"
-                              onChange={(date) => setSelectedDate(date)}
+                              onChange={handleDateChange}
                               disabledDate={(current) => current && current < new Date().setHours(0,0,0,0)}
                             />
                           </Col>
@@ -219,10 +303,21 @@ function DoctorDetailPage() {
                             <Select
                               size="large"
                               style={{ width: '100%' }}
-                              placeholder="Chọn giờ khám"
+                              placeholder={
+                                !selectedDate
+                                  ? "Vui lòng chọn ngày khám trước"
+                                  : slotsLoading
+                                  ? "Đang tải khung giờ..."
+                                  : availableSlots.length === 0
+                                  ? "Không có khung giờ trống"
+                                  : "Chọn giờ khám"
+                              }
                               onChange={(value) => setSelectedTime(value)}
+                              value={selectedTime}
+                              loading={slotsLoading}
+                              disabled={!selectedDate || slotsLoading}
                             >
-                              {timeSlots.map((time) => (
+                              {availableSlots.map((time) => (
                                 <Option key={time} value={time}>
                                   <ClockCircleOutlined /> {time}
                                 </Option>

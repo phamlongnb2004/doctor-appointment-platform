@@ -1,5 +1,6 @@
 package com.doctorappointment.controller;
 
+import com.doctorappointment.dto.DoctorResponse;
 import com.doctorappointment.model.Doctor;
 import com.doctorappointment.model.Specialty;
 import com.doctorappointment.repository.SpecialtyRepository;
@@ -10,11 +11,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/doctors")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(
+    origins = {
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://doctor-appointment-platform-vaff.onrender.com",
+        "https://doctor-appointment-frontend-ujug.onrender.com",
+        "https://doctor-appointment-frontend.onrender.com"
+    },
+    allowedHeaders = "*",
+    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}
+)
 public class DoctorController {
     private final DoctorService doctorService;
     private final SpecialtyRepository specialtyRepository;
@@ -33,19 +45,25 @@ public class DoctorController {
     public ResponseEntity<?> getDoctorById(@PathVariable Long id) {
         var doctor = doctorService.getDoctorById(id);
         if (doctor.isPresent()) {
-            return ResponseEntity.ok(doctor.get());
+            return ResponseEntity.ok(DoctorResponse.fromDoctor(doctor.get()));
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Doctor not found"));
     }
 
     @GetMapping
-    public ResponseEntity<List<Doctor>> getAllDoctors() {
-        return ResponseEntity.ok(doctorService.getAllDoctors());
+    public ResponseEntity<List<DoctorResponse>> getAllDoctors() {
+        List<DoctorResponse> doctors = doctorService.getAllDoctors().stream()
+                .map(DoctorResponse::fromDoctor)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(doctors);
     }
 
     @GetMapping("/active/all")
-    public ResponseEntity<List<Doctor>> getActiveDoctors() {
-        return ResponseEntity.ok(doctorService.getActiveDoctors());
+    public ResponseEntity<List<DoctorResponse>> getActiveDoctors() {
+        List<DoctorResponse> doctors = doctorService.getActiveDoctors().stream()
+                .map(DoctorResponse::fromDoctor)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(doctors);
     }
     
     @GetMapping("/user/{userId}")

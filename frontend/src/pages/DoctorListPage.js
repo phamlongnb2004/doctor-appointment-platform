@@ -111,7 +111,7 @@ function DoctorListPage() {
   };
 
   const filteredDoctors = doctors.filter(doctor => {
-    const fullName = `${doctor.user?.firstName || ''} ${doctor.user?.lastName || ''}`.toLowerCase();
+    const fullName = `${doctor.firstName || ''} ${doctor.lastName || ''}`.toLowerCase();
     return fullName.includes(searchQuery.toLowerCase()) ||
            (doctor.specialization?.toLowerCase().includes(searchQuery.toLowerCase()) || false);
   });
@@ -203,7 +203,7 @@ function DoctorListPage() {
                       <div className="doctor-card-avatar">
                         <Avatar
                           size={70}
-                          src={doctor.user?.profileImage}
+                          src={doctor.profileImage}
                           icon={<UserOutlined />}
                         />
                         <div className="doctor-card-badge">
@@ -212,7 +212,7 @@ function DoctorListPage() {
                       </div>
                       
                       <div className="doctor-card-name">
-                        {doctor.user?.firstName} {doctor.user?.lastName}
+                        {doctor.firstName} {doctor.lastName}
                       </div>
                       
                       <div className="doctor-card-specialty">
@@ -252,10 +252,10 @@ function DoctorListPage() {
                           <ChatButton
                             currentUser={currentUser}
                             targetUser={{
-                              id: doctor.user?.id,
-                              email: doctor.user?.email,
-                              firstName: doctor.user?.firstName,
-                              lastName: doctor.user?.lastName,
+                              id: doctor.userId,
+                              email: doctor.email,
+                              firstName: doctor.firstName,
+                              lastName: doctor.lastName,
                               role: 'DOCTOR'
                             }}
                             type="default"

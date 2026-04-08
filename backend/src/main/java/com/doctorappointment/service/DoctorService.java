@@ -21,7 +21,7 @@ public class DoctorService {
     }
 
     public List<Doctor> getAllDoctors() {
-        return doctorRepository.findAll();
+        return doctorRepository.findAllWithUser();
     }
 
     public List<Doctor> getDoctorsBySpecialization(String specialization) {

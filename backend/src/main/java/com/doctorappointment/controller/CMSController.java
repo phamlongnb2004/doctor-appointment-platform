@@ -1,5 +1,6 @@
 package com.doctorappointment.controller;
 
+import com.doctorappointment.dto.NewsArticleSummary;
 import com.doctorappointment.model.*;
 import com.doctorappointment.service.CMSService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/cms")
@@ -78,9 +80,12 @@ public class CMSController {
     }
     
     @GetMapping("/news")
-    public ResponseEntity<List<NewsArticle>> getLatestNews(@RequestParam(defaultValue = "4") int limit) {
+    public ResponseEntity<List<NewsArticleSummary>> getLatestNews(@RequestParam(defaultValue = "4") int limit) {
         List<NewsArticle> articles = cmsService.getLatestNewsArticles(limit);
-        return ResponseEntity.ok(articles);
+        List<NewsArticleSummary> summaries = articles.stream()
+                .map(NewsArticleSummary::fromNewsArticle)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(summaries);
     }
     
     @GetMapping("/news/featured")
@@ -375,15 +380,27 @@ public class CMSController {
     
     // Admin endpoints - Quản lý bài viết bác sĩ
     @GetMapping("/admin/news/pending")
-    public ResponseEntity<List<NewsArticle>> getPendingArticles() {
+    public ResponseEntity<List<NewsArticleSummary>> getPendingArticles() {
         List<NewsArticle> articles = cmsService.getPendingArticles();
-        return ResponseEntity.ok(articles);
+        List<NewsArticleSummary> summaries = articles.stream()
+                .map(NewsArticleSummary::fromNewsArticle)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(summaries);
     }
     
     @GetMapping("/admin/news/all")
-    public ResponseEntity<List<NewsArticle>> getAllArticles() {
+    public ResponseEntity<List<NewsArticleSummary>> getAllArticles() {
         List<NewsArticle> articles = cmsService.getAllArticlesForAdmin();
-        return ResponseEntity.ok(articles);
+        List<NewsArticleSummary> summaries = articles.stream()
+                .map(NewsArticleSummary::fromNewsArticle)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(summaries);
+    }
+    
+    @GetMapping("/admin/news/{id}")
+    public ResponseEntity<NewsArticle> getArticleById(@PathVariable Long id) {
+        Optional<NewsArticle> article = newsArticleRepository.findById(id);
+        return article.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
     
     @PutMapping("/admin/news/{id}/approve")

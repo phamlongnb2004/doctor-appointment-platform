@@ -16,7 +16,17 @@ import java.util.Map;
 @RestController
 @RequestMapping("/images")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*")
+@CrossOrigin(
+    origins = {
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://doctor-appointment-platform-vaff.onrender.com",
+        "https://doctor-appointment-frontend-ujug.onrender.com",
+        "https://doctor-appointment-frontend.onrender.com"
+    },
+    allowedHeaders = "*",
+    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}
+)
 public class ImageController {
 
     private final ImageService imageService;

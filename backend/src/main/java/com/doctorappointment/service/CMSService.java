@@ -530,7 +530,23 @@ public class CMSService {
     private ArticleCtaSectionRepository articleCtaSectionRepository;
     
     public Optional<ArticleCtaSection> getArticleCtaSection() {
-        return articleCtaSectionRepository.findFirstByIsActiveTrueOrderByIdAsc();
+        Optional<ArticleCtaSection> section = articleCtaSectionRepository.findFirstByIsActiveTrueOrderByIdAsc();
+        
+        // If no active section exists, create a default one
+        if (section.isEmpty()) {
+            ArticleCtaSection defaultSection = new ArticleCtaSection();
+            defaultSection.setTitle("Đặt lịch khám ngay");
+            defaultSection.setSubtitle("Đội ngũ bác sĩ chuyên nghiệp");
+            defaultSection.setCta1Title("Đặt lịch khám");
+            defaultSection.setCta1Description("Đội ngũ bác sĩ chuyên nghiệp sẵn sàng tư vấn và điều trị cho bạn");
+            defaultSection.setCta1ButtonText("Đặt lịch ngay");
+            defaultSection.setCta1ButtonUrl("/appointment");
+            defaultSection.setIsActive(true);
+            defaultSection = articleCtaSectionRepository.save(defaultSection);
+            return Optional.of(defaultSection);
+        }
+        
+        return section;
     }
     
     public ArticleCtaSection saveArticleCtaSection(ArticleCtaSection section) {

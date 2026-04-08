@@ -35,11 +35,28 @@ public class UserSessionService {
      */
     @Transactional
     public UserSession registerSession(Long userId, String sessionId, String ipAddress, String userAgent) {
-        // Mark any existing sessions for this user as offline
-        userSessionRepository.markUserOffline(userId);
-
-        // Create new session
-        UserSession session = new UserSession(userId, sessionId, ipAddress, userAgent);
+        // Check if session already exists
+        Optional<UserSession> existingSession = userSessionRepository.findBySessionId(sessionId);
+        
+        UserSession session;
+        if (existingSession.isPresent()) {
+            // Update existing session
+            session = existingSession.get();
+            session.setUserId(userId);
+            session.setIpAddress(ipAddress);
+            session.setUserAgent(userAgent);
+            session.setOnline(true);
+            session.updateActivity();
+            log.info("Existing session {} updated for user {}", sessionId, userId);
+        } else {
+            // Mark any existing sessions for this user as offline
+            userSessionRepository.markUserOffline(userId);
+            
+            // Create new session
+            session = new UserSession(userId, sessionId, ipAddress, userAgent);
+            log.info("New session {} created for user {}", sessionId, userId);
+        }
+        
         session = userSessionRepository.save(session);
 
         // Update cache
