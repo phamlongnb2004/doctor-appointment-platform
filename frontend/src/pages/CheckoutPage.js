@@ -428,28 +428,141 @@ function CheckoutPage() {
               </Card>
 
               <Card title="Phương thức thanh toán">
-                <Radio.Group 
-                  value={paymentMethod} 
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  style={{ width: '100%' }}
-                >
-                  <div style={{ marginBottom: 16 }}>
-                    <Radio value="COD" style={{ fontSize: 16 }}>
-                      <strong>Thanh toán khi nhận hàng (COD)</strong>
-                      <div style={{ color: '#8c8c8c', fontSize: 14, marginTop: 4 }}>
-                        Thanh toán bằng tiền mặt khi nhận hàng
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {/* COD Payment */}
+                  <div
+                    onClick={() => setPaymentMethod('COD')}
+                    style={{
+                      border: paymentMethod === 'COD' ? '2px solid #1890ff' : '2px solid #e8e8e8',
+                      borderRadius: 8,
+                      padding: 16,
+                      cursor: 'pointer',
+                      transition: 'all 0.3s',
+                      background: paymentMethod === 'COD' ? '#f0f7ff' : '#fff',
+                      position: 'relative'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                      <Radio 
+                        checked={paymentMethod === 'COD'}
+                        style={{ marginTop: 2 }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ 
+                          fontSize: 16, 
+                          fontWeight: 600,
+                          marginBottom: 4,
+                          color: '#262626'
+                        }}>
+                          Thanh toán khi nhận hàng
+                        </div>
+                        <div style={{ 
+                          fontSize: 14, 
+                          color: '#8c8c8c',
+                          lineHeight: 1.5
+                        }}>
+                          Thanh toán bằng tiền mặt khi nhận hàng tại nhà
+                        </div>
                       </div>
-                    </Radio>
-                  </div>
-                  <div>
-                    <Radio value="SEPAY" style={{ fontSize: 16 }}>
-                      <strong>🏦 Thanh toán qua SePay</strong>
-                      <div style={{ color: '#8c8c8c', fontSize: 14, marginTop: 4 }}>
-                        Thanh toán an toàn qua cổng SePay (Chuyển khoản ngân hàng, Ví điện tử)
+                      <div style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 8,
+                        background: '#f5f5f5',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 24
+                      }}>
+                        💵
                       </div>
-                    </Radio>
+                    </div>
                   </div>
-                </Radio.Group>
+
+                  {/* SePay Payment */}
+                  <div
+                    onClick={() => setPaymentMethod('SEPAY')}
+                    style={{
+                      border: paymentMethod === 'SEPAY' ? '2px solid #1890ff' : '2px solid #e8e8e8',
+                      borderRadius: 8,
+                      padding: 16,
+                      cursor: 'pointer',
+                      transition: 'all 0.3s',
+                      background: paymentMethod === 'SEPAY' ? '#f0f7ff' : '#fff',
+                      position: 'relative'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                      <Radio 
+                        checked={paymentMethod === 'SEPAY'}
+                        style={{ marginTop: 2 }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ 
+                          fontSize: 16, 
+                          fontWeight: 600,
+                          marginBottom: 4,
+                          color: '#262626'
+                        }}>
+                          Thanh toán qua SePay
+                        </div>
+                        <div style={{ 
+                          fontSize: 14, 
+                          color: '#8c8c8c',
+                          lineHeight: 1.5,
+                          marginBottom: 8
+                        }}>
+                          Thanh toán an toàn qua cổng thanh toán SePay
+                        </div>
+                        <div style={{ 
+                          display: 'flex', 
+                          gap: 8,
+                          flexWrap: 'wrap'
+                        }}>
+                          <span style={{
+                            padding: '4px 8px',
+                            background: '#f0f0f0',
+                            borderRadius: 4,
+                            fontSize: 12,
+                            color: '#595959'
+                          }}>
+                            Chuyển khoản
+                          </span>
+                          <span style={{
+                            padding: '4px 8px',
+                            background: '#f0f0f0',
+                            borderRadius: 4,
+                            fontSize: 12,
+                            color: '#595959'
+                          }}>
+                            Ví điện tử
+                          </span>
+                          <span style={{
+                            padding: '4px 8px',
+                            background: '#f0f0f0',
+                            borderRadius: 4,
+                            fontSize: 12,
+                            color: '#595959'
+                          }}>
+                            Thẻ ATM
+                          </span>
+                        </div>
+                      </div>
+                      <div style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 8,
+                        background: '#f5f5f5',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 24
+                      }}>
+                        🏦
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </Card>
             </Col>
 
