@@ -132,9 +132,18 @@ function HomePage() {
         cmsAPI.getSiteSettings().catch(() => ({ data: null }))
       ]);
 
-      // Set doctors data
+      // Set doctors data - Get top 3 by rating and review count
       const doctors = doctorsResponse.data || [];
-      const sorted = doctors.sort((a, b) => (b.ratingScore || 0) - (a.ratingScore || 0)).slice(0, 3);
+      const sorted = doctors
+        .filter(d => d.ratingScore > 0 || d.reviewCount > 0) // Only doctors with ratings
+        .sort((a, b) => {
+          // Sort by rating first, then by review count
+          if (b.ratingScore !== a.ratingScore) {
+            return (b.ratingScore || 0) - (a.ratingScore || 0);
+          }
+          return (b.reviewCount || 0) - (a.reviewCount || 0);
+        })
+        .slice(0, 3);
       setTopDoctors(sorted);
 
       // Set CMS data
@@ -701,12 +710,24 @@ function HomePage() {
                       Chuyên khoa - {doctor.specialization}
                     </div>
                     
-                    <div style={{ marginBottom: 12 }}>
-                      <img 
-                        src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCA4MCAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggMTJMMTIgOEw4IDRWNkgwVjEwSDhWMTJaIiBmaWxsPSIjRkZENzAwIi8+CjxwYXRoIGQ9Ik0yNCA4TDI4IDRWNkgyMFYxMEgyOFYxMkwyNCA4WiIgZmlsbD0iI0ZGRDcwMCIvPgo8cGF0aCBkPSJNNDAgOEw0NCA0VjZIMzZWMTBINDRWMTJMNDAgOFoiIGZpbGw9IiNGRkQ3MDAiLz4KPHA+CjwvcGF0aD4KPC9zdmc+"
-                        alt="Rating"
-                        style={{ height: 16 }}
-                      />
+                    <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ display: 'flex', gap: 2 }}>
+                        {[...Array(5)].map((_, index) => (
+                          <StarFilled 
+                            key={index}
+                            style={{ 
+                              fontSize: 14,
+                              color: index < Math.round(doctor.ratingScore || 0) ? '#FFD700' : '#e8e8e8'
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <span style={{ fontSize: 13, color: '#666', fontWeight: 600 }}>
+                        {(doctor.ratingScore || 0).toFixed(1)}
+                      </span>
+                      <span style={{ fontSize: 12, color: '#999' }}>
+                        ({doctor.reviewCount || 0} đánh giá)
+                      </span>
                     </div>
                     
                     <div style={{ marginBottom: 16 }}>
