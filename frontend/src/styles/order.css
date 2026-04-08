@@ -24,8 +24,19 @@
 }
 
 .my-orders-page .ant-table-thead > tr > th {
-  background: #fafafa;
+  background: rgb(0, 58, 112) !important;
+  color: #fff !important;
   font-weight: 600;
+  border-bottom: 2px solid rgb(0, 58, 112) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.my-orders-page .ant-table-thead > tr > th:last-child {
+  border-right: none !important;
+}
+
+.my-orders-page .ant-table-thead > tr > th::before {
+  display: none !important;
 }
 
 @media (max-width: 768px) {
