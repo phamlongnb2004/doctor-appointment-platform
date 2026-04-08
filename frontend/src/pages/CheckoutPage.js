@@ -4,6 +4,7 @@ import { Row, Col, Card, Form, Input, Button, Radio, Breadcrumb, message, Spin, 
 import { HomeOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { useCart } from '../contexts/CartContext';
 import axios from 'axios';
+import defaultProductImage from '../assets/default-product.png';
 import '../styles/checkout.css';
 
 const { TextArea } = Input;
@@ -223,7 +224,7 @@ function CheckoutPage() {
                       name="customerName"
                       rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}
                     >
-                      <Input size="large" placeholder="Nguyễn Văn A" />
+                      <Input size="large" placeholder="Ví dụ: Trần Văn An" />
                     </Form.Item>
                   </Col>
 
@@ -256,7 +257,7 @@ function CheckoutPage() {
                       name="shippingAddress"
                       rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}
                     >
-                      <Input size="large" placeholder="Số nhà, tên đường" />
+                      <Input size="large" placeholder="Ví dụ: 123 Nguyễn Huệ" />
                     </Form.Item>
                   </Col>
 
@@ -314,7 +315,7 @@ function CheckoutPage() {
                     >
                       <TextArea 
                         rows={3} 
-                        placeholder="Ghi chú thêm về đơn hàng (tùy chọn)"
+                        placeholder="Ví dụ: Giao hàng giờ hành chính, gọi trước 15 phút"
                       />
                     </Form.Item>
                   </Col>
@@ -489,25 +490,11 @@ function CheckoutPage() {
                         borderRadius: 8,
                         overflow: 'hidden'
                       }}>
-                        {item.serviceImage ? (
-                          <img 
-                            src={item.serviceImage}
-                            alt={item.serviceTitle}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <div style={{ 
-                            width: '100%', 
-                            height: '100%', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center',
-                            fontSize: 24,
-                            opacity: 0.3
-                          }}>
-                            🏥
-                          </div>
-                        )}
+                        <img 
+                          src={item.serviceImage || defaultProductImage}
+                          alt={item.serviceTitle}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 14, marginBottom: 4 }}>
@@ -588,16 +575,30 @@ function CheckoutPage() {
 
                 <div style={{ 
                   marginTop: 16,
-                  padding: 12,
-                  background: '#f5f5f5',
-                  borderRadius: 8,
+                  padding: 16,
+                  background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                  borderRadius: 12,
+                  border: '1px solid #bae6fd',
                   fontSize: 13,
-                  color: '#595959'
+                  color: '#0c4a6e'
                 }}>
-                  <div style={{ fontWeight: 600, marginBottom: 4 }}>
-                    🔒 Thanh toán an toàn
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 10,
+                    marginBottom: 8
+                  }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2C9.243 2 7 4.243 7 7v3H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2h-1V7c0-2.757-2.243-5-5-5zm3 8H9V7c0-1.654 1.346-3 3-3s3 1.346 3 3v3z" fill="#0284c7"/>
+                      <circle cx="12" cy="16" r="1.5" fill="#0284c7"/>
+                    </svg>
+                    <span style={{ fontWeight: 600, fontSize: 14, color: '#0c4a6e' }}>
+                      Thanh toán an toàn
+                    </span>
                   </div>
-                  Thông tin của bạn được bảo mật và mã hóa
+                  <div style={{ paddingLeft: 30, color: '#0369a1', fontSize: 12 }}>
+                    Thông tin của bạn được bảo mật và mã hóa
+                  </div>
                 </div>
               </Card>
             </Col>
