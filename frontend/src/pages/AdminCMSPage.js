@@ -310,6 +310,74 @@ function AdminCMSPage() {
     setCurrentTextColor('#FFFFFF'); // Reset text color
     setSlugExists(false); // Reset slug validation
     setSlugSuggestion(''); // Reset slug suggestion
+    
+    // Calculate next display order based on current tab
+    let nextDisplayOrder = 0;
+    let currentData = [];
+    
+    switch (currentTab) {
+      case 'homepage':
+        currentData = homePageContent;
+        break;
+      case 'services':
+        currentData = services;
+        break;
+      case 'testimonials':
+        currentData = testimonials;
+        break;
+      case 'features':
+        currentData = features;
+        break;
+      case 'banners':
+        currentData = banners;
+        break;
+      case 'news-banners':
+        currentData = newsBanners;
+        break;
+      case 'specialties':
+        currentData = specialties;
+        break;
+      case 'statistics':
+        currentData = statistics;
+        break;
+      case 'certifications':
+        currentData = certifications;
+        break;
+      case 'news-categories':
+        currentData = newsCategories;
+        break;
+      case 'membership-benefits':
+        currentData = membershipBenefits;
+        break;
+      case 'news-sections':
+        currentData = newsSections;
+        break;
+      case 'news-sidebar-widgets':
+        currentData = newsSidebarWidgets;
+        break;
+      case 'service-categories':
+        currentData = serviceCategories;
+        break;
+      case 'medical-services':
+        currentData = medicalServices;
+        break;
+      default:
+        currentData = [];
+    }
+    
+    // Find max displayOrder and add 1
+    if (currentData && currentData.length > 0) {
+      const maxOrder = Math.max(...currentData.map(item => item.displayOrder || 0));
+      nextDisplayOrder = maxOrder + 1;
+    }
+    
+    // Set initial values with calculated displayOrder
+    form.setFieldsValue({ 
+      isActive: true, 
+      displayOrder: nextDisplayOrder, 
+      rating: 5 
+    });
+    
     setModalVisible(true);
   };
 
@@ -5379,7 +5447,6 @@ function AdminCMSPage() {
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
-          initialValues={{ isActive: true, displayOrder: 0, rating: 5 }}
         >
           {renderForm()}
         </Form>
