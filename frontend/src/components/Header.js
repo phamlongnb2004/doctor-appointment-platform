@@ -159,6 +159,11 @@ function HeaderComponent({ user, onLogout }) {
       onClick: () => navigate('/appointments'),
     },
     {
+      key: 'medical-history',
+      label: 'Lịch sử khám bệnh',
+      onClick: () => navigate('/patient/medical-history'),
+    },
+    {
       key: 'my-orders',
       label: 'Đơn hàng của tôi',
       onClick: () => navigate('/my-orders'),

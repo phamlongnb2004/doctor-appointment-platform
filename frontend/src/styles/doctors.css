@@ -350,6 +350,34 @@
   font-size: 12px;
 }
 
+.doctor-card-address {
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 8px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.doctor-card-address .anticon {
+  color: #10b981;
+  font-size: 12px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.doctor-card-address span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
 .doctor-card-fee {
   font-size: 17px;
   font-weight: 700;

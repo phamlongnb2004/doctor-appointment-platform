@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Tag, Button, message, Space, Modal, Typography, Row, Col } from 'antd';
-import { CheckCircleOutlined, CloseCircleOutlined, EyeOutlined, CalendarOutlined, UserOutlined, MedicineBoxOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, CloseCircleOutlined, EyeOutlined, CalendarOutlined, UserOutlined, MedicineBoxOutlined, FileTextOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { appointmentAPI, doctorAPI } from '../services/api';
 import '../styles/appointment.css';
 
 const { Title, Text } = Typography;
 
 function AppointmentsListPage({ user }) {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
@@ -84,12 +86,17 @@ function AppointmentsListPage({ user }) {
     setDetailModalVisible(true);
   };
 
+  const handleExamination = (appointmentId) => {
+    navigate(`/doctor/examination/${appointmentId}`);
+  };
+
   const getStatusTag = (status) => {
     const statusConfig = {
       PENDING: { color: '#fa8c16', text: 'Chờ xác nhận' },
       CONFIRMED: { color: '#52c41a', text: 'Đã xác nhận' },
+      IN_PROGRESS: { color: '#1890ff', text: 'Đang khám' },
       CANCELLED: { color: '#ff4d4f', text: 'Đã hủy' },
-      COMPLETED: { color: '#1890ff', text: 'Hoàn thành' },
+      COMPLETED: { color: '#722ed1', text: 'Hoàn thành' },
     };
     const config = statusConfig[status] || { color: '#d9d9d9', text: status };
     return <Tag color={config.color} style={{ fontWeight: 500 }}>{config.text}</Tag>;
@@ -190,6 +197,17 @@ function AppointmentsListPage({ user }) {
               style={{ background: '#00a651', borderColor: '#00a651' }}
             >
               Xác nhận
+            </Button>
+          )}
+          {user.role === 'DOCTOR' && (record.status === 'CONFIRMED' || record.status === 'IN_PROGRESS') && (
+            <Button
+              size="small"
+              type="primary"
+              icon={<FileTextOutlined />}
+              onClick={() => handleExamination(record.id)}
+              style={{ background: '#1890ff', borderColor: '#1890ff' }}
+            >
+              Khám bệnh
             </Button>
           )}
           {record.status === 'PENDING' && (

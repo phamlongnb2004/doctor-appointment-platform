@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Typography, Button, Tabs, Avatar, Rate, Tag, DatePicker, Select, message, Spin, Space, Image } from 'antd';
-import { UserOutlined, CalendarOutlined, ClockCircleOutlined, EnvironmentOutlined, StarOutlined, ArrowLeftOutlined, MessageOutlined } from '@ant-design/icons';
+import { UserOutlined, CalendarOutlined, ClockCircleOutlined, EnvironmentOutlined, StarOutlined, StarFilled, ArrowLeftOutlined, MessageOutlined } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doctorAPI, appointmentAPI } from '../services/api';
 import cmsAPI from '../services/cmsApi';
@@ -44,6 +44,9 @@ function DoctorDetailPage() {
     setLoading(true);
     try {
       const response = await doctorAPI.getDoctorById(id);
+      console.log('=== DOCTOR DETAIL PAGE ===');
+      console.log('Doctor data from API:', response.data);
+      console.log('Clinic Address:', response.data.clinicAddress);
       setDoctor(response.data);
       
       // Fetch certifications
@@ -210,8 +213,42 @@ function DoctorDetailPage() {
               <Tag color="blue" style={{ marginBottom: 16 }}>{doctor.specialization}</Tag>
               
               <div style={{ marginTop: 16 }}>
-                <Rate disabled value={doctor.ratingScore || 0} />
-                <div>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 4 }}>
+                  {[1, 2, 3, 4, 5].map((star) => {
+                    const rating = doctor.ratingScore || 0;
+                    const fillPercentage = Math.min(Math.max((rating - star + 1) * 100, 0), 100);
+                    
+                    return (
+                      <div key={star} style={{ position: 'relative', width: 20, height: 20 }}>
+                        {/* Empty star background */}
+                        <StarFilled style={{ 
+                          fontSize: 20, 
+                          color: '#d9d9d9',
+                          position: 'absolute',
+                          top: 0,
+                          left: 0
+                        }} />
+                        {/* Filled star with clip */}
+                        <div style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: `${fillPercentage}%`,
+                          overflow: 'hidden'
+                        }}>
+                          <StarFilled style={{ 
+                            fontSize: 20, 
+                            color: '#fadb14',
+                          }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <Text strong style={{ marginLeft: 8, fontSize: 16 }}>
+                    {(doctor.ratingScore || 0).toFixed(1)}
+                  </Text>
+                </div>
+                <div style={{ marginTop: 4 }}>
                   <Text type="secondary">
                     ({doctor.reviewCount || 0} đánh giá)
                   </Text>

@@ -29,6 +29,8 @@ import SePayCheckoutPage from './pages/SePayCheckoutPage';
 import SePayTestPage from './pages/SePayTestPage';
 import ServiceWalletPage from './pages/ServiceWalletPage';
 import DoctorVerifyCodePage from './pages/DoctorVerifyCodePage';
+import DoctorExaminationPage from './pages/DoctorExaminationPage';
+import PatientMedicalHistoryPage from './pages/PatientMedicalHistoryPage';
 import NotFoundPage from './pages/NotFoundPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -135,6 +137,30 @@ function AppContent({ user, isAuthenticated, handleLogin, handleLogout, handleUs
             element={
               isAuthenticated && isDoctor ? (
                 <DoctorVerifyCodePage />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          
+          {/* Doctor Examination Route - For doctors only */}
+          <Route
+            path="/doctor/examination/:appointmentId"
+            element={
+              isAuthenticated && isDoctor ? (
+                <DoctorExaminationPage />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          
+          {/* Patient Medical History Route - For patients */}
+          <Route
+            path="/patient/medical-history"
+            element={
+              isAuthenticated ? (
+                <PatientMedicalHistoryPage />
               ) : (
                 <Navigate to="/login" />
               )

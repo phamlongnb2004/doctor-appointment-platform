@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, InputNumber, Button, message, Card, Spin, Upload, Select } from 'antd';
+import { Form, Input, InputNumber, Button, message, Card, Spin, Upload, Select, Modal } from 'antd';
 import { SaveOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { doctorAPI, userAPI } from '../services/api';
 import RichTextEditor from '../components/RichTextEditor';
+import axios from 'axios';
 import '../styles/doctor-profile-edit.css';
 import 'react-quill/dist/quill.snow.css';
 
@@ -20,6 +21,14 @@ function DoctorProfileEditPage() {
   const [certificationImages, setCertificationImages] = useState([]);
   const [biography, setBiography] = useState('');
   const navigate = useNavigate();
+  
+  // Address data (API v2)
+  const [provinces, setProvinces] = useState([]);
+  const [modalWards, setModalWards] = useState([]);
+  const [modalStreet, setModalStreet] = useState('');
+  const [modalProvince, setModalProvince] = useState(null);
+  const [modalWard, setModalWard] = useState(null);
+  const [addressModalVisible, setAddressModalVisible] = useState(false);
 
   useEffect(() => {
     const userRole = localStorage.getItem('userRole');
@@ -33,7 +42,49 @@ function DoctorProfileEditPage() {
 
     fetchDoctorProfile(userId);
     fetchSpecialties();
+    fetchProvinces();
   }, [navigate]);
+  
+  const fetchProvinces = async () => {
+    try {
+      const response = await axios.get('https://provinces.open-api.vn/api/v2/p/');
+      setProvinces(response.data);
+    } catch (error) {
+      console.error('Error fetching provinces:', error);
+      message.error('Không thể tải danh sách tỉnh/thành phố');
+    }
+  };
+  
+  const handleModalProvinceChange = async (value) => {
+    const province = provinces.find(p => p.code === value);
+    setModalProvince(province);
+    setModalWard(null);
+    setModalWards([]);
+    
+    try {
+      const response = await axios.get(`https://provinces.open-api.vn/api/v2/p/${value}?depth=2`);
+      setModalWards(response.data.wards || []);
+    } catch (error) {
+      console.error('Error fetching wards:', error);
+      message.error('Không thể tải danh sách phường/xã');
+    }
+  };
+  
+  const handleApplyAddress = () => {
+    let fullAddress = modalStreet;
+    if (modalWard && modalProvince) {
+      fullAddress = `${modalStreet}, ${modalWard.name}, ${modalProvince.name}`;
+    } else if (modalProvince) {
+      fullAddress = `${modalStreet}, ${modalProvince.name}`;
+    }
+    form.setFieldsValue({ clinicStreet: fullAddress });
+    setAddressModalVisible(false);
+    // Reset modal state
+    setModalStreet('');
+    setModalProvince(null);
+    setModalWard(null);
+    setModalWards([]);
+  };
 
   const fetchSpecialties = async () => {
     try {
@@ -81,7 +132,7 @@ function DoctorProfileEditPage() {
         specialization: doctor.specialization,
         experienceYears: doctor.experienceYears,
         consultationFee: doctor.consultationFee,
-        clinicAddress: doctor.clinicAddress,
+        clinicStreet: doctor.clinicAddress || '',
       });
       
       // Set biography separately for RichTextEditor
@@ -99,16 +150,26 @@ function DoctorProfileEditPage() {
       setSaving(true);
       const userId = localStorage.getItem('userId');
       
+      // Use clinicStreet as the full address
+      const clinicAddress = values.clinicStreet || '';
+      
+      console.log('=== SUBMITTING DOCTOR PROFILE ===');
+      console.log('Clinic Address:', clinicAddress);
+      console.log('All values:', values);
+      
       // Update doctor profile
       const doctorUpdateData = {
         specialization: values.specialization,
         experienceYears: values.experienceYears,
         consultationFee: values.consultationFee,
         biography: biography,
-        clinicAddress: values.clinicAddress,
+        clinicAddress: clinicAddress,
       };
       
-      await doctorAPI.updateMyDoctorProfile(userId, doctorUpdateData);
+      console.log('Doctor Update Data:', doctorUpdateData);
+      
+      const response = await doctorAPI.updateMyDoctorProfile(userId, doctorUpdateData);
+      console.log('Update response:', response.data);
       
       // Handle certification images - only upload new ones
       const newImages = certificationImages.filter(img => img.originFileObj);
@@ -291,16 +352,116 @@ function DoctorProfileEditPage() {
                 />
               </div>
 
+              <h3 className="section-title" style={{ marginTop: 32 }}>Địa chỉ phòng khám</h3>
+              
               <Form.Item
                 label="Địa chỉ phòng khám"
-                name="clinicAddress"
+                name="clinicStreet"
+                rules={[{ required: true, message: 'Vui lòng nhập địa chỉ phòng khám' }]}
+                extra={
+                  <div style={{ marginTop: 8 }}>
+                    <Button 
+                      size="small" 
+                      onClick={() => setAddressModalVisible(true)}
+                    >
+                      📍 Chọn từ danh sách tỉnh/phường
+                    </Button>
+                  </div>
+                }
               >
-                <TextArea 
-                  rows={2} 
-                  placeholder="Địa chỉ nơi làm việc hoặc phòng khám"
+                <Input.TextArea 
+                  rows={3}
+                  placeholder="Ví dụ: 123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh"
+                  size="large"
                 />
               </Form.Item>
             </div>
+
+            <Modal
+              title="Chọn địa chỉ"
+              open={addressModalVisible}
+              onOk={handleApplyAddress}
+              onCancel={() => {
+                setAddressModalVisible(false);
+                setModalStreet('');
+                setModalProvince(null);
+                setModalWard(null);
+                setModalWards([]);
+              }}
+              okText="Áp dụng"
+              cancelText="Hủy"
+              width={600}
+            >
+              <div style={{ marginTop: 16 }}>
+                <div style={{ marginBottom: 12 }}>
+                  <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>
+                    Số nhà, tên đường
+                  </label>
+                  <Input 
+                    value={modalStreet}
+                    onChange={(e) => setModalStreet(e.target.value)}
+                    placeholder="Ví dụ: 123 Nguyễn Huệ"
+                    size="large"
+                  />
+                </div>
+                <div style={{ marginBottom: 12 }}>
+                  <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>
+                    Tỉnh/Thành phố
+                  </label>
+                  <Select
+                    value={modalProvince?.code}
+                    size="large"
+                    placeholder="Chọn tỉnh/thành phố"
+                    showSearch
+                    style={{ width: '100%' }}
+                    optionFilterProp="children"
+                    filterOption={(input, option) =>
+                      (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                    }
+                    onChange={handleModalProvinceChange}
+                    options={provinces.map(p => ({
+                      value: p.code,
+                      label: p.name
+                    }))}
+                  />
+                </div>
+                <div style={{ marginBottom: 12 }}>
+                  <label style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>
+                    Phường/Xã/Quận/Huyện
+                  </label>
+                  <Select
+                    value={modalWard?.code}
+                    size="large"
+                    placeholder="Chọn phường/xã/quận/huyện"
+                    showSearch
+                    style={{ width: '100%' }}
+                    optionFilterProp="children"
+                    filterOption={(input, option) =>
+                      (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                    }
+                    onChange={(value) => {
+                      const ward = modalWards.find(w => w.code === value);
+                      setModalWard(ward);
+                    }}
+                    disabled={modalWards.length === 0}
+                    options={modalWards.map(w => ({
+                      value: w.code,
+                      label: w.name
+                    }))}
+                  />
+                  {modalWards.length === 0 && modalProvince && (
+                    <div style={{ marginTop: 4, fontSize: 12, color: '#8c8c8c' }}>
+                      Đang tải danh sách phường/xã...
+                    </div>
+                  )}
+                  {!modalProvince && (
+                    <div style={{ marginTop: 4, fontSize: 12, color: '#8c8c8c' }}>
+                      Vui lòng chọn tỉnh/thành phố trước
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Modal>
 
             <div className="form-actions">
               <Button 

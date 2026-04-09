@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Button, Input, Select, Avatar, Spin, Rate } from 'antd';
-import { UserOutlined, SearchOutlined, CalendarOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { UserOutlined, SearchOutlined, CalendarOutlined, CheckCircleOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { doctorAPI } from '../services/api';
 import ChatButton from '../components/ChatButton';
+import axios from 'axios';
 import '../styles/doctors.css';
 
 const { Option } = Select;
@@ -13,7 +14,9 @@ function DoctorListPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpecialization, setSelectedSpecialization] = useState(null);
+  const [selectedProvince, setSelectedProvince] = useState(null);
   const [specializations, setSpecializations] = useState([]);
+  const [provinces, setProvinces] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [heroLoading, setHeroLoading] = useState(true);
   const [heroContent, setHeroContent] = useState({
@@ -50,7 +53,17 @@ function DoctorListPage() {
 
   useEffect(() => {
     fetchSpecializations();
+    fetchProvinces();
   }, []);
+  
+  const fetchProvinces = async () => {
+    try {
+      const response = await axios.get('https://provinces.open-api.vn/api/v2/p/');
+      setProvinces(response.data);
+    } catch (error) {
+      console.error('Error fetching provinces:', error);
+    }
+  };
 
   const fetchSiteSettings = async () => {
     try {
@@ -113,8 +126,14 @@ function DoctorListPage() {
 
   const filteredDoctors = doctors.filter(doctor => {
     const fullName = `${doctor.firstName || ''} ${doctor.lastName || ''}`.toLowerCase();
-    return fullName.includes(searchQuery.toLowerCase()) ||
+    const matchesSearch = fullName.includes(searchQuery.toLowerCase()) ||
            (doctor.specialization?.toLowerCase().includes(searchQuery.toLowerCase()) || false);
+    
+    // Filter by province
+    const matchesProvince = !selectedProvince || 
+      (doctor.clinicAddress && doctor.clinicAddress.includes(selectedProvince));
+    
+    return matchesSearch && matchesProvince;
   });
 
   return (
@@ -142,16 +161,16 @@ function DoctorListPage() {
         {/* Search Card */}
         <div className="doctors-search-card">
           <Row gutter={[16, 16]}>
-            <Col xs={24} sm={24} md={8}>
+            <Col xs={24} sm={24} md={6}>
               <Input
                 size="large"
-                placeholder="Tìm kiếm bác sĩ theo tên hoặc chuyên khoa..."
+                placeholder="Tìm kiếm bác sĩ..."
                 prefix={<SearchOutlined />}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
               />
             </Col>
-            <Col xs={24} sm={12} md={8}>
+            <Col xs={24} sm={12} md={6}>
               <Select
                 size="large"
                 placeholder="Chọn chuyên khoa"
@@ -164,7 +183,25 @@ function DoctorListPage() {
                 ))}
               </Select>
             </Col>
-            <Col xs={24} sm={12} md={8}>
+            <Col xs={24} sm={12} md={6}>
+              <Select
+                size="large"
+                placeholder="Chọn tỉnh/thành phố"
+                style={{ width: '100%' }}
+                onChange={setSelectedProvince}
+                allowClear
+                showSearch
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                  (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+              >
+                {provinces.map((province) => (
+                  <Option key={province.code} value={province.name}>{province.name}</Option>
+                ))}
+              </Select>
+            </Col>
+            <Col xs={24} sm={24} md={6}>
               <Button 
                 size="large"
                 block
@@ -172,7 +209,7 @@ function DoctorListPage() {
                 className="doctors-action-btn doctors-action-btn-primary"
                 onClick={() => navigate('/appointment')}
               >
-                Đặt lịch khám nhanh
+                Đặt lịch nhanh
               </Button>
             </Col>
           </Row>
@@ -250,6 +287,13 @@ function DoctorListPage() {
                         <span>{doctor.experienceYears || 0} năm</span>
                       </div>
                       
+                      {doctor.clinicAddress && (
+                        <div className="doctor-card-address">
+                          <EnvironmentOutlined />
+                          <span>{doctor.clinicAddress}</span>
+                        </div>
+                      )}
+                      
                       <div className="doctor-card-fee">
                         {doctor.consultationFee?.toLocaleString() || 0} VNĐ
                       </div>
@@ -305,6 +349,7 @@ function DoctorListPage() {
                   onClick={() => {
                     setSearchQuery('');
                     setSelectedSpecialization(null);
+                    setSelectedProvince(null);
                   }}
                 >
                   Xóa bộ lọc

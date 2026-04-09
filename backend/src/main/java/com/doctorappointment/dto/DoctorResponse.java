@@ -14,6 +14,7 @@ public class DoctorResponse {
     private String specialization;
     private String licenseNumber;
     private String biography;
+    private String clinicAddress;
     private Double ratingScore;
     private Integer consultationFee;
     private Integer experienceYears;
@@ -30,6 +31,7 @@ public class DoctorResponse {
         response.setSpecialization(doctor.getSpecialization());
         response.setLicenseNumber(doctor.getLicenseNumber());
         response.setBiography(doctor.getBiography());
+        response.setClinicAddress(doctor.getClinicAddress());
         response.setRatingScore(doctor.getRatingScore());
         response.setConsultationFee(doctor.getConsultationFee());
         response.setExperienceYears(doctor.getExperienceYears());
@@ -99,6 +101,9 @@ public class DoctorResponse {
 
     public String getBiography() { return biography; }
     public void setBiography(String biography) { this.biography = biography; }
+
+    public String getClinicAddress() { return clinicAddress; }
+    public void setClinicAddress(String clinicAddress) { this.clinicAddress = clinicAddress; }
 
     public Double getRatingScore() { return ratingScore; }
     public void setRatingScore(Double ratingScore) { this.ratingScore = ratingScore; }

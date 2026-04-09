@@ -90,115 +90,136 @@ function ServiceWalletPage() {
 
     return (
         <div className="service-wallet-page">
-            <div className="wallet-header">
-                <h1>Ví Dịch Vụ Của Tôi</h1>
-                <p>Quản lý các dịch vụ đã mua và mã sử dụng</p>
-            </div>
-
-            <div className="wallet-tabs">
-                <button 
-                    className={`tab-button ${activeTab === 'services' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('services')}
-                >
-                    Dịch vụ trong ví ({wallet?.items?.length || 0})
-                </button>
-                <button 
-                    className={`tab-button ${activeTab === 'codes' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('codes')}
-                >
-                    Mã sử dụng ({codes.length})
-                </button>
-            </div>
-
-            {error && <div className="error-message">{error}</div>}
-
-            {activeTab === 'services' && (
-                <div className="wallet-services">
-                    {wallet?.items?.length === 0 ? (
-                        <div className="empty-state">
-                            <p>Bạn chưa có dịch vụ nào trong ví</p>
-                            <button onClick={() => navigate('/services')} className="btn-primary">
-                                Mua dịch vụ
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="services-grid">
-                            {wallet?.items?.map(item => (
-                                <div key={item.id} className="service-card">
-                                    {item.serviceImage && (
-                                        <img src={item.serviceImage} alt={item.serviceTitle} />
-                                    )}
-                                    <div className="service-info">
-                                        <h3>{item.serviceTitle}</h3>
-                                        <p className="service-price">{formatPrice(item.unitPrice)}</p>
-                                        <div className="service-quantity">
-                                            <span>Số lượng: {item.quantity}</span>
-                                            <span>Đã dùng: {item.usedQuantity}</span>
-                                            <span className="available">Còn lại: {item.availableQuantity}</span>
-                                        </div>
-                                        {getStatusBadge(item.status)}
-                                        <p className="service-date">
-                                            Mua ngày: {formatDate(item.createdAt)}
-                                        </p>
-                                        {item.expiryDate && (
-                                            <p className="service-expiry">
-                                                Hết hạn: {formatDate(item.expiryDate)}
-                                            </p>
-                                        )}
-                                        {item.availableQuantity > 0 && item.status === 'ACTIVE' && (
-                                            <button 
-                                                className="btn-use-service"
-                                                onClick={() => handleUseService(item.id)}
-                                            >
-                                                Sử dụng dịch vụ
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+            <div className="wallet-container">
+                <div className="wallet-sidebar">
+                    <div className="wallet-sidebar-header">
+                        <h1>Ví Dịch Vụ</h1>
+                        <p>Quản lý dịch vụ của bạn</p>
+                    </div>
+                    <nav className="wallet-nav">
+                        <button 
+                            className={`wallet-nav-item ${activeTab === 'services' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('services')}
+                        >
+                            <span>Dịch vụ của tôi</span>
+                            <span className="count">{wallet?.items?.length || 0}</span>
+                        </button>
+                        <button 
+                            className={`wallet-nav-item ${activeTab === 'codes' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('codes')}
+                        >
+                            <span>Mã sử dụng</span>
+                            <span className="count">{codes.length}</span>
+                        </button>
+                    </nav>
                 </div>
-            )}
 
-            {activeTab === 'codes' && (
-                <div className="wallet-codes">
-                    {codes.length === 0 ? (
-                        <div className="empty-state">
-                            <p>Bạn chưa có mã sử dụng nào</p>
-                        </div>
-                    ) : (
-                        <div className="codes-list">
-                            {codes.map(code => (
-                                <div key={code.id} className="code-card">
-                                    <div className="code-header">
-                                        <h3 className="code-number">{code.code}</h3>
-                                        {getStatusBadge(code.status)}
-                                    </div>
-                                    <div className="code-details">
-                                        <p><strong>Dịch vụ:</strong> {code.serviceTitle}</p>
-                                        <p><strong>Tạo lúc:</strong> {formatDate(code.createdAt)}</p>
-                                        {code.expiryDate && (
-                                            <p><strong>Hết hạn:</strong> {formatDate(code.expiryDate)}</p>
-                                        )}
-                                        {code.status === 'USED' && (
-                                            <>
-                                                <p><strong>Đã sử dụng:</strong> {formatDate(code.usedAt)}</p>
-                                                {code.usedByDoctorName && (
-                                                    <p><strong>Bác sĩ:</strong> {code.usedByDoctorName}</p>
+                <div className="wallet-main">
+                    {error && <div className="error-message">{error}</div>}
+
+                    {activeTab === 'services' && (
+                        <>
+                            <div className="wallet-main-header">
+                                <h2>Dịch vụ trong ví</h2>
+                                <p>Các dịch vụ y tế bạn đã mua và có thể sử dụng</p>
+                            </div>
+                            {wallet?.items?.length === 0 ? (
+                                <div className="empty-state">
+                                    <p>Bạn chưa có dịch vụ nào trong ví</p>
+                                    <button onClick={() => navigate('/services')} className="btn-primary">
+                                        Khám phá dịch vụ
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="services-grid">
+                                    {wallet?.items?.map(item => (
+                                        <div key={item.id} className="service-card">
+                                            {item.serviceImage && (
+                                                <img src={item.serviceImage} alt={item.serviceTitle} />
+                                            )}
+                                            <div className="service-info">
+                                                <h3>{item.serviceTitle}</h3>
+                                                <p className="service-price">{formatPrice(item.unitPrice)}</p>
+                                                <div className="service-stats">
+                                                    <div className="stat-item">
+                                                        <span className="stat-value">{item.quantity}</span>
+                                                        <span className="stat-label">Tổng</span>
+                                                    </div>
+                                                    <div className="stat-item">
+                                                        <span className="stat-value">{item.usedQuantity}</span>
+                                                        <span className="stat-label">Đã dùng</span>
+                                                    </div>
+                                                    <div className="stat-item">
+                                                        <span className="stat-value available">{item.availableQuantity}</span>
+                                                        <span className="stat-label">Còn lại</span>
+                                                    </div>
+                                                </div>
+                                                {getStatusBadge(item.status)}
+                                                <p className="service-meta">
+                                                    Mua: {formatDate(item.createdAt)}
+                                                </p>
+                                                {item.expiryDate && (
+                                                    <p className="service-meta">
+                                                        Hết hạn: {formatDate(item.expiryDate)}
+                                                    </p>
                                                 )}
-                                            </>
-                                        )}
-                                        {code.notes && (
-                                            <p className="code-notes"><strong>Ghi chú:</strong> {code.notes}</p>
-                                        )}
-                                    </div>
+                                                {item.availableQuantity > 0 && item.status === 'ACTIVE' && (
+                                                    <button 
+                                                        className="btn-use-service"
+                                                        onClick={() => handleUseService(item.id)}
+                                                    >
+                                                        Sử dụng dịch vụ
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
+                            )}
+                        </>
+                    )}
+
+                    {activeTab === 'codes' && (
+                        <>
+                            <div className="wallet-main-header">
+                                <h2>Mã sử dụng dịch vụ</h2>
+                                <p>Danh sách các mã đã tạo để sử dụng dịch vụ</p>
+                            </div>
+                            {codes.length === 0 ? (
+                                <div className="empty-state">
+                                    <p>Bạn chưa có mã sử dụng nào</p>
+                                </div>
+                            ) : (
+                                <div className="codes-grid">
+                                    {codes.map(code => (
+                                        <div key={code.id} className="code-card">
+                                            <div className="code-header">
+                                                <h3 className="code-number">{code.code}</h3>
+                                                {getStatusBadge(code.status)}
+                                            </div>
+                                            <div className="code-details">
+                                                <p><strong>Dịch vụ:</strong> {code.serviceTitle}</p>
+                                                <p><strong>Tạo lúc:</strong> {formatDate(code.createdAt)}</p>
+                                                {code.expiryDate && (
+                                                    <p><strong>Hết hạn:</strong> {formatDate(code.expiryDate)}</p>
+                                                )}
+                                                {code.status === 'USED' && (
+                                                    <>
+                                                        <p><strong>Đã sử dụng:</strong> {formatDate(code.usedAt)}</p>
+                                                        {code.usedByDoctorName && (
+                                                            <p><strong>Bác sĩ:</strong> {code.usedByDoctorName}</p>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
-            )}
+            </div>
 
             {showCodeModal && selectedCode && (
                 <div className="modal-overlay" onClick={() => setShowCodeModal(false)}>
