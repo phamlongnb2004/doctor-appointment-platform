@@ -208,7 +208,7 @@
 .doctor-card {
   background: #fff;
   border-radius: 16px;
-  padding: 20px;
+  padding: 14px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
@@ -246,7 +246,7 @@
 
 .doctor-card-avatar {
   position: relative;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .doctor-card-avatar .ant-avatar {
@@ -262,35 +262,35 @@
 
 .doctor-card-badge {
   position: absolute;
-  bottom: -2px;
-  right: -2px;
+  bottom: 0;
+  right: 0;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: #fff;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 10px;
   border: 2px solid #fff;
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
 }
 
 .doctor-card-name {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
   color: #1a1a1a;
-  margin-bottom: 6px;
-  line-height: 1.3;
+  margin-bottom: 3px;
+  line-height: 1.2;
 }
 
 .doctor-card-specialty {
-  font-size: 13px;
+  font-size: 11px;
   color: #0066FF;
   font-weight: 600;
-  margin-bottom: 10px;
-  padding: 3px 10px;
+  margin-bottom: 4px;
+  padding: 2px 8px;
   background: rgba(0, 102, 255, 0.08);
   border-radius: 20px;
   display: inline-block;
@@ -300,61 +300,69 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  font-size: 13px;
-  color: #64748b;
-  margin-bottom: 10px;
-  padding: 6px 12px;
-  background: #f8fafc;
-  border-radius: 8px;
+  margin-bottom: 2px;
 }
 
-.doctor-card-rating .anticon {
-  color: #fbbf24;
+.doctor-card-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.star-wrapper {
+  position: relative;
+  display: inline-block;
   font-size: 14px;
+  line-height: 1;
 }
 
-.doctor-card-rating span:first-of-type {
-  font-weight: 700;
-  color: #1a1a1a;
-  font-size: 15px;
+.star-empty {
+  color: #e0e0e0;
 }
 
-.doctor-card-divider {
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, #e2e8f0 50%, transparent 100%);
-  margin: 10px 0;
+.star-filled {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  color: #fadb14;
+  white-space: nowrap;
+}
+
+.doctor-card-rating-text {
+  font-size: 11px;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 4px;
 }
 
 .doctor-card-info {
-  font-size: 13px;
+  font-size: 11px;
   color: #64748b;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 3px;
 }
 
 .doctor-card-info .anticon {
   color: #0066FF;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .doctor-card-fee {
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 700;
   background: linear-gradient(135deg, #0066FF 0%, #00B8D4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 10px 0 14px;
+  margin: 4px 0 8px;
 }
 
 .doctor-card-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
   margin-top: auto;
   align-items: stretch;
@@ -362,10 +370,10 @@
 
 .doctor-card-btn {
   flex: 1;
-  height: 36px;
+  height: 32px;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -398,7 +406,7 @@
 
 /* Ensure ChatButton matches the style */
 .doctor-card-actions .ant-btn {
-  height: 36px !important;
+  height: 32px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;

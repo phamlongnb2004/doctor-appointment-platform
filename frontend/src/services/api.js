@@ -84,7 +84,22 @@ export const doctorAPI = {
   getSpecialties: () => api.get('/doctors/specialties'),
   createDoctor: (doctorData) => api.post('/doctors', doctorData),
   updateDoctor: (id, doctorData) => api.put(`/doctors/${id}`, doctorData),
+  updateMyDoctorProfile: (userId, doctorData) => api.put(`/doctors/my-profile/${userId}`, doctorData),
   deleteDoctor: (id) => api.delete(`/doctors/${id}`),
+  
+  // Certification endpoints
+  getDoctorCertifications: (doctorId) => api.get(`/doctors/${doctorId}/certifications`),
+  uploadCertification: (userId, file, title, description) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (title) formData.append('title', title);
+    if (description) formData.append('description', description);
+    return api.post(`/doctors/my-profile/${userId}/certifications`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  deleteCertification: (userId, certificationId) => 
+    api.delete(`/doctors/my-profile/${userId}/certifications/${certificationId}`),
 };
 
 // Appointment API

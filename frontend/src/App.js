@@ -14,6 +14,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ChatPage from './pages/ChatPage';
 import AdminCMSPage from './pages/AdminCMSPage';
 import DoctorArticlesPage from './pages/DoctorArticlesPage';
+import DoctorProfileEditPage from './pages/DoctorProfileEditPage';
 import NewsDetailPage from './pages/NewsDetailPage';
 import NewsListPage from './pages/NewsListPage';
 import AboutPage from './pages/AboutPage';
@@ -110,6 +111,18 @@ function AppContent({ user, isAuthenticated, handleLogin, handleLogout, handleUs
             element={
               isAuthenticated && isDoctor ? (
                 <DoctorArticlesPage user={user} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          
+          {/* Doctor Profile Edit Route - For doctors only */}
+          <Route
+            path="/doctor/profile-edit"
+            element={
+              isAuthenticated && isDoctor ? (
+                <DoctorProfileEditPage />
               ) : (
                 <Navigate to="/login" />
               )

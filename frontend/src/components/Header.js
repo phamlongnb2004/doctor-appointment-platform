@@ -181,10 +181,10 @@ function HeaderComponent({ user, onLogout }) {
 
   if (isDoctor) {
     userMenuItems.push({
-      key: 'doctor',
-      icon: <SettingOutlined />,
-      label: 'Quản lý lịch',
-      onClick: () => navigate('/doctor/dashboard'),
+      key: 'doctor-profile-edit',
+      icon: <EditOutlined />,
+      label: 'Chỉnh sửa thông tin bác sĩ',
+      onClick: () => navigate('/doctor/profile-edit'),
     });
     userMenuItems.push({
       key: 'verify-code',
@@ -786,6 +786,22 @@ function HeaderComponent({ user, onLogout }) {
                 <span>Hồ sơ của tôi</span>
               </div>
               
+              <div 
+                onClick={() => { navigate('/my-orders'); setMobileMenuOpen(false); }}
+                style={{ padding: '12px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+              >
+                <ShoppingCartOutlined />
+                <span>Đơn hàng của tôi</span>
+              </div>
+              
+              <div 
+                onClick={() => { navigate('/wallet'); setMobileMenuOpen(false); }}
+                style={{ padding: '12px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+              >
+                <SettingOutlined />
+                <span>Ví dịch vụ</span>
+              </div>
+              
               {isAdmin && (
                 <div 
                   onClick={() => { navigate('/admin'); setMobileMenuOpen(false); }}
@@ -798,11 +814,11 @@ function HeaderComponent({ user, onLogout }) {
               
               {isDoctor && (
                 <div 
-                  onClick={() => { navigate('/doctor/dashboard'); setMobileMenuOpen(false); }}
+                  onClick={() => { navigate('/doctor/verify-code'); setMobileMenuOpen(false); }}
                   style={{ padding: '12px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
                 >
                   <SettingOutlined />
-                  <span>Quản lý lịch</span>
+                  <span>Xác nhận mã dịch vụ</span>
                 </div>
               )}
               

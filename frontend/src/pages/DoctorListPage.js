@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Button, Input, Select, Avatar, Spin } from 'antd';
-import { UserOutlined, SearchOutlined, StarOutlined, CalendarOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Button, Input, Select, Avatar, Spin, Rate } from 'antd';
+import { UserOutlined, SearchOutlined, CalendarOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { doctorAPI } from '../services/api';
 import ChatButton from '../components/ChatButton';
@@ -87,6 +87,7 @@ function DoctorListPage() {
       } else {
         response = await doctorAPI.getActiveDoctors();
       }
+      console.log('Doctors data:', response.data); // Debug log
       setDoctors(response.data || []);
     } catch (error) {
       console.error('Error fetching doctors:', error);
@@ -202,7 +203,7 @@ function DoctorListPage() {
                     <div className="doctor-card" onClick={() => navigate(`/doctors/${doctor.id}`)}>
                       <div className="doctor-card-avatar">
                         <Avatar
-                          size={70}
+                          size={60}
                           src={doctor.profileImage}
                           icon={<UserOutlined />}
                         />
@@ -220,16 +221,33 @@ function DoctorListPage() {
                       </div>
                       
                       <div className="doctor-card-rating">
-                        <StarOutlined />
-                        <span>{(doctor.ratingScore || 0).toFixed(1)}</span>
-                        <span>({doctor.reviewCount || 0})</span>
+                        <div className="doctor-card-stars">
+                          {[1, 2, 3, 4, 5].map((star) => {
+                            const rating = doctor.ratingScore || 0;
+                            const fillPercentage = Math.min(Math.max((rating - star + 1) * 100, 0), 100);
+                            
+                            return (
+                              <span key={star} className="star-wrapper">
+                                <span className="star-empty">☆</span>
+                                <span 
+                                  className="star-filled" 
+                                  style={{ width: `${fillPercentage}%` }}
+                                >
+                                  ★
+                                </span>
+                              </span>
+                            );
+                          })}
+                        </div>
                       </div>
                       
-                      <div className="doctor-card-divider"></div>
+                      <div className="doctor-card-rating-text">
+                        {(doctor.ratingScore || 0).toFixed(1)} sao ({doctor.reviewCount || 0} đánh giá)
+                      </div>
                       
                       <div className="doctor-card-info">
                         <CalendarOutlined />
-                        <span>{doctor.experienceYears || 0} năm kinh nghiệm</span>
+                        <span>{doctor.experienceYears || 0} năm</span>
                       </div>
                       
                       <div className="doctor-card-fee">

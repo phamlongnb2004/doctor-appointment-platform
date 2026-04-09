@@ -25,6 +25,12 @@ public class Doctor {
 
     @Column(columnDefinition = "TEXT")
     private String biography;
+    
+    @Column(columnDefinition = "TEXT")
+    private String qualifications;
+    
+    @Column(name = "clinic_address", columnDefinition = "TEXT")
+    private String clinicAddress;
 
     @Column(nullable = false)
     private Double ratingScore;
@@ -55,6 +61,8 @@ public class Doctor {
     public String getSpecialization() { return specialization; }
     public String getLicenseNumber() { return licenseNumber; }
     public String getBiography() { return biography; }
+    public String getQualifications() { return qualifications; }
+    public String getClinicAddress() { return clinicAddress; }
     public Double getRatingScore() { return ratingScore; }
     public Integer getConsultationFee() { return consultationFee; }
     public Integer getExperienceYears() { return experienceYears; }
@@ -69,6 +77,8 @@ public class Doctor {
     public void setSpecialization(String specialization) { this.specialization = specialization; }
     public void setLicenseNumber(String licenseNumber) { this.licenseNumber = licenseNumber; }
     public void setBiography(String biography) { this.biography = biography; }
+    public void setQualifications(String qualifications) { this.qualifications = qualifications; }
+    public void setClinicAddress(String clinicAddress) { this.clinicAddress = clinicAddress; }
     public void setRatingScore(Double ratingScore) { this.ratingScore = ratingScore; }
     public void setConsultationFee(Integer consultationFee) { this.consultationFee = consultationFee; }
     public void setExperienceYears(Integer experienceYears) { this.experienceYears = experienceYears; }

@@ -2,13 +2,16 @@ package com.doctorappointment.controller;
 
 import com.doctorappointment.dto.DoctorResponse;
 import com.doctorappointment.model.Doctor;
+import com.doctorappointment.model.DoctorCertification;
 import com.doctorappointment.model.Specialty;
 import com.doctorappointment.repository.SpecialtyRepository;
 import com.doctorappointment.service.DoctorService;
+import com.doctorappointment.service.DoctorCertificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,6 +33,7 @@ import java.util.stream.Collectors;
 public class DoctorController {
     private final DoctorService doctorService;
     private final SpecialtyRepository specialtyRepository;
+    private final DoctorCertificationService certificationService;
 
     @PostMapping
     public ResponseEntity<?> createDoctor(@RequestBody Doctor doctor) {
@@ -94,6 +98,54 @@ public class DoctorController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         }
     }
+    
+    @PutMapping("/my-profile/{userId}")
+    public ResponseEntity<?> updateMyDoctorProfile(@PathVariable Long userId, @RequestBody Doctor doctorDetails) {
+        try {
+            System.out.println("=== UPDATE DOCTOR PROFILE ===");
+            System.out.println("User ID: " + userId);
+            System.out.println("Doctor Details: " + doctorDetails);
+            
+            // Get doctor by userId to ensure they can only update their own profile
+            var doctorOpt = doctorService.getDoctorByUserId(userId);
+            if (doctorOpt.isEmpty()) {
+                System.out.println("ERROR: Doctor profile not found for user ID: " + userId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Doctor profile not found"));
+            }
+            
+            Doctor existingDoctor = doctorOpt.get();
+            System.out.println("Existing Doctor ID: " + existingDoctor.getId());
+            
+            // Update only allowed fields
+            if (doctorDetails.getSpecialization() != null) {
+                existingDoctor.setSpecialization(doctorDetails.getSpecialization());
+            }
+            if (doctorDetails.getQualifications() != null) {
+                existingDoctor.setQualifications(doctorDetails.getQualifications());
+            }
+            if (doctorDetails.getExperienceYears() != null) {
+                existingDoctor.setExperienceYears(doctorDetails.getExperienceYears());
+            }
+            if (doctorDetails.getConsultationFee() != null) {
+                existingDoctor.setConsultationFee(doctorDetails.getConsultationFee());
+            }
+            if (doctorDetails.getBiography() != null) {
+                existingDoctor.setBiography(doctorDetails.getBiography());
+            }
+            if (doctorDetails.getClinicAddress() != null) {
+                existingDoctor.setClinicAddress(doctorDetails.getClinicAddress());
+            }
+            
+            System.out.println("About to update doctor...");
+            Doctor updatedDoctor = doctorService.updateDoctor(existingDoctor.getId(), existingDoctor);
+            System.out.println("Doctor updated successfully!");
+            return ResponseEntity.ok(updatedDoctor);
+        } catch (Exception e) {
+            System.out.println("ERROR updating doctor profile: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteDoctor(@PathVariable Long id) {
@@ -102,6 +154,71 @@ public class DoctorController {
             return ResponseEntity.ok(Map.of("message", "Doctor deleted successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    // Doctor Certification endpoints
+    @GetMapping("/{doctorId}/certifications")
+    public ResponseEntity<List<DoctorCertification>> getDoctorCertifications(@PathVariable Long doctorId) {
+        List<DoctorCertification> certifications = certificationService.getDoctorCertifications(doctorId);
+        return ResponseEntity.ok(certifications);
+    }
+    
+    @GetMapping("/my-profile/{userId}/certifications")
+    public ResponseEntity<List<DoctorCertification>> getMyCertifications(@PathVariable Long userId) {
+        try {
+            var doctorOpt = doctorService.getDoctorByUserId(userId);
+            if (doctorOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+            Doctor doctor = doctorOpt.get();
+            List<DoctorCertification> certifications = certificationService.getDoctorCertifications(doctor.getId());
+            return ResponseEntity.ok(certifications);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+    
+    @PostMapping("/my-profile/{userId}/certifications")
+    public ResponseEntity<?> uploadCertification(
+            @PathVariable Long userId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "description", required = false) String description) {
+        try {
+            // Get doctor by userId
+            var doctorOpt = doctorService.getDoctorByUserId(userId);
+            if (doctorOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Doctor profile not found"));
+            }
+            
+            Doctor doctor = doctorOpt.get();
+            DoctorCertification certification = certificationService.addCertification(
+                    doctor.getId(), file, title, description);
+            
+            return ResponseEntity.ok(certification);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    @DeleteMapping("/my-profile/{userId}/certifications/{certificationId}")
+    public ResponseEntity<?> deleteCertification(
+            @PathVariable Long userId,
+            @PathVariable Long certificationId) {
+        try {
+            // Get doctor by userId to ensure they can only delete their own certifications
+            var doctorOpt = doctorService.getDoctorByUserId(userId);
+            if (doctorOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Doctor profile not found"));
+            }
+            
+            Doctor doctor = doctorOpt.get();
+            certificationService.deleteCertification(doctor.getId(), certificationId);
+            
+            return ResponseEntity.ok(Map.of("message", "Certification deleted successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
 }

@@ -264,23 +264,43 @@ function DoctorDetailPage() {
                     key: 'info',
                     label: 'Thông tin',
                     children: (
-                      <Row gutter={24}>
-                        <Col xs={24} md={12}>
-                          <Title level={5}>Thông tin liên hệ</Title>
-                          <Paragraph>
-                            <EnvironmentOutlined /> Địa chỉ: Chưa cập nhật
-                          </Paragraph>
-                          <Paragraph>
-                            <CalendarOutlined /> Email: {doctor.email || 'Chưa cập nhật'}
-                          </Paragraph>
-                        </Col>
-                        <Col xs={24} md={12}>
-                          <Title level={5}>Phí tư vấn</Title>
-                          <Title level={3} style={{ color: '#667eea', margin: 0 }}>
-                            {doctor.consultationFee?.toLocaleString() || 0} VNĐ
-                          </Title>
-                        </Col>
-                      </Row>
+                      <>
+                        <Row gutter={24}>
+                          <Col xs={24} md={12}>
+                            <Title level={5}>Thông tin liên hệ</Title>
+                            <Paragraph>
+                              <EnvironmentOutlined /> Địa chỉ phòng khám: {doctor.clinicAddress || 'Chưa cập nhật'}
+                            </Paragraph>
+                            <Paragraph>
+                              <CalendarOutlined /> Email: {doctor.email || 'Chưa cập nhật'}
+                            </Paragraph>
+                          </Col>
+                          <Col xs={24} md={12}>
+                            <Title level={5}>Phí tư vấn</Title>
+                            <Title level={3} style={{ color: '#667eea', margin: 0 }}>
+                              {doctor.consultationFee?.toLocaleString() || 0} VNĐ
+                            </Title>
+                          </Col>
+                        </Row>
+                        
+                        {doctor.qualifications && (
+                          <div style={{ marginTop: 24 }}>
+                            <Title level={5}>Bằng cấp & Chứng chỉ</Title>
+                            <Paragraph style={{ whiteSpace: 'pre-line' }}>
+                              {doctor.qualifications}
+                            </Paragraph>
+                          </div>
+                        )}
+                        
+                        {doctor.biography && (
+                          <div style={{ marginTop: 24 }}>
+                            <Title level={5}>Tiểu sử</Title>
+                            <Paragraph style={{ whiteSpace: 'pre-line' }}>
+                              {doctor.biography}
+                            </Paragraph>
+                          </div>
+                        )}
+                      </>
                     ),
                   },
                   {
