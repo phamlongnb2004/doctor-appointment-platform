@@ -42,9 +42,6 @@ public class DoctorService {
             doctor.setBiography(doctorDetails.getBiography());
             doctor.setConsultationFee(doctorDetails.getConsultationFee());
             doctor.setExperienceYears(doctorDetails.getExperienceYears());
-            if (doctorDetails.getQualifications() != null) {
-                doctor.setQualifications(doctorDetails.getQualifications());
-            }
             if (doctorDetails.getClinicAddress() != null) {
                 doctor.setClinicAddress(doctorDetails.getClinicAddress());
             }

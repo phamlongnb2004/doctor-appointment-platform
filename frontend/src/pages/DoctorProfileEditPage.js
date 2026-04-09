@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, InputNumber, Button, message, Card, Spin, Upload, Select } from 'antd';
-import { UploadOutlined, SaveOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { SaveOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { doctorAPI, userAPI } from '../services/api';
+import RichTextEditor from '../components/RichTextEditor';
 import '../styles/doctor-profile-edit.css';
+import 'react-quill/dist/quill.snow.css';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -16,7 +18,7 @@ function DoctorProfileEditPage() {
   const [userData, setUserData] = useState(null);
   const [specialties, setSpecialties] = useState([]);
   const [certificationImages, setCertificationImages] = useState([]);
-  const [uploadingCert, setUploadingCert] = useState(false);
+  const [biography, setBiography] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -77,12 +79,13 @@ function DoctorProfileEditPage() {
         lastName: userResponse.data.lastName,
         email: userResponse.data.email,
         specialization: doctor.specialization,
-        qualifications: doctor.qualifications,
         experienceYears: doctor.experienceYears,
         consultationFee: doctor.consultationFee,
-        bio: doctor.biography,
         clinicAddress: doctor.clinicAddress,
       });
+      
+      // Set biography separately for RichTextEditor
+      setBiography(doctor.biography || '');
     } catch (error) {
       console.error('Error fetching doctor profile:', error);
       message.error('Không thể tải thông tin bác sĩ');
@@ -99,10 +102,9 @@ function DoctorProfileEditPage() {
       // Update doctor profile
       const doctorUpdateData = {
         specialization: values.specialization,
-        qualifications: values.qualifications,
         experienceYears: values.experienceYears,
         consultationFee: values.consultationFee,
-        biography: values.bio,
+        biography: biography,
         clinicAddress: values.clinicAddress,
       };
       
@@ -215,20 +217,9 @@ function DoctorProfileEditPage() {
                   ))}
                 </Select>
               </Form.Item>
-
-              <Form.Item
-                label="Bằng cấp & Chứng chỉ"
-                name="qualifications"
-                rules={[{ required: true, message: 'Vui lòng nhập bằng cấp' }]}
-              >
-                <TextArea 
-                  rows={3} 
-                  placeholder="Ví dụ: Bác sĩ Chuyên khoa I Tim mạch, Thạc sĩ Y học..."
-                />
-              </Form.Item>
               
               <Form.Item
-                label="Ảnh chứng chỉ"
+                label="Ảnh chứng chỉ & Bằng cấp"
                 extra="Upload ảnh bằng cấp, chứng chỉ của bạn (có thể upload nhiều ảnh, tối đa 10 ảnh)"
               >
                 <Upload
@@ -284,15 +275,21 @@ function DoctorProfileEditPage() {
             <div className="form-section">
               <h3 className="section-title">Giới thiệu</h3>
               
-              <Form.Item
-                label="Tiểu sử"
-                name="bio"
-              >
-                <TextArea 
-                  rows={5} 
-                  placeholder="Giới thiệu về bản thân, kinh nghiệm làm việc, lĩnh vực chuyên môn..."
+              <div style={{ marginBottom: 24 }}>
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: 8,
+                  fontSize: 14,
+                  fontWeight: 500
+                }}>
+                  Tiểu sử
+                </label>
+                <RichTextEditor
+                  value={biography}
+                  onChange={setBiography}
+                  placeholder="Giới thiệu về bản thân, kinh nghiệm làm việc, lĩnh vực chuyên môn... Bạn có thể chèn ảnh, định dạng text, thay đổi cỡ chữ, màu sắc, v.v."
                 />
-              </Form.Item>
+              </div>
 
               <Form.Item
                 label="Địa chỉ phòng khám"

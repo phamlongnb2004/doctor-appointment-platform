@@ -120,9 +120,6 @@ public class DoctorController {
             if (doctorDetails.getSpecialization() != null) {
                 existingDoctor.setSpecialization(doctorDetails.getSpecialization());
             }
-            if (doctorDetails.getQualifications() != null) {
-                existingDoctor.setQualifications(doctorDetails.getQualifications());
-            }
             if (doctorDetails.getExperienceYears() != null) {
                 existingDoctor.setExperienceYears(doctorDetails.getExperienceYears());
             }

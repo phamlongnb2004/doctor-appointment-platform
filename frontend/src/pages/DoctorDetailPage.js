@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Typography, Button, Tabs, Avatar, Rate, Tag, DatePicker, Select, message, Spin, Space } from 'antd';
+import { Row, Col, Card, Typography, Button, Tabs, Avatar, Rate, Tag, DatePicker, Select, message, Spin, Space, Image } from 'antd';
 import { UserOutlined, CalendarOutlined, ClockCircleOutlined, EnvironmentOutlined, StarOutlined, ArrowLeftOutlined, MessageOutlined } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doctorAPI, appointmentAPI } from '../services/api';
@@ -7,6 +7,7 @@ import cmsAPI from '../services/cmsApi';
 import ChatButton from '../components/ChatButton';
 import useFallingFlowers from '../hooks/useFallingFlowers';
 import '../styles/animations.css';
+import 'react-quill/dist/quill.snow.css';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -22,6 +23,7 @@ function DoctorDetailPage() {
   const [articles, setArticles] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
+  const [certifications, setCertifications] = useState([]);
   const flowerContainerRef = useFallingFlowers(5);
 
   useEffect(() => {
@@ -43,6 +45,15 @@ function DoctorDetailPage() {
     try {
       const response = await doctorAPI.getDoctorById(id);
       setDoctor(response.data);
+      
+      // Fetch certifications
+      try {
+        const certResponse = await doctorAPI.getDoctorCertifications(response.data.id);
+        setCertifications(certResponse.data || []);
+      } catch (certError) {
+        console.log('No certifications found:', certError);
+        setCertifications([]);
+      }
     } catch (error) {
       console.error('Error fetching doctor:', error);
       message.error('Không tìm thấy bác sĩ!');
@@ -283,21 +294,42 @@ function DoctorDetailPage() {
                           </Col>
                         </Row>
                         
-                        {doctor.qualifications && (
-                          <div style={{ marginTop: 24 }}>
-                            <Title level={5}>Bằng cấp & Chứng chỉ</Title>
-                            <Paragraph style={{ whiteSpace: 'pre-line' }}>
-                              {doctor.qualifications}
-                            </Paragraph>
-                          </div>
-                        )}
-                        
                         {doctor.biography && (
                           <div style={{ marginTop: 24 }}>
                             <Title level={5}>Tiểu sử</Title>
-                            <Paragraph style={{ whiteSpace: 'pre-line' }}>
-                              {doctor.biography}
-                            </Paragraph>
+                            <div 
+                              className="doctor-biography-content"
+                              dangerouslySetInnerHTML={{ __html: doctor.biography }}
+                              style={{
+                                lineHeight: 1.8,
+                                fontSize: 16
+                              }}
+                            />
+                          </div>
+                        )}
+                        
+                        {certifications.length > 0 && (
+                          <div style={{ marginTop: 24 }}>
+                            <Title level={5}>Ảnh chứng chỉ</Title>
+                            <Image.PreviewGroup>
+                              <Row gutter={[16, 16]}>
+                                {certifications.map((cert) => (
+                                  <Col xs={12} sm={8} md={6} key={cert.id}>
+                                    <Image
+                                      src={cert.imageUrl}
+                                      alt={cert.title || 'Chứng chỉ'}
+                                      style={{
+                                        width: '100%',
+                                        height: 120,
+                                        objectFit: 'cover',
+                                        borderRadius: 8,
+                                        cursor: 'pointer'
+                                      }}
+                                    />
+                                  </Col>
+                                ))}
+                              </Row>
+                            </Image.PreviewGroup>
                           </div>
                         )}
                       </>
