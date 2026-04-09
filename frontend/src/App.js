@@ -26,6 +26,8 @@ import MyOrdersPage from './pages/MyOrdersPage';
 import PaymentTestPage from './pages/PaymentTestPage';
 import SePayCheckoutPage from './pages/SePayCheckoutPage';
 import SePayTestPage from './pages/SePayTestPage';
+import ServiceWalletPage from './pages/ServiceWalletPage';
+import DoctorVerifyCodePage from './pages/DoctorVerifyCodePage';
 import NotFoundPage from './pages/NotFoundPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -60,6 +62,10 @@ function AppContent({ user, isAuthenticated, handleLogin, handleLogout, handleUs
           <Route 
             path="/my-orders" 
             element={isAuthenticated ? <MyOrdersPage /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/wallet" 
+            element={isAuthenticated ? <ServiceWalletPage /> : <Navigate to="/login" />} 
           />
           <Route path="/payment-test" element={<PaymentTestPage />} />
           <Route path="/sepay-test" element={<SePayTestPage />} />
@@ -104,6 +110,18 @@ function AppContent({ user, isAuthenticated, handleLogin, handleLogout, handleUs
             element={
               isAuthenticated && isDoctor ? (
                 <DoctorArticlesPage user={user} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          
+          {/* Doctor Verify Code Route - For doctors only */}
+          <Route
+            path="/doctor/verify-code"
+            element={
+              isAuthenticated && isDoctor ? (
+                <DoctorVerifyCodePage />
               ) : (
                 <Navigate to="/login" />
               )

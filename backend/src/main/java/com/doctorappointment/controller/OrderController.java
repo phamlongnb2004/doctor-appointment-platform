@@ -121,10 +121,20 @@ public class OrderController {
         // Tạo đơn hàng trước
         OrderResponse order = orderService.createOrder(userId, request);
         
-        // Tạo form data để submit đến SePay
-        String successUrl = frontendUrl + "/order-success/" + order.getOrderNumber();
-        String errorUrl = frontendUrl + "/checkout?error=payment_failed&order=" + order.getOrderNumber();
-        String cancelUrl = frontendUrl + "/checkout?cancelled=true&order=" + order.getOrderNumber();
+        // Log frontend URL để debug
+        System.out.println("=== FRONTEND URL DEBUG ===");
+        System.out.println("frontendUrl value: [" + frontendUrl + "]");
+        System.out.println("frontendUrl length: " + frontendUrl.length());
+        System.out.println("frontendUrl trimmed: [" + frontendUrl.trim() + "]");
+        
+        // Tạo form data để submit đến SePay - trim để loại bỏ khoảng trắng
+        String cleanFrontendUrl = frontendUrl.trim();
+        String successUrl = cleanFrontendUrl + "/order-success/" + order.getOrderNumber();
+        String errorUrl = cleanFrontendUrl + "/checkout?error=payment_failed&order=" + order.getOrderNumber();
+        String cancelUrl = cleanFrontendUrl + "/checkout?cancelled=true&order=" + order.getOrderNumber();
+        
+        System.out.println("Success URL: [" + successUrl + "]");
+        System.out.println("==========================");
         
         Map<String, Object> formData = sePayService.createCheckoutFormData(
             orderService.getOrderEntity(order.getId()),

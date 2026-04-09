@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Card, Row, Col, Typography, Table, Tag, Button, Statistic, Space, Spin, Modal, Form, Select, Input, message, Avatar, Dropdown, Badge, Progress, List, Typography as AntTypography, Drawer } from 'antd';
-import { DashboardOutlined, UserOutlined, TeamOutlined, CalendarOutlined, LogoutOutlined, SettingOutlined, MedicineBoxOutlined, EditOutlined, BellOutlined, PlusOutlined, SearchOutlined, FilterOutlined, ArrowUpOutlined, ArrowDownOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, WifiOutlined, MenuOutlined, CloseOutlined, MailOutlined, DeleteOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { Layout, Menu, Card, Row, Col, Typography, Table, Tag, Button, Space, Modal, Form, Select, Input, message, Avatar, Dropdown, Badge, Progress, List, Typography as AntTypography, Drawer } from 'antd';
+import { DashboardOutlined, UserOutlined, TeamOutlined, CalendarOutlined, LogoutOutlined, SettingOutlined, MedicineBoxOutlined, EditOutlined, BellOutlined, PlusOutlined, SearchOutlined, FilterOutlined, ArrowUpOutlined, ArrowDownOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, WifiOutlined, MenuOutlined, CloseOutlined, MailOutlined, DeleteOutlined, ShoppingCartOutlined, BarChartOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { userAPI, doctorAPI, appointmentAPI } from '../services/api';
 import webSocketService from '../services/websocket';
+import ReportsTab from '../components/admin/ReportsTab';
 import '../styles/admin.css';
 
 const { Header, Content, Sider } = Layout;
@@ -269,6 +270,7 @@ function AdminDashboard({ user, onLogout }) {
 
   const menuItems = [
     { key: 'overview', icon: <DashboardOutlined />, label: 'Tổng quan' },
+    { key: 'reports', icon: <BarChartOutlined />, label: 'Báo cáo & Thống kê' },
     { key: 'users', icon: <TeamOutlined />, label: 'Quản lý người dùng' },
     { key: 'doctors', icon: <MedicineBoxOutlined />, label: 'Quản lý bác sĩ' },
     { key: 'appointments', icon: <CalendarOutlined />, label: 'Lịch hẹn' },
@@ -684,6 +686,8 @@ function AdminDashboard({ user, onLogout }) {
     }
 
     switch (selectedKey) {
+      case 'reports':
+        return <ReportsTab />;
       case 'users':
         return (
           <div className="admin-section">
@@ -1078,43 +1082,111 @@ function AdminDashboard({ user, onLogout }) {
                   {
                     title: 'Thao tác',
                     key: 'action',
-                    width: 180,
+                    width: 120,
                     fixed: 'right',
-                    render: (_, record) => (
-                      <Space>
-                        <Button
-                          type="text"
-                          size="small"
-                          onClick={() => {
-                            Modal.info({
-                              title: `Chi tiết đơn hàng ${record.orderNumber}`,
-                              width: 800,
-                              content: (
-                                <div style={{ marginTop: 20 }}>
-                                  <p><strong>Khách hàng:</strong> {record.customerName}</p>
-                                  <p><strong>Email:</strong> {record.customerEmail}</p>
-                                  <p><strong>Số điện thoại:</strong> {record.customerPhone}</p>
-                                  <p><strong>Tổng tiền:</strong> {record.finalAmount?.toLocaleString()} VNĐ</p>
-                                  <p><strong>Phương thức thanh toán:</strong> {record.paymentMethod}</p>
-                                  <p><strong>Trạng thái thanh toán:</strong> {record.paymentStatus}</p>
-                                  <p><strong>Trạng thái đơn hàng:</strong> {record.status}</p>
+                    render: (_, record) => {
+                      const getMenuItems = () => {
+                        const items = [
+                          {
+                            key: 'view',
+                            label: 'Xem chi tiết',
+                            icon: <SearchOutlined />
+                          }
+                        ];
+
+                        if (record.status === 'PENDING') {
+                          items.push({
+                            key: 'confirm',
+                            label: 'Xác nhận đơn',
+                            icon: <CheckCircleOutlined />,
+                            style: { color: '#52c41a' }
+                          });
+                        }
+
+                        if (record.status !== 'CANCELLED' && record.status !== 'COMPLETED') {
+                          items.push({
+                            key: 'cancel',
+                            label: 'Hủy đơn hàng',
+                            icon: <CloseCircleOutlined />,
+                            danger: true
+                          });
+                        }
+
+                        return items;
+                      };
+
+                      const handleMenuClick = ({ key }) => {
+                        const orderDetails = orders.find(o => o.id === record.id);
+                        
+                        if (key === 'view') {
+                          Modal.info({
+                            title: 'Chi tiết đơn hàng',
+                            width: 700,
+                            content: (
+                              <div style={{ marginTop: 20 }}>
+                                <div style={{ 
+                                  background: '#f5f5f5', 
+                                  padding: '16px', 
+                                  borderRadius: '8px',
+                                  marginBottom: '16px'
+                                }}>
+                                  <Text strong style={{ fontSize: 16, color: '#667eea' }}>
+                                    {record.orderNumber}
+                                  </Text>
                                 </div>
-                              )
-                            });
-                          }}
-                          style={{
-                            borderRadius: 8,
-                            color: '#667eea',
-                            background: '#667eea15'
-                          }}
-                        >
-                          Xem chi tiết
-                        </Button>
-                        {record.status === 'PENDING' && (
-                          <Button
-                            type="primary"
-                            size="small"
-                            onClick={async () => {
+                                
+                                <div style={{ marginBottom: 16 }}>
+                                  <Text strong>Thông tin khách hàng:</Text>
+                                  <div style={{ marginTop: 8, paddingLeft: 16 }}>
+                                    <p style={{ margin: '4px 0' }}>• Họ tên: {record.customerName}</p>
+                                    <p style={{ margin: '4px 0' }}>• Email: {record.customerEmail}</p>
+                                    <p style={{ margin: '4px 0' }}>• Số điện thoại: {record.customerPhone}</p>
+                                  </div>
+                                </div>
+
+                                <div style={{ marginBottom: 16 }}>
+                                  <Text strong>Thông tin đơn hàng:</Text>
+                                  <div style={{ marginTop: 8, paddingLeft: 16 }}>
+                                    <p style={{ margin: '4px 0' }}>• Số dịch vụ: {record.itemCount}</p>
+                                    <p style={{ margin: '4px 0' }}>• Tổng tiền: {record.finalAmount?.toLocaleString()} VNĐ</p>
+                                    <p style={{ margin: '4px 0' }}>• Phương thức: {record.paymentMethod === 'COD' ? 'Tiền mặt' : 'Chuyển khoản'}</p>
+                                    <p style={{ margin: '4px 0' }}>• Thanh toán: {record.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}</p>
+                                    <p style={{ margin: '4px 0' }}>• Trạng thái: {record.status}</p>
+                                    <p style={{ margin: '4px 0' }}>• Ngày đặt: {record.createdAt}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          });
+                        } else if (key === 'confirm') {
+                          Modal.confirm({
+                            title: 'Xác nhận đơn hàng',
+                            width: 600,
+                            content: (
+                              <div style={{ marginTop: 20 }}>
+                                <div style={{ 
+                                  background: '#f0f9ff', 
+                                  padding: '16px', 
+                                  borderRadius: '8px',
+                                  marginBottom: '16px',
+                                  border: '1px solid #bae7ff'
+                                }}>
+                                  <Text strong style={{ fontSize: 16, color: '#1890ff' }}>
+                                    {record.orderNumber}
+                                  </Text>
+                                </div>
+                                <p><strong>Khách hàng:</strong> {record.customerName}</p>
+                                <p><strong>Số điện thoại:</strong> {record.customerPhone}</p>
+                                <p><strong>Tổng tiền:</strong> {record.finalAmount?.toLocaleString()} VNĐ</p>
+                                <p style={{ marginTop: 16, color: '#52c41a' }}>
+                                  <CheckCircleOutlined /> Bạn có chắc chắn muốn xác nhận đơn hàng này?
+                                </p>
+                              </div>
+                            ),
+                            okText: 'Xác nhận',
+                            cancelText: 'Hủy',
+                            okButtonProps: { type: 'primary' },
+                            onOk: async () => {
                               try {
                                 await fetch(`${API_BASE_URL}/orders/${record.id}/status`, {
                                   method: 'PUT',
@@ -1124,19 +1196,84 @@ function AdminDashboard({ user, onLogout }) {
                                   },
                                   body: JSON.stringify({ status: 'CONFIRMED' })
                                 });
-                                message.success('Đã xác nhận đơn hàng!');
+                                message.success('Đã xác nhận đơn hàng thành công!');
                                 fetchDashboardData();
                               } catch (error) {
-                                message.error('Có lỗi xảy ra!');
+                                message.error('Có lỗi xảy ra khi xác nhận đơn hàng!');
                               }
+                            }
+                          });
+                        } else if (key === 'cancel') {
+                          Modal.confirm({
+                            title: 'Hủy đơn hàng',
+                            width: 600,
+                            content: (
+                              <div style={{ marginTop: 20 }}>
+                                <div style={{ 
+                                  background: '#fff2e8', 
+                                  padding: '16px', 
+                                  borderRadius: '8px',
+                                  marginBottom: '16px',
+                                  border: '1px solid #ffbb96'
+                                }}>
+                                  <Text strong style={{ fontSize: 16, color: '#ff4d4f' }}>
+                                    {record.orderNumber}
+                                  </Text>
+                                </div>
+                                <p><strong>Khách hàng:</strong> {record.customerName}</p>
+                                <p><strong>Số điện thoại:</strong> {record.customerPhone}</p>
+                                <p><strong>Tổng tiền:</strong> {record.finalAmount?.toLocaleString()} VNĐ</p>
+                                <p><strong>Trạng thái hiện tại:</strong> {record.status}</p>
+                                <p style={{ marginTop: 16, color: '#ff4d4f' }}>
+                                  <CloseCircleOutlined /> Bạn có chắc chắn muốn hủy đơn hàng này?
+                                </p>
+                              </div>
+                            ),
+                            okText: 'Hủy đơn hàng',
+                            cancelText: 'Không',
+                            okButtonProps: { danger: true },
+                            onOk: async () => {
+                              try {
+                                await fetch(`${API_BASE_URL}/orders/${record.id}/status`, {
+                                  method: 'PUT',
+                                  headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                    'Content-Type': 'application/json'
+                                  },
+                                  body: JSON.stringify({ status: 'CANCELLED' })
+                                });
+                                message.success('Đã hủy đơn hàng thành công!');
+                                fetchDashboardData();
+                              } catch (error) {
+                                message.error('Có lỗi xảy ra khi hủy đơn hàng!');
+                              }
+                            }
+                          });
+                        }
+                      };
+
+                      return (
+                        <Dropdown
+                          menu={{
+                            items: getMenuItems(),
+                            onClick: handleMenuClick
+                          }}
+                          trigger={['click']}
+                        >
+                          <Button
+                            type="text"
+                            icon={<SettingOutlined />}
+                            style={{
+                              borderRadius: 8,
+                              color: '#667eea',
+                              background: '#667eea15'
                             }}
-                            style={{ borderRadius: 8, color: '#fff !important' }}
                           >
-                            Xác nhận
+                            Thao tác
                           </Button>
-                        )}
-                      </Space>
-                    )
+                        </Dropdown>
+                      );
+                    }
                   }
                 ]}
                 pagination={{
@@ -1171,15 +1308,59 @@ function AdminDashboard({ user, onLogout }) {
       default:
         return (
           <div className="admin-dashboard">
-            {/* Welcome Banner */}
+            {/* Welcome Banner - Modern Design */}
             <div className="admin-welcome-banner">
               <div className="admin-welcome-content">
-                <Title level={2}>Xin chào, {user?.firstName} {user?.lastName}! 👋</Title>
-                <Text className="admin-welcome-subtitle">Chào mừng bạn trở lại bảng điều khiển quản trị</Text>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
+                  <div style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '16px',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backdropFilter: 'blur(10px)',
+                    border: '2px solid rgba(255,255,255,0.2)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+                  }}>
+                    <DashboardOutlined style={{ fontSize: '28px', color: 'white' }} />
+                  </div>
+                  <div>
+                    <Title level={2} style={{ margin: 0, color: 'white', fontSize: '28px', fontWeight: '700' }}>
+                      Xin chào, {user?.firstName} {user?.lastName}
+                    </Title>
+                    <Text className="admin-welcome-subtitle" style={{ 
+                      fontSize: '15px', 
+                      color: 'rgba(255,255,255,0.9)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginTop: '4px'
+                    }}>
+                      <CheckCircleOutlined style={{ fontSize: '16px' }} />
+                      Chào mừng bạn trở lại bảng điều khiển quản trị
+                    </Text>
+                  </div>
+                </div>
               </div>
               <div className="admin-welcome-actions">
-                <Button type="primary" icon={<PlusOutlined />} className="admin-btn-primary admin-btn-lg">
-                  Tạo mới
+                <Button 
+                  icon={<CalendarOutlined />} 
+                  className="admin-btn-secondary"
+                  onClick={() => setSelectedKey('appointments')}
+                  style={{ height: '44px', borderRadius: '12px' }}
+                >
+                  Xem lịch hẹn
+                </Button>
+                <Button 
+                  type="primary" 
+                  icon={<BarChartOutlined />} 
+                  className="admin-btn-primary"
+                  onClick={() => setSelectedKey('reports')}
+                  style={{ height: '44px', borderRadius: '12px' }}
+                >
+                  Xem báo cáo
                 </Button>
               </div>
             </div>

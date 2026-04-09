@@ -20,7 +20,37 @@ function OrderSuccessPage() {
     fetchOrder();
     // Refresh cart to ensure it's cleared after successful order
     refreshCart();
+    // Auto-confirm payment when user returns from payment gateway (only for local testing)
+    // On production, SePay will send IPN callback directly to backend
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      confirmPaymentIfNeeded();
+    }
   }, [orderNumber]);
+
+  const confirmPaymentIfNeeded = async () => {
+    try {
+      // Khi test local với database Render, gọi IPN endpoint trên Render
+      // để cập nhật database chung
+      const ipnUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'https://doctor-appointment-backend-mq2p.onrender.com/api/orders/sepay/ipn'
+        : `${API_BASE_URL}/orders/sepay/ipn`;
+      
+      // Simulate SePay IPN callback
+      await axios.post(ipnUrl, {
+        notification_type: 'ORDER_PAID',
+        order: {
+          order_invoice_number: orderNumber,
+          order_status: 'CAPTURED'
+        }
+      });
+      
+      console.log('Payment confirmed via IPN for order:', orderNumber);
+      // Reload order after confirmation
+      setTimeout(() => fetchOrder(), 1000);
+    } catch (error) {
+      console.error('Error confirming payment:', error);
+    }
+  };
 
   const fetchOrder = async () => {
     try {

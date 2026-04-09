@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Typography, Breadcrumb, Spin, Tag, Button, Empty } from 'antd';
-import { HomeOutlined, ShoppingCartOutlined, ClockCircleOutlined, SafetyOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Typography, Breadcrumb, Spin, Tag, Button, Empty, Input, Select } from 'antd';
+import { HomeOutlined, ShoppingCartOutlined, ClockCircleOutlined, SafetyOutlined, CheckCircleOutlined, SearchOutlined, FilterOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import cmsAPI from '../services/cmsApi';
 import NewsSidebar from '../components/NewsSidebar';
 import '../styles/services.css';
 
 const { Title, Text, Paragraph } = Typography;
+const { Option } = Select;
 
 function ServicesPage() {
   const navigate = useNavigate();
@@ -17,6 +18,8 @@ function ServicesPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(12); // 12 items per page
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('default');
 
   useEffect(() => {
     fetchData();
@@ -42,17 +45,64 @@ function ServicesPage() {
   const handleCategoryChange = (categoryKey) => {
     setSelectedCategory(categoryKey);
     setCurrentPage(1); // Reset to page 1 when changing category
-    
-    // Filter from allServices instead of fetching from server
-    if (categoryKey === 'all') {
-      setServices(allServices);
-    } else {
+    filterAndSortServices(categoryKey, searchQuery, sortBy);
+  };
+
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+    filterAndSortServices(selectedCategory, value, sortBy);
+  };
+
+  const handleSortChange = (value) => {
+    setSortBy(value);
+    setCurrentPage(1);
+    filterAndSortServices(selectedCategory, searchQuery, value);
+  };
+
+  const filterAndSortServices = (categoryKey, search, sort) => {
+    let filtered = [...allServices];
+
+    // Filter by category
+    if (categoryKey !== 'all') {
       const category = categories.find(c => c.slug === categoryKey);
       if (category) {
-        const filtered = allServices.filter(s => s.categoryId === category.id);
-        setServices(filtered);
+        filtered = filtered.filter(s => s.categoryId === category.id);
       }
     }
+
+    // Filter by search query
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filtered = filtered.filter(s => 
+        s.title?.toLowerCase().includes(searchLower) ||
+        s.description?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Sort services
+    switch (sort) {
+      case 'price-asc':
+        filtered.sort((a, b) => (a.discountedPrice || a.originalPrice) - (b.discountedPrice || b.originalPrice));
+        break;
+      case 'price-desc':
+        filtered.sort((a, b) => (b.discountedPrice || b.originalPrice) - (a.discountedPrice || a.originalPrice));
+        break;
+      case 'name-asc':
+        filtered.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'name-desc':
+        filtered.sort((a, b) => b.title.localeCompare(a.title));
+        break;
+      case 'discount':
+        filtered.sort((a, b) => (b.discountPercentage || 0) - (a.discountPercentage || 0));
+        break;
+      default:
+        // Keep original order
+        break;
+    }
+
+    setServices(filtered);
   };
 
   // Calculate pagination
@@ -148,6 +198,40 @@ function ServicesPage() {
 
           {/* Services Grid */}
           <Col xs={24} lg={18}>
+            {/* Search and Filter Bar */}
+            <div className="services-search-bar">
+              <Row gutter={[16, 16]}>
+                <Col xs={24} md={14}>
+                  <Input
+                    size="large"
+                    placeholder="Tìm kiếm dịch vụ theo tên..."
+                    prefix={<SearchOutlined style={{ color: '#0066FF', fontSize: 18 }} />}
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    allowClear
+                    className="services-search-input"
+                  />
+                </Col>
+                <Col xs={24} md={10}>
+                  <Select
+                    size="large"
+                    value={sortBy}
+                    onChange={handleSortChange}
+                    style={{ width: '100%' }}
+                    className="services-sort-select"
+                    suffixIcon={<FilterOutlined style={{ color: '#0066FF' }} />}
+                  >
+                    <Option value="default">Sắp xếp mặc định</Option>
+                    <Option value="price-asc">Giá: Thấp đến cao</Option>
+                    <Option value="price-desc">Giá: Cao đến thấp</Option>
+                    <Option value="name-asc">Tên: A-Z</Option>
+                    <Option value="name-desc">Tên: Z-A</Option>
+                    <Option value="discount">Giảm giá nhiều nhất</Option>
+                  </Select>
+                </Col>
+              </Row>
+            </div>
+
             {/* Header */}
             <div className="services-header">
               <div className="services-header-info">

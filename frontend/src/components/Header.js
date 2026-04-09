@@ -163,6 +163,11 @@ function HeaderComponent({ user, onLogout }) {
       label: 'Đơn hàng của tôi',
       onClick: () => navigate('/my-orders'),
     },
+    {
+      key: 'wallet',
+      label: 'Ví dịch vụ',
+      onClick: () => navigate('/wallet'),
+    },
   ];
 
   if (isAdmin) {
@@ -180,6 +185,12 @@ function HeaderComponent({ user, onLogout }) {
       icon: <SettingOutlined />,
       label: 'Quản lý lịch',
       onClick: () => navigate('/doctor/dashboard'),
+    });
+    userMenuItems.push({
+      key: 'verify-code',
+      icon: <SettingOutlined />,
+      label: 'Xác nhận mã dịch vụ',
+      onClick: () => navigate('/doctor/verify-code'),
     });
   }
 

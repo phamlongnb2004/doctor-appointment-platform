@@ -1,0 +1,259 @@
+.verify-code-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.verify-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.verify-header h1 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.verify-header p {
+    color: #7f8c8d;
+}
+
+.verify-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    padding: 30px;
+}
+
+.lookup-form {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.lookup-form .form-group {
+    flex: 1;
+}
+
+.lookup-form label {
+    display: block;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.code-input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 18px;
+    font-family: monospace;
+    text-transform: uppercase;
+    transition: border-color 0.3s;
+}
+
+.code-input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.btn-lookup {
+    padding: 12px 30px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    align-self: flex-end;
+    transition: background 0.3s;
+    white-space: nowrap;
+}
+
+.btn-lookup:hover:not(:disabled) {
+    background: #2980b9;
+}
+
+.btn-lookup:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.success-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.warning-message {
+    background: #fff3cd;
+    color: #856404;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.code-info-card {
+    border: 2px solid #ecf0f1;
+    border-radius: 8px;
+    padding: 25px;
+}
+
+.code-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.code-info-header h2 {
+    color: #2c3e50;
+    margin: 0;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.status-active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-used {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-expired {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.code-details {
+    margin-bottom: 25px;
+}
+
+.detail-row {
+    display: flex;
+    padding: 12px 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-row .label {
+    flex: 0 0 150px;
+    color: #7f8c8d;
+    font-weight: 500;
+}
+
+.detail-row .value {
+    flex: 1;
+    color: #2c3e50;
+}
+
+.detail-row .code-number {
+    font-family: monospace;
+    font-size: 20px;
+    font-weight: bold;
+    color: #3498db;
+}
+
+.verify-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.verify-section .form-group {
+    margin-bottom: 15px;
+}
+
+.verify-section label {
+    display: block;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.notes-input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.3s;
+}
+
+.notes-input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.btn-verify {
+    width: 100%;
+    padding: 14px;
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.btn-verify:hover:not(:disabled) {
+    background: #229954;
+}
+
+.btn-verify:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .lookup-form {
+        flex-direction: column;
+    }
+    
+    .btn-lookup {
+        align-self: stretch;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .detail-row .label {
+        flex: none;
+    }
+}

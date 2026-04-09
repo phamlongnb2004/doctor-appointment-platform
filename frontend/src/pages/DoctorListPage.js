@@ -270,9 +270,27 @@ function DoctorListPage() {
               </Row>
             ) : (
               <div className="doctors-empty">
-                <div className="doctors-empty-icon">🔍</div>
+                <div className="doctors-empty-icon">
+                  <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="60" cy="60" r="60" fill="#F1F5F9"/>
+                    <path d="M60 30C43.43 30 30 43.43 30 60C30 76.57 43.43 90 60 90C76.57 90 90 76.57 90 60C90 43.43 76.57 30 60 30ZM60 80C49.51 80 41 71.49 41 61C41 50.51 49.51 42 60 42C70.49 42 79 50.51 79 61C79 71.49 70.49 80 60 80Z" fill="#CBD5E1"/>
+                    <path d="M75 75L85 85" stroke="#CBD5E1" strokeWidth="6" strokeLinecap="round"/>
+                    <circle cx="60" cy="60" r="8" fill="#94A3B8"/>
+                  </svg>
+                </div>
                 <h3 className="doctors-empty-title">Không tìm thấy bác sĩ</h3>
                 <p className="doctors-empty-text">Thử thay đổi từ khóa tìm kiếm hoặc chuyên khoa</p>
+                <Button 
+                  type="primary" 
+                  size="large"
+                  className="doctors-empty-btn"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedSpecialization(null);
+                  }}
+                >
+                  Xóa bộ lọc
+                </Button>
               </div>
             )}
           </>

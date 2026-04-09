@@ -4,14 +4,12 @@ import com.sendgrid.*;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
 @Service
-@Slf4j
 public class SendGridEmailService {
     
     @Value("${sendgrid.api-key:}")
@@ -47,13 +45,17 @@ public class SendGridEmailService {
             Response response = sg.api(request);
             
             if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
-                log.info("✅ SendGrid verification email sent successfully to: {}", toEmail);
+                // log.info("✅ SendGrid verification email sent successfully to: {}", toEmail);
+                System.out.println("✅ SendGrid verification email sent successfully to: " + toEmail);
             } else {
-                log.error("❌ SendGrid failed with status {}: {}", response.getStatusCode(), response.getBody());
+                // log.error("❌ SendGrid failed with status {}: {}", response.getStatusCode(), response.getBody());
+                System.err.println("❌ SendGrid failed with status " + response.getStatusCode() + ": " + response.getBody());
                 logEmailToConsole("VERIFICATION", toEmail, name, verificationCode);
             }
         } catch (IOException e) {
-            log.error("❌ Failed to send verification email via SendGrid to: {}", toEmail, e);
+            // log.error("❌ Failed to send verification email via SendGrid to: {}", toEmail, e);
+            System.err.println("❌ Failed to send verification email via SendGrid to: " + toEmail);
+            e.printStackTrace();
             logEmailToConsole("VERIFICATION", toEmail, name, verificationCode);
         }
     }
@@ -82,46 +84,50 @@ public class SendGridEmailService {
             Response response = sg.api(request);
             
             if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
-                log.info("✅ SendGrid welcome email sent successfully to: {}", toEmail);
+                // log.info("✅ SendGrid welcome email sent successfully to: {}", toEmail);
+                System.out.println("✅ SendGrid welcome email sent successfully to: " + toEmail);
             } else {
-                log.error("❌ SendGrid failed with status {}: {}", response.getStatusCode(), response.getBody());
+                // log.error("❌ SendGrid failed with status {}: {}", response.getStatusCode(), response.getBody());
+                System.err.println("❌ SendGrid failed with status " + response.getStatusCode() + ": " + response.getBody());
                 logWelcomeEmailToConsole(toEmail, name);
             }
         } catch (IOException e) {
-            log.error("❌ Failed to send welcome email via SendGrid to: {}", toEmail, e);
+            // log.error("❌ Failed to send welcome email via SendGrid to: {}", toEmail, e);
+            System.err.println("❌ Failed to send welcome email via SendGrid to: " + toEmail);
+            e.printStackTrace();
             logWelcomeEmailToConsole(toEmail, name);
         }
     }
     
     private void logEmailToConsole(String type, String toEmail, String name, String verificationCode) {
-        log.info("=================================================");
-        log.info("📧 SENDING {} EMAIL (Console Mode - SendGrid not configured)", type);
-        log.info("=================================================");
-        log.info("To: {}", toEmail);
-        log.info("Subject: Xác nhận đăng ký nhận tin từ MEDLATEC");
-        log.info("");
-        log.info("Xin chào {},", name != null ? name : "bạn");
-        log.info("");
-        log.info("Cảm ơn bạn đã đăng ký nhận tin từ MEDLATEC!");
-        log.info("");
-        log.info("🔑 Mã xác nhận của bạn là: {}", verificationCode);
-        log.info("");
-        log.info("Vui lòng nhập mã này vào trang web để hoàn tất đăng ký.");
-        log.info("Mã có hiệu lực trong 15 phút.");
-        log.info("=================================================");
+        System.out.println("=================================================");
+        System.out.println("📧 SENDING " + type + " EMAIL (Console Mode - SendGrid not configured)");
+        System.out.println("=================================================");
+        System.out.println("To: " + toEmail);
+        System.out.println("Subject: Xác nhận đăng ký nhận tin từ MEDLATEC");
+        System.out.println("");
+        System.out.println("Xin chào " + (name != null ? name : "bạn") + ",");
+        System.out.println("");
+        System.out.println("Cảm ơn bạn đã đăng ký nhận tin từ MEDLATEC!");
+        System.out.println("");
+        System.out.println("🔑 Mã xác nhận của bạn là: " + verificationCode);
+        System.out.println("");
+        System.out.println("Vui lòng nhập mã này vào trang web để hoàn tất đăng ký.");
+        System.out.println("Mã có hiệu lực trong 15 phút.");
+        System.out.println("=================================================");
     }
     
     private void logWelcomeEmailToConsole(String toEmail, String name) {
-        log.info("=================================================");
-        log.info("📧 SENDING WELCOME EMAIL (Console Mode - SendGrid not configured)");
-        log.info("=================================================");
-        log.info("To: {}", toEmail);
-        log.info("Subject: Chào mừng bạn đến với MEDLATEC!");
-        log.info("");
-        log.info("Xin chào {},", name != null ? name : "bạn");
-        log.info("");
-        log.info("🎉 Chúc mừng! Bạn đã đăng ký nhận tin thành công.");
-        log.info("=================================================");
+        System.out.println("=================================================");
+        System.out.println("📧 SENDING WELCOME EMAIL (Console Mode - SendGrid not configured)");
+        System.out.println("=================================================");
+        System.out.println("To: " + toEmail);
+        System.out.println("Subject: Chào mừng bạn đến với MEDLATEC!");
+        System.out.println("");
+        System.out.println("Xin chào " + (name != null ? name : "bạn") + ",");
+        System.out.println("");
+        System.out.println("🎉 Chúc mừng! Bạn đã đăng ký nhận tin thành công.");
+        System.out.println("=================================================");
     }
     
     private String buildVerificationEmailContent(String name, String verificationCode) {

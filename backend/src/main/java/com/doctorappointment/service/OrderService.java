@@ -31,6 +31,9 @@ public class OrderService {
     @Autowired
     private MedicalServiceRepository medicalServiceRepository;
 
+    @Autowired
+    private ServiceWalletService walletService;
+
     @Transactional
     public OrderResponse createOrder(Long userId, CheckoutRequest request) {
         // Get cart
@@ -174,10 +177,19 @@ public class OrderService {
         
         if ("PAID".equals(paymentStatus)) {
             order.setPaidAt(LocalDateTime.now());
-            // Tự động chuyển trạng thái đơn hàng sang CONFIRMED
-            if ("PENDING".equals(order.getStatus())) {
-                order.setStatus("CONFIRMED");
+            // Tự động chuyển trạng thái đơn hàng sang COMPLETED
+            order.setStatus("COMPLETED");
+            order.setCompletedAt(LocalDateTime.now());
+            
+            // Thêm dịch vụ vào ví nếu user đã đăng nhập
+            if (order.getUserId() != null) {
+                try {
+                    walletService.addServicesToWalletFromOrder(order);
+                } catch (Exception e) {
+                    System.err.println("Error adding services to wallet: " + e.getMessage());
+                }
             }
+            
             // Clear cart after successful payment
             clearCartForOrder(order);
         }
@@ -194,9 +206,17 @@ public class OrderService {
         order.setPaymentStatus("PAID");
         order.setPaidAt(LocalDateTime.now());
         
-        // Tự động chuyển trạng thái đơn hàng sang CONFIRMED
-        if ("PENDING".equals(order.getStatus())) {
-            order.setStatus("CONFIRMED");
+        // Tự động chuyển trạng thái đơn hàng sang COMPLETED
+        order.setStatus("COMPLETED");
+        order.setCompletedAt(LocalDateTime.now());
+        
+        // Thêm dịch vụ vào ví nếu user đã đăng nhập
+        if (order.getUserId() != null) {
+            try {
+                walletService.addServicesToWalletFromOrder(order);
+            } catch (Exception e) {
+                System.err.println("Error adding services to wallet: " + e.getMessage());
+            }
         }
         
         orderRepository.save(order);
