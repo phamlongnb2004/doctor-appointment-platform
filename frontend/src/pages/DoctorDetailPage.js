@@ -159,9 +159,9 @@ function DoctorDetailPage() {
       setSelectedTime(null);
       setAvailableSlots([]);
       
-      // Navigate to appointments list
+      // Navigate to appointments page
       setTimeout(() => {
-        navigate('/appointments-list');
+        navigate('/appointments');
       }, 1500);
     } catch (error) {
       console.error('Error creating appointment:', error);
