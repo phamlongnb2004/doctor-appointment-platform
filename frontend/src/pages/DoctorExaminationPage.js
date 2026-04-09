@@ -187,7 +187,7 @@ const DoctorExaminationPage = () => {
       setLoading(true);
       await api.post(`/medical-records/${medicalRecord.id}/complete`);
       alert('Đã hoàn thành khám bệnh');
-      navigate('/doctor/appointments');
+      navigate('/appointments');
     } catch (error) {
       console.error('Error completing examination:', error);
       alert('Không thể hoàn thành khám');
