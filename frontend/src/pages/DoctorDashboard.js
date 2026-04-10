@@ -44,7 +44,7 @@ const DoctorDashboard = () => {
         </Col>
 
         <Col xs={24} sm={12} lg={8}>
-          <Link to="/doctor/profile/edit">
+          <Link to="/doctor/profile-edit">
             <Card hoverable className="dashboard-card">
               <div className="card-icon" style={{ background: '#722ed1' }}>
                 <EditOutlined />

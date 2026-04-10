@@ -10,10 +10,12 @@ import com.doctorappointment.service.DoctorService;
 import com.doctorappointment.service.DoctorCertificationService;
 import com.doctorappointment.service.DoctorRevenueService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -224,7 +226,10 @@ public class DoctorController {
     
     // Revenue endpoint
     @GetMapping("/my-profile/{userId}/revenue")
-    public ResponseEntity<?> getMyRevenue(@PathVariable Long userId) {
+    public ResponseEntity<?> getMyRevenue(
+            @PathVariable Long userId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         try {
             var doctorOpt = doctorService.getDoctorByUserId(userId);
             if (doctorOpt.isEmpty()) {
@@ -232,7 +237,7 @@ public class DoctorController {
             }
             
             Doctor doctor = doctorOpt.get();
-            DoctorRevenueResponse revenue = revenueService.getDoctorRevenue(doctor.getId());
+            DoctorRevenueResponse revenue = revenueService.getDoctorRevenue(doctor.getId(), startDate, endDate);
             
             return ResponseEntity.ok(revenue);
         } catch (Exception e) {

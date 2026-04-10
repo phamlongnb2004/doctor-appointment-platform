@@ -95,3 +95,13 @@ SEPAY_PAYMENT_FLOW.md
 SEPAY_SETUP_CHECKLIST.md
 SEPAY_TESTING_GUIDE.md
 SETUP_*.md
+
+# Exclude all Python files
+*.py
+
+# Exclude all Markdown files except README.md
+*.md
+!README.md
+
+# Exclude all batch files
+*.bat

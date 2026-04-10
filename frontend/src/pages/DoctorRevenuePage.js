@@ -1,25 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Table, Statistic, message, Spin } from 'antd';
+import { Card, Row, Col, Table, Statistic, message, Spin, DatePicker, Space, Button } from 'antd';
 import {
   DollarOutlined,
   CalendarOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-  ClockCircleOutlined
+  ClockCircleOutlined,
+  FilterOutlined
 } from '@ant-design/icons';
-import { Line } from '@ant-design/charts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import dayjs from 'dayjs';
 import api from '../services/api';
 import '../styles/doctor-revenue.css';
+
+const { RangePicker } = DatePicker;
 
 const DoctorRevenuePage = () => {
   const [loading, setLoading] = useState(true);
   const [revenueData, setRevenueData] = useState(null);
+  const [dateRange, setDateRange] = useState([dayjs().subtract(6, 'month'), dayjs()]);
 
   useEffect(() => {
     fetchRevenueData();
   }, []);
 
-  const fetchRevenueData = async () => {
+  const fetchRevenueData = async (startDate, endDate) => {
     try {
       setLoading(true);
       const user = JSON.parse(localStorage.getItem('user'));
@@ -29,7 +34,12 @@ const DoctorRevenuePage = () => {
         return;
       }
 
-      const response = await api.get(`/doctors/my-profile/${user.id}/revenue`);
+      let url = `/doctors/my-profile/${user.id}/revenue`;
+      if (startDate && endDate) {
+        url += `?startDate=${startDate}&endDate=${endDate}`;
+      }
+
+      const response = await api.get(url);
       setRevenueData(response.data);
     } catch (error) {
       console.error('Error fetching revenue:', error);
@@ -37,6 +47,21 @@ const DoctorRevenuePage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDateRangeChange = (dates) => {
+    if (dates && dates.length === 2) {
+      setDateRange(dates);
+      const startDate = dates[0].format('YYYY-MM-DD');
+      const endDate = dates[1].format('YYYY-MM-DD');
+      fetchRevenueData(startDate, endDate);
+    }
+  };
+
+  const handleResetFilter = () => {
+    const defaultRange = [dayjs().subtract(6, 'month'), dayjs()];
+    setDateRange(defaultRange);
+    fetchRevenueData();
   };
 
   const formatCurrency = (amount) => {
@@ -100,34 +125,6 @@ const DoctorRevenuePage = () => {
     }
   ];
 
-  const chartConfig = {
-    data: revenueData?.monthlyData || [],
-    xField: 'month',
-    yField: 'revenue',
-    point: {
-      size: 5,
-      shape: 'diamond',
-    },
-    label: {
-      style: {
-        fill: '#aaa',
-      },
-    },
-    yAxis: {
-      label: {
-        formatter: (v) => `${(v / 1000000).toFixed(1)}M`
-      }
-    },
-    tooltip: {
-      formatter: (datum) => {
-        return {
-          name: 'Doanh thu',
-          value: formatCurrency(datum.revenue)
-        };
-      }
-    }
-  };
-
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '100px 0' }}>
@@ -151,6 +148,22 @@ const DoctorRevenuePage = () => {
         <h1><DollarOutlined /> Doanh Thu Của Tôi</h1>
         <p>Theo dõi doanh thu và thống kê cuộc hẹn</p>
       </div>
+
+      {/* Date Filter */}
+      <Card style={{ marginBottom: 24 }}>
+        <Space size="middle" wrap>
+          <FilterOutlined style={{ fontSize: 18, color: 'rgb(0, 58, 112)' }} />
+          <span style={{ fontWeight: 600, color: 'rgb(0, 58, 112)' }}>Lọc theo thời gian:</span>
+          <RangePicker
+            value={dateRange}
+            onChange={handleDateRangeChange}
+            format="DD/MM/YYYY"
+            placeholder={['Từ ngày', 'Đến ngày']}
+            style={{ width: 280 }}
+          />
+          <Button onClick={handleResetFilter}>Đặt lại</Button>
+        </Space>
+      </Card>
 
       {/* Revenue Statistics */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
@@ -249,7 +262,16 @@ const DoctorRevenuePage = () => {
 
       {/* Revenue Chart */}
       <Card title="Biểu Đồ Doanh Thu 6 Tháng Gần Đây" style={{ marginBottom: 24 }}>
-        <Line {...chartConfig} />
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={revenueData.monthlyData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip formatter={(value) => formatCurrency(value)} />
+            <Legend />
+            <Line type="monotone" dataKey="revenue" stroke="#8884d8" name="Doanh thu" />
+          </LineChart>
+        </ResponsiveContainer>
       </Card>
 
       {/* Recent Appointments */}
@@ -260,6 +282,7 @@ const DoctorRevenuePage = () => {
           rowKey="appointmentId"
           pagination={{ pageSize: 10 }}
           scroll={{ x: 800 }}
+          className="revenue-table"
         />
       </Card>
     </div>

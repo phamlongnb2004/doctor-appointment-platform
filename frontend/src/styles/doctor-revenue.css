@@ -2,16 +2,22 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 24px;
+  background: linear-gradient(135deg, #f0f4f8 0%, #e8eef5 100%);
+  min-height: 100vh;
 }
 
 .doctor-revenue-page .page-header {
   margin-bottom: 32px;
+  background: rgb(0, 58, 112);
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 58, 112, 0.15);
 }
 
 .doctor-revenue-page .page-header h1 {
-  font-size: 28px;
-  font-weight: 600;
-  color: #1f2937;
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
   margin: 0 0 8px 0;
   display: flex;
   align-items: center;
@@ -19,25 +25,46 @@
 }
 
 .doctor-revenue-page .page-header p {
-  color: #6b7280;
-  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
   margin: 0;
 }
 
 .doctor-revenue-page .ant-card {
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 58, 112, 0.08);
+  border: 1px solid rgba(0, 58, 112, 0.1);
+  transition: all 0.3s ease;
+}
+
+.doctor-revenue-page .ant-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 58, 112, 0.15);
+  transform: translateY(-2px);
+}
+
+.doctor-revenue-page .ant-card-head {
+  background: linear-gradient(135deg, rgb(0, 58, 112) 0%, rgb(0, 78, 146) 100%);
+  color: #ffffff;
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.doctor-revenue-page .ant-card-head-title {
+  color: #ffffff;
 }
 
 .doctor-revenue-page .ant-statistic-title {
   font-size: 14px;
   color: #6b7280;
   margin-bottom: 8px;
+  font-weight: 500;
 }
 
 .doctor-revenue-page .ant-statistic-content {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 700;
 }
 
 .doctor-revenue-page .ant-table {
@@ -45,18 +72,27 @@
 }
 
 .doctor-revenue-page .ant-table-thead > tr > th {
-  background: #f9fafb;
+  background: rgb(0, 58, 112) !important;
+  color: #ffffff !important;
   font-weight: 600;
-  color: #374151;
+  border-bottom: 2px solid rgba(0, 58, 112, 0.2) !important;
 }
 
 .doctor-revenue-page .ant-table-tbody > tr:hover > td {
-  background: #f9fafb;
+  background: rgba(0, 58, 112, 0.05);
+}
+
+.doctor-revenue-page .ant-table-tbody > tr > td {
+  border-bottom: 1px solid rgba(0, 58, 112, 0.08);
 }
 
 @media (max-width: 768px) {
   .doctor-revenue-page {
     padding: 16px;
+  }
+
+  .doctor-revenue-page .page-header {
+    padding: 24px 16px;
   }
 
   .doctor-revenue-page .page-header h1 {
@@ -66,4 +102,17 @@
   .doctor-revenue-page .ant-statistic-content {
     font-size: 20px;
   }
+}
+
+
+/* Force table header color */
+.doctor-revenue-page .revenue-table .ant-table-thead > tr > th {
+  background: rgb(0, 58, 112) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border-bottom: 2px solid rgba(0, 58, 112, 0.2) !important;
+}
+
+.doctor-revenue-page .revenue-table .ant-table-thead > tr > th::before {
+  display: none !important;
 }

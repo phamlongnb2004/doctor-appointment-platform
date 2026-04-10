@@ -2,6 +2,7 @@ package com.doctorappointment.service;
 
 import com.doctorappointment.dto.DoctorRevenueResponse;
 import com.doctorappointment.model.Appointment;
+import com.doctorappointment.model.Appointment.AppointmentStatus;
 import com.doctorappointment.repository.AppointmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,68 +19,86 @@ import java.util.stream.Collectors;
 public class DoctorRevenueService {
     private final AppointmentRepository appointmentRepository;
     
-    public DoctorRevenueResponse getDoctorRevenue(Long doctorId) {
-        // Get all appointments for this doctor
-        List<Appointment> allAppointments = appointmentRepository.findByDoctorId(doctorId);
+    public DoctorRevenueResponse getDoctorRevenue(Long doctorId, LocalDate startDate, LocalDate endDate) {
+        // Set default date range if not provided (last 6 months)
+        LocalDate now = LocalDate.now();
+        final LocalDate filterStartDate = (startDate != null) ? startDate : now.minusMonths(6);
+        final LocalDate filterEndDate = (endDate != null) ? endDate : now;
+        
+        // Get all appointments for this doctor within date range
+        List<Appointment> allAppointments = appointmentRepository.findByDoctor_Id(doctorId).stream()
+                .filter(apt -> {
+                    LocalDate aptDate = apt.getAppointmentDateTime().toLocalDate();
+                    return !aptDate.isBefore(filterStartDate) && !aptDate.isAfter(filterEndDate);
+                })
+                .collect(Collectors.toList());
         
         // Filter completed appointments (these generate revenue)
         List<Appointment> completedAppointments = allAppointments.stream()
-                .filter(apt -> "COMPLETED".equalsIgnoreCase(apt.getStatus()))
+                .filter(apt -> apt.getStatus() == AppointmentStatus.COMPLETED)
                 .collect(Collectors.toList());
         
+        // Get doctor's consultation fee
+        BigDecimal consultationFee = BigDecimal.valueOf(200000); // Default fee, should get from doctor
+        
         // Calculate total revenue
-        BigDecimal totalRevenue = completedAppointments.stream()
-                .map(apt -> apt.getFee() != null ? apt.getFee() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalRevenue = BigDecimal.valueOf(completedAppointments.size())
+                .multiply(consultationFee);
         
         // Calculate monthly revenue (current month)
-        LocalDate now = LocalDate.now();
-        LocalDate startOfMonth = now.withDayOfMonth(1);
-        BigDecimal monthlyRevenue = completedAppointments.stream()
-                .filter(apt -> !apt.getAppointmentDate().isBefore(startOfMonth))
-                .map(apt -> apt.getFee() != null ? apt.getFee() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        LocalDate today = LocalDate.now();
+        LocalDate startOfMonth = today.withDayOfMonth(1);
+        long monthlyCount = completedAppointments.stream()
+                .filter(apt -> !apt.getAppointmentDateTime().toLocalDate().isBefore(startOfMonth))
+                .count();
+        BigDecimal monthlyRevenue = BigDecimal.valueOf(monthlyCount).multiply(consultationFee);
         
         // Calculate weekly revenue (last 7 days)
-        LocalDate weekAgo = now.minusDays(7);
-        BigDecimal weeklyRevenue = completedAppointments.stream()
-                .filter(apt -> !apt.getAppointmentDate().isBefore(weekAgo))
-                .map(apt -> apt.getFee() != null ? apt.getFee() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        LocalDate weekAgo = today.minusDays(7);
+        long weeklyCount = completedAppointments.stream()
+                .filter(apt -> !apt.getAppointmentDateTime().toLocalDate().isBefore(weekAgo))
+                .count();
+        BigDecimal weeklyRevenue = BigDecimal.valueOf(weeklyCount).multiply(consultationFee);
         
         // Calculate today's revenue
-        BigDecimal todayRevenue = completedAppointments.stream()
-                .filter(apt -> apt.getAppointmentDate().equals(now))
-                .map(apt -> apt.getFee() != null ? apt.getFee() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        long todayCount = completedAppointments.stream()
+                .filter(apt -> apt.getAppointmentDateTime().toLocalDate().equals(today))
+                .count();
+        BigDecimal todayRevenue = BigDecimal.valueOf(todayCount).multiply(consultationFee);
         
         // Count appointments by status
         long completed = allAppointments.stream()
-                .filter(apt -> "COMPLETED".equalsIgnoreCase(apt.getStatus()))
+                .filter(apt -> apt.getStatus() == AppointmentStatus.COMPLETED)
                 .count();
         long cancelled = allAppointments.stream()
-                .filter(apt -> "CANCELLED".equalsIgnoreCase(apt.getStatus()))
+                .filter(apt -> apt.getStatus() == AppointmentStatus.CANCELLED)
                 .count();
         long pending = allAppointments.stream()
-                .filter(apt -> "PENDING".equalsIgnoreCase(apt.getStatus()) || 
-                              "CONFIRMED".equalsIgnoreCase(apt.getStatus()))
+                .filter(apt -> apt.getStatus() == AppointmentStatus.PENDING || 
+                              apt.getStatus() == AppointmentStatus.CONFIRMED)
                 .count();
         
         // Get monthly data for last 6 months
-        List<DoctorRevenueResponse.MonthlyRevenueData> monthlyData = getMonthlyRevenueData(completedAppointments);
+        List<DoctorRevenueResponse.MonthlyRevenueData> monthlyData = getMonthlyRevenueData(completedAppointments, consultationFee);
         
         // Get recent appointments (last 10 completed)
         List<DoctorRevenueResponse.AppointmentRevenueDetail> recentAppointments = completedAppointments.stream()
-                .sorted(Comparator.comparing(Appointment::getAppointmentDate).reversed())
+                .sorted(Comparator.comparing(Appointment::getAppointmentDateTime).reversed())
                 .limit(10)
-                .map(apt -> DoctorRevenueResponse.AppointmentRevenueDetail.builder()
-                        .appointmentId(apt.getId())
-                        .patientName(apt.getPatient() != null ? apt.getPatient().getFullName() : "N/A")
-                        .appointmentDate(apt.getAppointmentDate())
-                        .timeSlot(apt.getTimeSlot())
-                        .fee(apt.getFee())
-                        .status(apt.getStatus())
-                        .build())
+                .map(apt -> {
+                    String patientName = "N/A";
+                    if (apt.getPatient() != null) {
+                        patientName = apt.getPatient().getFirstName() + " " + apt.getPatient().getLastName();
+                    }
+                    return DoctorRevenueResponse.AppointmentRevenueDetail.builder()
+                            .appointmentId(apt.getId())
+                            .patientName(patientName)
+                            .appointmentDate(apt.getAppointmentDateTime().toLocalDate())
+                            .timeSlot(apt.getAppointmentDateTime().toLocalTime().toString())
+                            .fee(consultationFee)
+                            .status(apt.getStatus().toString())
+                            .build();
+                })
                 .collect(Collectors.toList());
         
         return DoctorRevenueResponse.builder()
@@ -96,7 +115,7 @@ public class DoctorRevenueService {
                 .build();
     }
     
-    private List<DoctorRevenueResponse.MonthlyRevenueData> getMonthlyRevenueData(List<Appointment> completedAppointments) {
+    private List<DoctorRevenueResponse.MonthlyRevenueData> getMonthlyRevenueData(List<Appointment> completedAppointments, BigDecimal consultationFee) {
         LocalDate now = LocalDate.now();
         List<DoctorRevenueResponse.MonthlyRevenueData> monthlyData = new ArrayList<>();
         
@@ -105,13 +124,14 @@ public class DoctorRevenueService {
             LocalDate monthEnd = monthStart.plusMonths(1).minusDays(1);
             
             List<Appointment> monthAppointments = completedAppointments.stream()
-                    .filter(apt -> !apt.getAppointmentDate().isBefore(monthStart) && 
-                                  !apt.getAppointmentDate().isAfter(monthEnd))
+                    .filter(apt -> {
+                        LocalDate aptDate = apt.getAppointmentDateTime().toLocalDate();
+                        return !aptDate.isBefore(monthStart) && !aptDate.isAfter(monthEnd);
+                    })
                     .collect(Collectors.toList());
             
-            BigDecimal monthRevenue = monthAppointments.stream()
-                    .map(apt -> apt.getFee() != null ? apt.getFee() : BigDecimal.ZERO)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal monthRevenue = BigDecimal.valueOf(monthAppointments.size())
+                    .multiply(consultationFee);
             
             String monthName = monthStart.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH) + 
                              " " + monthStart.getYear();

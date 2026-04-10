@@ -13,7 +13,8 @@ import {
   CloseOutlined,
   RightOutlined,
   ShoppingCartOutlined,
-  BellOutlined
+  BellOutlined,
+  DollarOutlined
 } from '@ant-design/icons';
 import { userAPI, notificationAPI } from '../services/api';
 import webSocketService from '../services/websocket';
@@ -185,6 +186,18 @@ function HeaderComponent({ user, onLogout }) {
   }
 
   if (isDoctor) {
+    userMenuItems.push({
+      key: 'doctor-dashboard',
+      icon: <DashboardOutlined />,
+      label: 'Bảng điều khiển bác sĩ',
+      onClick: () => navigate('/doctor/dashboard'),
+    });
+    userMenuItems.push({
+      key: 'doctor-revenue',
+      icon: <DollarOutlined />,
+      label: 'Doanh thu của tôi',
+      onClick: () => navigate('/doctor/revenue'),
+    });
     userMenuItems.push({
       key: 'doctor-profile-edit',
       icon: <EditOutlined />,

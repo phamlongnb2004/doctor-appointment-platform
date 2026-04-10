@@ -1,24 +1,79 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Tag, Button, message, Space, Modal, Typography, Row, Col } from 'antd';
-import { CheckCircleOutlined, CloseCircleOutlined, EyeOutlined, CalendarOutlined, UserOutlined, MedicineBoxOutlined, FileTextOutlined } from '@ant-design/icons';
+import { Card, Table, Tag, Button, message, Space, Modal, Typography, Row, Col, Select, DatePicker, Input } from 'antd';
+import { CheckCircleOutlined, CloseCircleOutlined, EyeOutlined, CalendarOutlined, UserOutlined, MedicineBoxOutlined, FileTextOutlined, SearchOutlined, FilterOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { appointmentAPI, doctorAPI } from '../services/api';
 import '../styles/appointment.css';
+import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
 
 function AppointmentsListPage({ user }) {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
+  const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
+  
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [dateRange, setDateRange] = useState(null);
+  const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
     if (user) {
       fetchAppointments();
     }
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    applyFilters();
+  }, [appointments, statusFilter, dateRange, searchText]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const applyFilters = () => {
+    let filtered = [...appointments];
+
+    // Filter by status
+    if (statusFilter !== 'ALL') {
+      filtered = filtered.filter(apt => apt.status === statusFilter);
+    }
+
+    // Filter by date range
+    if (dateRange && dateRange[0] && dateRange[1]) {
+      const startDate = dateRange[0].startOf('day');
+      const endDate = dateRange[1].endOf('day');
+      filtered = filtered.filter(apt => {
+        const aptDate = dayjs(apt.appointmentDateTime);
+        return aptDate.isAfter(startDate) && aptDate.isBefore(endDate);
+      });
+    }
+
+    // Filter by search text
+    if (searchText.trim()) {
+      const searchLower = searchText.toLowerCase();
+      filtered = filtered.filter(apt => {
+        const patientName = `${apt.patient?.firstName || ''} ${apt.patient?.lastName || ''}`.toLowerCase();
+        const doctorName = `${apt.doctor?.user?.firstName || ''} ${apt.doctor?.user?.lastName || ''}`.toLowerCase();
+        const specialization = (apt.doctor?.specialization || '').toLowerCase();
+        const reason = (apt.reason || '').toLowerCase();
+        
+        return patientName.includes(searchLower) || 
+               doctorName.includes(searchLower) || 
+               specialization.includes(searchLower) ||
+               reason.includes(searchLower);
+      });
+    }
+
+    setFilteredAppointments(filtered);
+  };
+
+  const resetFilters = () => {
+    setStatusFilter('ALL');
+    setDateRange(null);
+    setSearchText('');
+  };
 
   const fetchAppointments = async () => {
     setLoading(true);
@@ -104,10 +159,10 @@ function AppointmentsListPage({ user }) {
 
   const getStatistics = () => {
     const stats = {
-      total: appointments.length,
-      pending: appointments.filter(a => a.status === 'PENDING').length,
-      confirmed: appointments.filter(a => a.status === 'CONFIRMED').length,
-      cancelled: appointments.filter(a => a.status === 'CANCELLED').length,
+      total: filteredAppointments.length,
+      pending: filteredAppointments.filter(a => a.status === 'PENDING').length,
+      confirmed: filteredAppointments.filter(a => a.status === 'CONFIRMED').length,
+      cancelled: filteredAppointments.filter(a => a.status === 'CANCELLED').length,
     };
     return stats;
   };
@@ -376,6 +431,103 @@ function AppointmentsListPage({ user }) {
           </Row>
         </div>
 
+        {/* Filters */}
+        <Card 
+          style={{ 
+            borderRadius: '16px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            marginBottom: '24px'
+          }}
+        >
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px',
+            marginBottom: '20px'
+          }}>
+            <FilterOutlined style={{ fontSize: 20, color: '#003a70' }} />
+            <Title level={4} style={{ margin: 0, color: '#003a70' }}>Bộ lọc</Title>
+          </div>
+          
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={12} md={6}>
+              <div style={{ marginBottom: 8 }}>
+                <Text strong>Trạng thái</Text>
+              </div>
+              <Select
+                style={{ width: '100%' }}
+                value={statusFilter}
+                onChange={setStatusFilter}
+                options={[
+                  { value: 'ALL', label: 'Tất cả' },
+                  { value: 'PENDING', label: 'Chờ xác nhận' },
+                  { value: 'CONFIRMED', label: 'Đã xác nhận' },
+                  { value: 'IN_PROGRESS', label: 'Đang khám' },
+                  { value: 'COMPLETED', label: 'Hoàn thành' },
+                  { value: 'CANCELLED', label: 'Đã hủy' },
+                ]}
+              />
+            </Col>
+            
+            <Col xs={24} sm={12} md={8}>
+              <div style={{ marginBottom: 8 }}>
+                <Text strong>Khoảng thời gian</Text>
+              </div>
+              <RangePicker
+                style={{ width: '100%' }}
+                value={dateRange}
+                onChange={setDateRange}
+                format="DD/MM/YYYY"
+                placeholder={['Từ ngày', 'Đến ngày']}
+              />
+            </Col>
+            
+            <Col xs={24} sm={12} md={7}>
+              <div style={{ marginBottom: 8 }}>
+                <Text strong>Tìm kiếm</Text>
+              </div>
+              <Input
+                placeholder="Tìm theo tên, chuyên khoa, lý do..."
+                prefix={<SearchOutlined />}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                allowClear
+              />
+            </Col>
+            
+            <Col xs={24} sm={12} md={3}>
+              <div style={{ marginBottom: 8 }}>
+                <Text strong style={{ opacity: 0 }}>.</Text>
+              </div>
+              <Button 
+                block
+                onClick={resetFilters}
+                style={{ 
+                  borderColor: '#003a70',
+                  color: '#003a70'
+                }}
+              >
+                Đặt lại
+              </Button>
+            </Col>
+          </Row>
+          
+          <div style={{ 
+            marginTop: 16, 
+            padding: '12px 16px',
+            background: '#f0f5ff',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <SearchOutlined style={{ color: '#003a70' }} />
+            <Text style={{ color: '#003a70' }}>
+              Hiển thị <strong>{filteredAppointments.length}</strong> / {appointments.length} lịch hẹn
+            </Text>
+          </div>
+        </Card>
+
         {/* Table */}
         <Card 
           style={{ 
@@ -420,7 +572,7 @@ function AppointmentsListPage({ user }) {
           </style>
           <Table
             columns={columns}
-            dataSource={appointments}
+            dataSource={filteredAppointments}
             loading={loading}
             rowKey="id"
             pagination={{ 
