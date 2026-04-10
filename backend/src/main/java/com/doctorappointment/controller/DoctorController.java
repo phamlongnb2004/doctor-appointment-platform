@@ -1,12 +1,14 @@
 package com.doctorappointment.controller;
 
 import com.doctorappointment.dto.DoctorResponse;
+import com.doctorappointment.dto.DoctorRevenueResponse;
 import com.doctorappointment.model.Doctor;
 import com.doctorappointment.model.DoctorCertification;
 import com.doctorappointment.model.Specialty;
 import com.doctorappointment.repository.SpecialtyRepository;
 import com.doctorappointment.service.DoctorService;
 import com.doctorappointment.service.DoctorCertificationService;
+import com.doctorappointment.service.DoctorRevenueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +36,7 @@ public class DoctorController {
     private final DoctorService doctorService;
     private final SpecialtyRepository specialtyRepository;
     private final DoctorCertificationService certificationService;
+    private final DoctorRevenueService revenueService;
 
     @PostMapping
     public ResponseEntity<?> createDoctor(@RequestBody Doctor doctor) {
@@ -216,6 +219,25 @@ public class DoctorController {
             return ResponseEntity.ok(Map.of("message", "Certification deleted successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    // Revenue endpoint
+    @GetMapping("/my-profile/{userId}/revenue")
+    public ResponseEntity<?> getMyRevenue(@PathVariable Long userId) {
+        try {
+            var doctorOpt = doctorService.getDoctorByUserId(userId);
+            if (doctorOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Doctor profile not found"));
+            }
+            
+            Doctor doctor = doctorOpt.get();
+            DoctorRevenueResponse revenue = revenueService.getDoctorRevenue(doctor.getId());
+            
+            return ResponseEntity.ok(revenue);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 }

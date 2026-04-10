@@ -30,6 +30,8 @@ import SePayTestPage from './pages/SePayTestPage';
 import ServiceWalletPage from './pages/ServiceWalletPage';
 import DoctorVerifyCodePage from './pages/DoctorVerifyCodePage';
 import DoctorExaminationPage from './pages/DoctorExaminationPage';
+import DoctorRevenuePage from './pages/DoctorRevenuePage';
+import DoctorDashboard from './pages/DoctorDashboard';
 import PatientMedicalHistoryPage from './pages/PatientMedicalHistoryPage';
 import NotFoundPage from './pages/NotFoundPage';
 import Header from './components/Header';
@@ -143,12 +145,36 @@ function AppContent({ user, isAuthenticated, handleLogin, handleLogout, handleUs
             }
           />
           
+          {/* Doctor Dashboard Route - For doctors only */}
+          <Route
+            path="/doctor/dashboard"
+            element={
+              isAuthenticated && isDoctor ? (
+                <DoctorDashboard />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          
           {/* Doctor Examination Route - For doctors only */}
           <Route
             path="/doctor/examination/:appointmentId"
             element={
               isAuthenticated && isDoctor ? (
                 <DoctorExaminationPage />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          
+          {/* Doctor Revenue Route - For doctors only */}
+          <Route
+            path="/doctor/revenue"
+            element={
+              isAuthenticated && isDoctor ? (
+                <DoctorRevenuePage />
               ) : (
                 <Navigate to="/login" />
               )

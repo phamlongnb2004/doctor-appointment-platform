@@ -1,0 +1,83 @@
+.doctor-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.doctor-dashboard .page-header {
+  margin-bottom: 32px;
+}
+
+.doctor-dashboard .page-header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.doctor-dashboard .page-header p {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+.doctor-dashboard .dashboard-card {
+  text-align: center;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid #e8e8e8;
+}
+
+.doctor-dashboard .dashboard-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.doctor-dashboard .dashboard-card .card-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 28px;
+  color: white;
+}
+
+.doctor-dashboard .dashboard-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.doctor-dashboard .dashboard-card p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.doctor-dashboard a {
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .doctor-dashboard {
+    padding: 16px;
+  }
+
+  .doctor-dashboard .page-header h1 {
+    font-size: 24px;
+  }
+
+  .doctor-dashboard .dashboard-card .card-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+
+  .doctor-dashboard .dashboard-card h3 {
+    font-size: 16px;
+  }
+}
