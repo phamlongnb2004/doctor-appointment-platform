@@ -15,10 +15,10 @@ public class SendGridEmailService {
     @Value("${sendgrid.api-key:}")
     private String sendGridApiKey;
     
-    @Value("${sendgrid.from-email:noreply@medlatec.com}")
+    @Value("${sendgrid.from-email:noreply@khamnow.com}")
     private String fromEmail;
     
-    @Value("${sendgrid.from-name:MEDLATEC}")
+    @Value("${sendgrid.from-name:KHAMNOW}")
     private String fromName;
     
     public void sendVerificationEmail(String toEmail, String name, String verificationCode) {
@@ -30,7 +30,7 @@ public class SendGridEmailService {
         try {
             Email from = new Email(fromEmail, fromName);
             Email to = new Email(toEmail);
-            String subject = "Xác nhận đăng ký nhận tin từ MEDLATEC";
+            String subject = "Xác nhận đăng ký nhận tin từ KHAMNOW";
             Content content = new Content("text/html", buildVerificationEmailContent(name, verificationCode));
             
             Mail mail = new Mail(from, subject, to, content);
@@ -45,11 +45,16 @@ public class SendGridEmailService {
             Response response = sg.api(request);
             
             if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
-                // log.info("✅ SendGrid verification email sent successfully to: {}", toEmail);
                 System.out.println("✅ SendGrid verification email sent successfully to: " + toEmail);
             } else {
-                // log.error("❌ SendGrid failed with status {}: {}", response.getStatusCode(), response.getBody());
                 System.err.println("❌ SendGrid failed with status " + response.getStatusCode() + ": " + response.getBody());
+                
+                // If 401 (Unauthorized) or 402 (Payment Required), disable SendGrid for this session
+                if (response.getStatusCode() == 401 || response.getStatusCode() == 402) {
+                    System.err.println("⚠️  SendGrid credits exceeded or unauthorized. Falling back to console logging.");
+                    sendGridApiKey = ""; // Disable for this session
+                }
+                
                 logEmailToConsole("VERIFICATION", toEmail, name, verificationCode);
             }
         } catch (IOException e) {
@@ -69,7 +74,7 @@ public class SendGridEmailService {
         try {
             Email from = new Email(fromEmail, fromName);
             Email to = new Email(toEmail);
-            String subject = "Chào mừng bạn đến với MEDLATEC!";
+            String subject = "Chào mừng bạn đến với KHAMNOW!";
             Content content = new Content("text/html", buildWelcomeEmailContent(name));
             
             Mail mail = new Mail(from, subject, to, content);
@@ -84,11 +89,16 @@ public class SendGridEmailService {
             Response response = sg.api(request);
             
             if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
-                // log.info("✅ SendGrid welcome email sent successfully to: {}", toEmail);
                 System.out.println("✅ SendGrid welcome email sent successfully to: " + toEmail);
             } else {
-                // log.error("❌ SendGrid failed with status {}: {}", response.getStatusCode(), response.getBody());
                 System.err.println("❌ SendGrid failed with status " + response.getStatusCode() + ": " + response.getBody());
+                
+                // If 401 (Unauthorized) or 402 (Payment Required), disable SendGrid for this session
+                if (response.getStatusCode() == 401 || response.getStatusCode() == 402) {
+                    System.err.println("⚠️  SendGrid credits exceeded or unauthorized. Falling back to console logging.");
+                    sendGridApiKey = ""; // Disable for this session
+                }
+                
                 logWelcomeEmailToConsole(toEmail, name);
             }
         } catch (IOException e) {
@@ -104,11 +114,11 @@ public class SendGridEmailService {
         System.out.println("📧 SENDING " + type + " EMAIL (Console Mode - SendGrid not configured)");
         System.out.println("=================================================");
         System.out.println("To: " + toEmail);
-        System.out.println("Subject: Xác nhận đăng ký nhận tin từ MEDLATEC");
+        System.out.println("Subject: Xác nhận đăng ký nhận tin từ KHAMNOW");
         System.out.println("");
         System.out.println("Xin chào " + (name != null ? name : "bạn") + ",");
         System.out.println("");
-        System.out.println("Cảm ơn bạn đã đăng ký nhận tin từ MEDLATEC!");
+        System.out.println("Cảm ơn bạn đã đăng ký nhận tin từ KHAMNOW!");
         System.out.println("");
         System.out.println("🔑 Mã xác nhận của bạn là: " + verificationCode);
         System.out.println("");
@@ -122,7 +132,7 @@ public class SendGridEmailService {
         System.out.println("📧 SENDING WELCOME EMAIL (Console Mode - SendGrid not configured)");
         System.out.println("=================================================");
         System.out.println("To: " + toEmail);
-        System.out.println("Subject: Chào mừng bạn đến với MEDLATEC!");
+        System.out.println("Subject: Chào mừng bạn đến với KHAMNOW!");
         System.out.println("");
         System.out.println("Xin chào " + (name != null ? name : "bạn") + ",");
         System.out.println("");
@@ -140,11 +150,11 @@ public class SendGridEmailService {
                 <style>
                     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                     .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-                    .header { background: linear-gradient(135deg, #1890ff 0%%, #096dd9 100%%); color: white; padding: 40px 30px; text-align: center; }
-                    .header h1 { margin: 0 0 10px 0; font-size: 32px; }
+                    .header { background: linear-gradient(135deg, #0066cc 0%%, #004d99 100%%); color: white; padding: 40px 30px; text-align: center; }
+                    .header h1 { margin: 0 0 10px 0; font-size: 32px; font-weight: 700; letter-spacing: 1px; }
                     .content { padding: 40px 30px; }
-                    .code-box { background: linear-gradient(135deg, #e6f7ff 0%%, #bae7ff 100%%); border: 3px dashed #1890ff; padding: 30px; text-align: center; margin: 30px 0; border-radius: 12px; }
-                    .code { font-size: 42px; font-weight: 800; color: #1890ff; letter-spacing: 8px; font-family: 'Courier New', monospace; }
+                    .code-box { background: linear-gradient(135deg, #e6f2ff 0%%, #cce5ff 100%%); border: 3px dashed #0066cc; padding: 30px; text-align: center; margin: 30px 0; border-radius: 12px; }
+                    .code { font-size: 42px; font-weight: 800; color: #0066cc; letter-spacing: 8px; font-family: 'Courier New', monospace; }
                     .footer { background: #f5f5f5; color: #666; padding: 30px; text-align: center; font-size: 13px; }
                     .unsubscribe { color: #999; font-size: 11px; margin-top: 15px; }
                     .unsubscribe a { color: #999; text-decoration: underline; }
@@ -153,7 +163,7 @@ public class SendGridEmailService {
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>🏥 DOCTOR APPOINTMENT PLATFORM</h1>
+                        <h1>KHAMNOW</h1>
                         <p>Xác nhận đăng ký nhận tin</p>
                     </div>
                     <div class="content">
@@ -167,10 +177,10 @@ public class SendGridEmailService {
                         <p>Nếu bạn không yêu cầu đăng ký này, vui lòng bỏ qua email này.</p>
                     </div>
                     <div class="footer">
-                        <p><strong>© 2026 DOCTOR APPOINTMENT PLATFORM</strong></p>
-                        <p>Hệ thống đặt lịch khám bệnh trực tuyến</p>
+                        <p><strong>© 2026 KHAMNOW</strong> - Nền tảng đặt khám trực tuyến</p>
+                        <p>Email này được gửi tự động, vui lòng không trả lời.</p>
                         <div class="unsubscribe">
-                            <p>Email này được gửi tự động. Vui lòng không trả lời trực tiếp.</p>
+                            <p>Nếu bạn không đăng ký nhận tin, vui lòng bỏ qua email này.</p>
                         </div>
                     </div>
                 </div>
@@ -189,10 +199,10 @@ public class SendGridEmailService {
                 <style>
                     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                     .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-                    .header { background: linear-gradient(135deg, #10b981 0%%, #059669 100%%); color: white; padding: 40px 30px; text-align: center; }
-                    .header h1 { margin: 0 0 10px 0; font-size: 32px; }
+                    .header { background: linear-gradient(135deg, #0066cc 0%%, #004d99 100%%); color: white; padding: 40px 30px; text-align: center; }
+                    .header h1 { margin: 0 0 10px 0; font-size: 32px; font-weight: 700; letter-spacing: 1px; }
                     .content { padding: 40px 30px; }
-                    .success-box { background: linear-gradient(135deg, #d1fae5 0%%, #a7f3d0 100%%); border: 3px solid #10b981; padding: 30px; text-align: center; margin: 30px 0; border-radius: 12px; }
+                    .success-box { background: linear-gradient(135deg, #e6f2ff 0%%, #cce5ff 100%%); border: 3px solid #0066cc; padding: 30px; text-align: center; margin: 30px 0; border-radius: 12px; }
                     .footer { background: #f5f5f5; color: #666; padding: 30px; text-align: center; font-size: 13px; }
                     .unsubscribe { color: #999; font-size: 11px; margin-top: 15px; }
                     .unsubscribe a { color: #999; text-decoration: underline; }
@@ -201,23 +211,22 @@ public class SendGridEmailService {
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>🏥 DOCTOR APPOINTMENT PLATFORM</h1>
-                        <p>Chào mừng bạn</p>
+                        <h1>KHAMNOW</h1>
+                        <p>Chào mừng bạn!</p>
                     </div>
                     <div class="content">
                         <div class="success-box">
-                            <div style="font-size: 64px;">🎉</div>
-                            <h2 style="margin: 0; color: #10b981;">Đăng ký thành công</h2>
+                            <h2 style="margin: 0; color: #0066cc;">✓ Đăng ký thành công!</h2>
                         </div>
                         <p>Xin chào <strong>%s</strong>,</p>
                         <p>Cảm ơn bạn đã xác nhận đăng ký nhận tin từ hệ thống của chúng tôi.</p>
                         <p>Bạn sẽ nhận được các thông báo và tin tức mới nhất qua email này.</p>
                     </div>
                     <div class="footer">
-                        <p><strong>© 2026 DOCTOR APPOINTMENT PLATFORM</strong></p>
-                        <p>Hệ thống đặt lịch khám bệnh trực tuyến</p>
+                        <p><strong>© 2026 KHAMNOW</strong> - Nền tảng đặt khám trực tuyến</p>
+                        <p>Hotline: <strong>1900 56 56 56</strong></p>
                         <div class="unsubscribe">
-                            <p>Email này được gửi tự động. Vui lòng không trả lời trực tiếp.</p>
+                            <p>Nếu bạn muốn hủy đăng ký, vui lòng liên hệ với chúng tôi.</p>
                         </div>
                     </div>
                 </div>
