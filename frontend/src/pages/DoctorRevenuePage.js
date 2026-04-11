@@ -129,7 +129,7 @@ const DoctorRevenuePage = () => {
     return (
       <div style={{ textAlign: 'center', padding: '100px 0' }}>
         <Spin size="large" />
-        <p style={{ marginTop: 20 }}>Đang tải dữ liệu...</p>
+        <p style={{ marginTop: 20, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Đang tải dữ liệu...</p>
       </div>
     );
   }

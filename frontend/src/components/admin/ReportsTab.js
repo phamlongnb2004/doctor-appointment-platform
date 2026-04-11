@@ -82,7 +82,7 @@ function ReportsTab() {
     return (
       <div style={{ textAlign: 'center', padding: '100px 0' }}>
         <Spin size="large" />
-        <div style={{ marginTop: 16 }}>Đang tải dữ liệu báo cáo...</div>
+        <div style={{ marginTop: 16, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>Đang tải dữ liệu báo cáo...</div>
       </div>
     );
   }
