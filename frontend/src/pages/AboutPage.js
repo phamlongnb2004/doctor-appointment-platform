@@ -167,7 +167,7 @@ function AboutPage() {
         style={{
           backgroundImage: heroData?.backgroundImage 
             ? `url(${heroData.backgroundImage})` 
-            : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            : 'linear-gradient(135deg, #0066cc 0%, #004d99 100%)',
           backgroundRepeat: 'no-repeat',
           backgroundSize: 'cover',
           backgroundPosition: 'center center'
@@ -338,7 +338,7 @@ function AboutPage() {
           style={{
             backgroundImage: backgroundImage
               ? `url(${backgroundImage})`
-              : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              : 'linear-gradient(135deg, #0066cc 0%, #004d99 100%)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             position: 'relative'
@@ -508,10 +508,10 @@ function AboutPage() {
       >
         <div className="container">
           <div className="about-cta-content">
-            <Title level={2} style={{ color: '#fff', marginBottom: 16 }}>
+            <Title level={2} className="cta-title">
               Sẵn sàng chăm sóc sức khỏe của bạn?
             </Title>
-            <Paragraph style={{ color: 'rgba(255,255,255,0.9)', fontSize: 18, marginBottom: 32 }}>
+            <Paragraph className="cta-subtitle">
               Đặt lịch khám ngay hôm nay để được tư vấn từ đội ngũ bác sĩ chuyên nghiệp
             </Paragraph>
             <div className="about-cta-buttons">

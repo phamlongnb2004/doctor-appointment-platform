@@ -16,7 +16,7 @@ public class EmailService {
     @Autowired(required = false)
     private JavaMailSender mailSender;
     
-    @Value("${spring.mail.username:noreply@medlatec.com}")
+    @Value("${spring.mail.username:noreply@khamnow.com}")
     private String fromEmail;
     
     public void sendVerificationEmail(String toEmail, String name, String verificationCode) {
@@ -31,7 +31,7 @@ public class EmailService {
             
             helper.setFrom(fromEmail);
             helper.setTo(toEmail);
-            helper.setSubject("Xác nhận đăng ký nhận tin từ MEDLATEC");
+            helper.setSubject("Xác nhận đăng ký nhận tin từ KHAMNOW");
             helper.setText(buildVerificationEmailContent(name, verificationCode), true);
             
             mailSender.send(message);
@@ -55,7 +55,7 @@ public class EmailService {
             
             helper.setFrom(fromEmail);
             helper.setTo(toEmail);
-            helper.setSubject("Chào mừng bạn đến với MEDLATEC!");
+            helper.setSubject("Chào mừng bạn đến với KHAMNOW!");
             helper.setText(buildWelcomeEmailContent(name), true);
             
             mailSender.send(message);
@@ -71,21 +71,21 @@ public class EmailService {
         log.info("📧 SENDING {} EMAIL (Console Mode)", type);
         log.info("=================================================");
         log.info("To: {}", toEmail);
-        log.info("Subject: Xác nhận đăng ký nhận tin từ MEDLATEC");
+        log.info("Subject: Xác nhận đăng ký nhận tin từ KHAMNOW");
         log.info("");
         log.info("Xin chào {},", name != null ? name : "bạn");
         log.info("");
-        log.info("Cảm ơn bạn đã đăng ký nhận tin từ MEDLATEC!");
+        log.info("Cảm ơn bạn đã đăng ký nhận tin từ KHAMNOW!");
         log.info("");
-        log.info("🔑 Mã xác nhận của bạn là: {}", verificationCode);
+        log.info("Mã xác nhận của bạn là: {}", verificationCode);
         log.info("");
         log.info("Vui lòng nhập mã này vào trang web để hoàn tất đăng ký.");
         log.info("Mã có hiệu lực trong 15 phút.");
         log.info("");
-        log.info("Sau khi xác nhận, bạn sẽ nhận được các thông báo ưu đãi và tin tức y tế mới nhất từ MEDLATEC.");
+        log.info("Sau khi xác nhận, bạn sẽ nhận được các thông báo ưu đãi và tin tức y tế mới nhất từ KHAMNOW.");
         log.info("");
         log.info("Trân trọng,");
-        log.info("Đội ngũ MEDLATEC");
+        log.info("Đội ngũ KHAMNOW");
         log.info("=================================================");
     }
     
@@ -94,21 +94,21 @@ public class EmailService {
         log.info("📧 SENDING WELCOME EMAIL (Console Mode)");
         log.info("=================================================");
         log.info("To: {}", toEmail);
-        log.info("Subject: Chào mừng bạn đến với MEDLATEC!");
+        log.info("Subject: Chào mừng bạn đến với KHAMNOW!");
         log.info("");
         log.info("Xin chào {},", name != null ? name : "bạn");
         log.info("");
-        log.info("🎉 Chúc mừng! Bạn đã đăng ký nhận tin thành công.");
+        log.info("Chúc mừng! Bạn đã đăng ký nhận tin thành công.");
         log.info("");
         log.info("Từ giờ, bạn sẽ nhận được:");
         log.info("✅ Thông tin về các chương trình khuyến mãi đặc biệt");
         log.info("✅ Tin tức y tế và sức khỏe mới nhất");
         log.info("✅ Các dịch vụ và gói khám sức khỏe ưu đãi");
         log.info("");
-        log.info("Cảm ơn bạn đã tin tưởng MEDLATEC!");
+        log.info("Cảm ơn bạn đã tin tưởng KHAMNOW!");
         log.info("");
         log.info("Trân trọng,");
-        log.info("Đội ngũ MEDLATEC");
+        log.info("Đội ngũ KHAMNOW");
         log.info("=================================================");
     }
     
@@ -137,7 +137,7 @@ public class EmailService {
                         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
                     }
                     .header { 
-                        background: linear-gradient(135deg, #1890ff 0%%, #096dd9 100%%); 
+                        background: linear-gradient(135deg, #0066cc 0%%, #004d99 100%%); 
                         color: white; 
                         padding: 40px 30px; 
                         text-align: center;
@@ -146,6 +146,7 @@ public class EmailService {
                         margin: 0 0 10px 0;
                         font-size: 32px;
                         font-weight: 700;
+                        letter-spacing: 1px;
                     }
                     .header p {
                         margin: 0;
@@ -162,8 +163,8 @@ public class EmailService {
                         line-height: 1.6;
                     }
                     .code-box { 
-                        background: linear-gradient(135deg, #e6f7ff 0%%, #bae7ff 100%%);
-                        border: 3px dashed #1890ff; 
+                        background: linear-gradient(135deg, #e6f2ff 0%%, #cce5ff 100%%);
+                        border: 3px dashed #0066cc; 
                         padding: 30px; 
                         text-align: center; 
                         margin: 30px 0; 
@@ -172,7 +173,7 @@ public class EmailService {
                     .code { 
                         font-size: 42px; 
                         font-weight: 800; 
-                        color: #1890ff; 
+                        color: #0066cc; 
                         letter-spacing: 8px;
                         font-family: 'Courier New', monospace;
                     }
@@ -215,31 +216,31 @@ public class EmailService {
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>🏥 MEDLATEC</h1>
+                        <h1>KHAMNOW</h1>
                         <p>Xác nhận đăng ký nhận tin</p>
                     </div>
                     <div class="content">
                         <p>Xin chào <strong>%s</strong>,</p>
-                        <p>Cảm ơn bạn đã đăng ký nhận tin từ <strong>MEDLATEC</strong>!</p>
+                        <p>Cảm ơn bạn đã đăng ký nhận tin từ <strong>KHAMNOW</strong>!</p>
                         <p>Để hoàn tất đăng ký, vui lòng nhập mã xác nhận sau vào trang web:</p>
                         <div class="code-box">
                             <div class="code">%s</div>
                         </div>
                         <div class="warning">
-                            <p><strong>⏰ Lưu ý:</strong> Mã xác nhận có hiệu lực trong <strong>15 phút</strong>.</p>
+                            <p><strong>Lưu ý:</strong> Mã xác nhận có hiệu lực trong <strong>15 phút</strong>.</p>
                         </div>
                         <div class="benefits">
-                            <p><strong>📬 Sau khi xác nhận, bạn sẽ nhận được:</strong></p>
+                            <p><strong>Sau khi xác nhận, bạn sẽ nhận được:</strong></p>
                             <ul>
-                                <li>🎁 Thông tin về các chương trình khuyến mãi đặc biệt</li>
-                                <li>📰 Tin tức y tế và sức khỏe mới nhất</li>
-                                <li>💊 Các dịch vụ và gói khám sức khỏe ưu đãi</li>
-                                <li>🩺 Tư vấn sức khỏe từ đội ngũ chuyên gia</li>
+                                <li>Thông tin về các chương trình khuyến mãi đặc biệt</li>
+                                <li>Tin tức y tế và sức khỏe mới nhất</li>
+                                <li>Các dịch vụ và gói khám sức khỏe ưu đãi</li>
+                                <li>Tư vấn sức khỏe từ đội ngũ chuyên gia</li>
                             </ul>
                         </div>
                     </div>
                     <div class="footer">
-                        <p><strong>© 2026 MEDLATEC</strong> - Hệ thống Y tế chất lượng cao</p>
+                        <p><strong>© 2026 KHAMNOW</strong> - Nền tảng đặt khám trực tuyến</p>
                         <p>Email này được gửi tự động, vui lòng không trả lời.</p>
                         <p style="margin-top: 15px; font-size: 11px; color: #666;">
                             Nếu bạn không đăng ký nhận tin, vui lòng bỏ qua email này.
@@ -276,7 +277,7 @@ public class EmailService {
                         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
                     }
                     .header { 
-                        background: linear-gradient(135deg, #10b981 0%%, #059669 100%%); 
+                        background: linear-gradient(135deg, #0066cc 0%%, #004d99 100%%); 
                         color: white; 
                         padding: 40px 30px; 
                         text-align: center;
@@ -301,16 +302,18 @@ public class EmailService {
                         line-height: 1.6;
                     }
                     .success-box {
-                        background: linear-gradient(135deg, #d1fae5 0%%, #a7f3d0 100%%);
-                        border: 3px solid #10b981;
+                        background: linear-gradient(135deg, #e6f2ff 0%%, #cce5ff 100%%);
+                        border: 3px solid #0066cc;
                         padding: 30px;
                         text-align: center;
                         margin: 30px 0;
                         border-radius: 12px;
                     }
                     .success-icon {
-                        font-size: 64px;
-                        margin-bottom: 10px;
+                        font-size: 48px;
+                        margin-bottom: 15px;
+                        color: #0066cc;
+                        font-weight: 700;
                     }
                     .benefits {
                         background: #f8f9fa;
@@ -320,7 +323,7 @@ public class EmailService {
                     }
                     .benefits h3 {
                         margin: 0 0 15px 0;
-                        color: #10b981;
+                        color: #0066cc;
                         font-size: 18px;
                     }
                     .benefits ul {
@@ -333,7 +336,7 @@ public class EmailService {
                     }
                     .cta-button {
                         display: inline-block;
-                        background: #10b981;
+                        background: #0066cc;
                         color: white;
                         padding: 15px 40px;
                         text-decoration: none;
@@ -357,35 +360,34 @@ public class EmailService {
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>🏥 MEDLATEC</h1>
+                        <h1>KHAMNOW</h1>
                         <p>Chào mừng bạn!</p>
                     </div>
                     <div class="content">
                         <div class="success-box">
-                            <div class="success-icon">🎉</div>
-                            <h2 style="margin: 0; color: #10b981;">Đăng ký thành công!</h2>
+                            <h2 style="margin: 0; color: #0066cc;">✓ Đăng ký thành công!</h2>
                         </div>
                         <p>Xin chào <strong>%s</strong>,</p>
-                        <p>Chúc mừng! Bạn đã trở thành thành viên nhận tin của <strong>MEDLATEC</strong>.</p>
+                        <p>Chúc mừng! Bạn đã trở thành thành viên nhận tin của <strong>KHAMNOW</strong>.</p>
                         <div class="benefits">
-                            <h3>📬 Bạn sẽ nhận được:</h3>
+                            <h3>Bạn sẽ nhận được:</h3>
                             <ul>
-                                <li>🎁 <strong>Ưu đãi độc quyền</strong> - Các chương trình khuyến mãi đặc biệt dành riêng cho thành viên</li>
-                                <li>📰 <strong>Tin tức y tế</strong> - Cập nhật kiến thức sức khỏe mới nhất từ các chuyên gia</li>
-                                <li>💊 <strong>Gói khám ưu đãi</strong> - Các dịch vụ khám chữa bệnh với giá đặc biệt</li>
-                                <li>🩺 <strong>Tư vấn miễn phí</strong> - Hỗ trợ tư vấn sức khỏe từ đội ngũ bác sĩ giàu kinh nghiệm</li>
-                                <li>📅 <strong>Nhắc lịch khám</strong> - Nhắc nhở định kỳ về các lịch khám sức khỏe quan trọng</li>
+                                <li><strong>Ưu đãi độc quyền</strong> - Các chương trình khuyến mãi đặc biệt dành riêng cho thành viên</li>
+                                <li><strong>Tin tức y tế</strong> - Cập nhật kiến thức sức khỏe mới nhất từ các chuyên gia</li>
+                                <li><strong>Gói khám ưu đãi</strong> - Các dịch vụ khám chữa bệnh với giá đặc biệt</li>
+                                <li><strong>Tư vấn miễn phí</strong> - Hỗ trợ tư vấn sức khỏe từ đội ngũ bác sĩ giàu kinh nghiệm</li>
+                                <li><strong>Nhắc lịch khám</strong> - Nhắc nhở định kỳ về các lịch khám sức khỏe quan trọng</li>
                             </ul>
                         </div>
                         <p style="text-align: center;">
                             <a href="http://localhost:3000" class="cta-button">Khám phá dịch vụ</a>
                         </p>
                         <p style="margin-top: 30px; color: #666; font-size: 14px;">
-                            Cảm ơn bạn đã tin tưởng và lựa chọn MEDLATEC làm đối tác chăm sóc sức khỏe!
+                            Cảm ơn bạn đã tin tưởng và lựa chọn KHAMNOW làm đối tác chăm sóc sức khỏe!
                         </p>
                     </div>
                     <div class="footer">
-                        <p><strong>© 2026 MEDLATEC</strong> - Hệ thống Y tế chất lượng cao</p>
+                        <p><strong>© 2026 KHAMNOW</strong> - Nền tảng đặt khám trực tuyến</p>
                         <p>Hotline: <strong>1900 56 56 56</strong></p>
                         <p style="margin-top: 15px; font-size: 11px; color: #666;">
                             Nếu bạn muốn hủy đăng ký, vui lòng liên hệ với chúng tôi.

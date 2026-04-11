@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Row, Col, Button, Breadcrumb, Spin, Tag, InputNumber, message, Card } from 'antd';
-import { HomeOutlined, ShoppingCartOutlined, PhoneOutlined, CheckOutlined } from '@ant-design/icons';
+import { HomeOutlined, ShoppingCartOutlined, PhoneOutlined, CheckOutlined, ClockCircleOutlined, InfoCircleOutlined, SafetyOutlined } from '@ant-design/icons';
 import cmsAPI from '../services/cmsApi';
 import { useCart } from '../contexts/CartContext';
 import '../styles/service-detail.css';
@@ -234,22 +234,98 @@ function ServiceDetailPage() {
 
               {/* Deal Info */}
               <div style={{ 
-                padding: 16, 
-                background: '#fff7e6', 
-                border: '1px solid #ffd591',
-                borderRadius: 8,
-                marginBottom: 24
+                padding: 20, 
+                background: 'linear-gradient(135deg, #fff7e6 0%, #fffbf0 100%)', 
+                border: '2px solid #ffa940',
+                borderRadius: 12,
+                marginBottom: 24,
+                boxShadow: '0 2px 8px rgba(250, 140, 22, 0.1)'
               }}>
-                <div style={{ fontWeight: 600, marginBottom: 8, color: '#fa8c16' }}>
-                  🔥 DEAL SIÊU HỜI – SỐ LƯỢNG CÓ HẠN🔥
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 12,
+                  marginBottom: 16,
+                  paddingBottom: 12,
+                  borderBottom: '1px solid #ffd591'
+                }}>
+                  <div style={{
+                    width: 40,
+                    height: 40,
+                    background: 'linear-gradient(135deg, #fa8c16 0%, #ff7a00 100%)',
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                    fontSize: 20,
+                    fontWeight: 700,
+                    boxShadow: '0 2px 8px rgba(250, 140, 22, 0.3)'
+                  }}>
+                    %
+                  </div>
+                  <div>
+                    <div style={{ 
+                      fontSize: 16, 
+                      fontWeight: 700, 
+                      color: '#d46b08',
+                      letterSpacing: '0.5px'
+                    }}>
+                      ƯU ĐÃI ĐỘC QUYỀN
+                    </div>
+                    <div style={{ fontSize: 12, color: '#8c8c8c' }}>
+                      Số lượng có hạn
+                    </div>
+                  </div>
                 </div>
-                <ul style={{ margin: 0, paddingLeft: 20 }}>
-                  <li>Chỉ áp dụng cho KH sắn deal trên Web online trong khung giờ từ 11 – 13h</li>
-                  <li>Deal không có giá trị quy đổi thành tiền mặt, dùng người sử dụng, không trao đổi hay mua bán</li>
-                  <li>Bảo lưu thời gian sử dụng deal trong 3 tháng tính từ ngày mua</li>
-                </ul>
-                <div style={{ marginTop: 8, fontSize: 13, fontStyle: 'italic' }}>
-                  (Ưu đãi chỉ dành cho khách hàng người Việt Nam)
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                    <ClockCircleOutlined style={{ 
+                      fontSize: 16, 
+                      color: '#fa8c16',
+                      marginTop: 2,
+                      flexShrink: 0
+                    }} />
+                    <div style={{ fontSize: 14, color: '#595959', lineHeight: 1.6 }}>
+                      Chỉ áp dụng cho khách hàng săn deal trên Web online trong khung giờ từ <strong>11:00 - 13:00</strong>
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                    <InfoCircleOutlined style={{ 
+                      fontSize: 16, 
+                      color: '#fa8c16',
+                      marginTop: 2,
+                      flexShrink: 0
+                    }} />
+                    <div style={{ fontSize: 14, color: '#595959', lineHeight: 1.6 }}>
+                      Deal không có giá trị quy đổi thành tiền mặt, dành cho người sử dụng, không trao đổi hay mua bán
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                    <SafetyOutlined style={{ 
+                      fontSize: 16, 
+                      color: '#fa8c16',
+                      marginTop: 2,
+                      flexShrink: 0
+                    }} />
+                    <div style={{ fontSize: 14, color: '#595959', lineHeight: 1.6 }}>
+                      Bảo lưu thời gian sử dụng deal trong <strong>3 tháng</strong> tính từ ngày mua
+                    </div>
+                  </div>
+                </div>
+                
+                <div style={{ 
+                  marginTop: 16,
+                  paddingTop: 12,
+                  borderTop: '1px dashed #ffd591',
+                  fontSize: 12, 
+                  color: '#8c8c8c',
+                  textAlign: 'center'
+                }}>
+                  * Ưu đãi chỉ dành cho khách hàng người Việt Nam
                 </div>
               </div>
 
