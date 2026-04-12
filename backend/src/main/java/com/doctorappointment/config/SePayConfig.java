@@ -15,7 +15,7 @@ public class SePayConfig {
     @Value("${sepay.env:sandbox}")
     private String environment;
     
-    @Value("${sepay.checkout-url:https://pay.sepay.vn/v1/checkout/init}")
+    @Value("${sepay.checkout-url:}")
     private String checkoutUrl;
     
     @Value("${sepay.ipn-url}")
@@ -34,6 +34,14 @@ public class SePayConfig {
     }
     
     public String getCheckoutUrl() {
+        // Auto-select checkout URL based on environment if not explicitly set
+        if (checkoutUrl == null || checkoutUrl.isEmpty()) {
+            if ("production".equalsIgnoreCase(environment) || "live".equalsIgnoreCase(environment)) {
+                return "https://pay.sepay.vn/v1/checkout/init";
+            } else {
+                return "https://pay-sandbox.sepay.vn/v1/checkout/init";
+            }
+        }
         return checkoutUrl;
     }
     
