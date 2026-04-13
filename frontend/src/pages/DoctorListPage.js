@@ -310,21 +310,19 @@ function DoctorListPage() {
                         >
                           Đặt lịch
                         </Button>
-                        {currentUser && currentUser.id && (
-                          <ChatButton
-                            currentUser={currentUser}
-                            targetUser={{
-                              id: doctor.userId,
-                              email: doctor.email,
-                              firstName: doctor.firstName,
-                              lastName: doctor.lastName,
-                              role: 'DOCTOR'
-                            }}
-                            type="default"
-                            size="small"
-                            className="doctor-card-btn doctor-card-btn-secondary"
-                          />
-                        )}
+                        <ChatButton
+                          currentUser={currentUser}
+                          targetUser={{
+                            id: doctor.userId,
+                            email: doctor.email,
+                            firstName: doctor.firstName,
+                            lastName: doctor.lastName,
+                            role: 'DOCTOR'
+                          }}
+                          type="default"
+                          size="small"
+                          className="doctor-card-btn doctor-card-btn-secondary"
+                        />
                       </div>
                     </div>
                   </Col>

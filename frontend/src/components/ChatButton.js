@@ -8,7 +8,14 @@ function ChatButton({ currentUser, targetUser, size = 'small', type = 'default',
   const navigate = useNavigate();
 
   const startChat = async () => {
-    if (!currentUser || !targetUser) {
+    // Nếu chưa đăng nhập, chuyển đến trang đăng nhập
+    if (!currentUser || !currentUser.id) {
+      message.warning('Vui lòng đăng nhập để sử dụng tính năng chat');
+      navigate('/login');
+      return;
+    }
+
+    if (!targetUser) {
       message.error('Không thể bắt đầu chat');
       return;
     }
@@ -46,7 +53,7 @@ function ChatButton({ currentUser, targetUser, size = 'small', type = 'default',
         border: 'none'
       } : {}}
     >
-      Chat với {targetUser.firstName}
+      Chat với {(targetUser?.firstName && targetUser.firstName !== 'undefined') ? targetUser.firstName : 'bác sĩ'}
     </Button>
   );
 }
