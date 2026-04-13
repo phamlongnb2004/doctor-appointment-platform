@@ -407,7 +407,9 @@
   section.ant-layout-content {
     margin-left: 0 !important;
     margin-right: 0 !important;
-    padding: 12px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    padding-bottom: 12px !important;
     width: 100% !important;
     max-width: 100% !important;
     flex: 1 !important;
@@ -421,6 +423,9 @@
   /* Card adjustments */
   .admin-cms-card {
     margin-bottom: 12px !important;
+    margin-top: 0 !important;
+    min-height: auto !important;
+    height: auto !important;
   }
 
   .admin-cms-card .ant-card-head {
@@ -430,41 +435,129 @@
   .admin-cms-card .ant-card-head-title {
     font-size: 16px !important;
   }
-
-  .admin-cms-card .ant-card-body {
-    padding: 16px !important;
+  
+  .admin-cms-card .ant-card-head-title > div:first-child {
+    font-size: 16px !important;
   }
-
-  /* Table responsive - horizontal scroll */
-  .admin-cms-table {
-    overflow-x: auto !important;
-  }
-
-  .admin-cms-table .ant-table {
-    min-width: 600px;
-  }
-
-  .admin-cms-table .ant-table-thead > tr > th {
-    padding: 12px 8px !important;
-    font-size: 11px !important;
-  }
-
-  .admin-cms-table .ant-table-tbody > tr > td {
-    padding: 10px 8px !important;
+  
+  .admin-cms-card .ant-card-head-title > div:last-child {
     font-size: 12px !important;
   }
 
-  /* Action buttons - stack vertically on mobile */
-  .admin-cms-table .ant-space {
-    flex-direction: column !important;
-    gap: 4px !important;
+  .admin-cms-card .ant-card-body {
+    padding: 12px !important;
+    min-height: auto !important;
+    height: auto !important;
   }
 
-  .admin-cms-table .ant-btn {
-    width: 100% !important;
-    font-size: 11px !important;
-    padding: 4px 8px !important;
+  /* TABLE ON MOBILE - Show with full height */
+  .admin-cms-card .ant-table-wrapper {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Force table to use full natural height on mobile - MAXIMUM SPECIFICITY */
+  .admin-cms-card .ant-table-wrapper .ant-spin-nested-loading,
+  .admin-cms-card .ant-table-wrapper .ant-spin-nested-loading .ant-spin-container,
+  .admin-cms-card .ant-table-wrapper .ant-spin-nested-loading .ant-spin-container .ant-table,
+  .admin-cms-card .ant-table-wrapper .ant-spin-nested-loading .ant-spin-container .ant-table .ant-table-container,
+  .admin-cms-card .ant-table-wrapper .ant-spin-nested-loading .ant-spin-container .ant-table .ant-table-container .ant-table-body {
     height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  /* Additional override with attribute selector */
+  .admin-cms-card .ant-table-body[style] {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  .admin-cms-card .ant-table-container[style] {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+  }
+  
+  .admin-cms-card .ant-spin-container[style] {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+  }
+  
+  /* Make table scrollable horizontally */
+  .admin-cms-card .ant-table {
+    min-width: 600px !important;
+  }
+
+  /* HIDE LIST VIEW ON MOBILE (not implemented yet) */
+  .admin-cms-card .ant-list {
+    display: none !important;
+  }
+
+  /* List item styling for mobile */
+  .admin-cms-card .ant-list-item {
+    padding: 12px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    margin-bottom: 12px !important;
+    background: #fff !important;
+  }
+  
+  .admin-cms-card .ant-list-item-meta {
+    width: 100% !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .admin-cms-card .ant-list-item-meta-avatar {
+    margin-right: 12px !important;
+  }
+  
+  .admin-cms-card .ant-list-item-action {
+    margin-left: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    gap: 8px !important;
+    padding-top: 12px !important;
+    border-top: 1px solid #f0f0f0 !important;
+  }
+  
+  .admin-cms-card .ant-list-item-action > li {
+    padding: 0 !important;
+    flex: 1 !important;
+  }
+  
+  .admin-cms-card .ant-list-item-action .ant-btn {
+    width: 100% !important;
+    font-size: 12px !important;
+  }
+  
+  /* Table cells on mobile - ensure full display */
+  .admin-cms-card .ant-table-tbody > tr > td {
+    min-height: 50px !important;
+    height: auto !important;
+    padding: 12px 8px !important;
+    font-size: 13px !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+  }
+  
+  .admin-cms-card .ant-table-thead > tr > th {
+    padding: 12px 8px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+  }
+  
+  /* Ensure rows display fully */
+  .admin-cms-card .ant-table-tbody > tr {
+    height: auto !important;
+    min-height: 50px !important;
   }
 
   /* Form adjustments */
@@ -576,17 +669,6 @@
     padding: 12px !important;
   }
 
-  /* Table - more compact */
-  .admin-cms-table .ant-table-thead > tr > th {
-    padding: 10px 6px !important;
-    font-size: 10px !important;
-  }
-
-  .admin-cms-table .ant-table-tbody > tr > td {
-    padding: 8px 6px !important;
-    font-size: 11px !important;
-  }
-
   /* Form - more compact */
   .ant-form-item {
     margin-bottom: 12px !important;
@@ -663,4 +745,108 @@
   color: #1e293b !important;
   font-size: 14px;
   font-weight: 500;
+}
+
+
+/* MOBILE RESPONSIVE - Show table with full height */
+@media (max-width: 768px) {
+  /* Remove fixed height and virtual scrolling */
+  .admin-cms-card .ant-table-body {
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+  
+  /* Keep table wrapper scrollable horizontally only */
+  .admin-cms-card .ant-table-wrapper {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Make table scrollable horizontally */
+  .admin-cms-card .ant-table {
+    min-width: 600px;
+  }
+  
+  /* Ensure table container doesn't restrict height */
+  .admin-cms-card .ant-table-container {
+    max-height: none !important;
+  }
+  
+  /* Show all rows without virtual scroll */
+  .admin-cms-card .ant-table-tbody > tr {
+    display: table-row !important;
+  }
+  
+  /* Pagination styling */
+  .admin-cms-card .ant-pagination {
+    display: flex !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    margin-top: 16px !important;
+  }
+  
+  /* Smaller pagination items */
+  .admin-cms-card .ant-pagination-item,
+  .admin-cms-card .ant-pagination-prev,
+  .admin-cms-card .ant-pagination-next {
+    min-width: 28px !important;
+    height: 28px !important;
+    line-height: 26px !important;
+    font-size: 12px !important;
+  }
+}
+
+
+/* MOBILE FIX - HIGHEST PRIORITY */
+@media (max-width: 768px) {
+  /* Force card to have auto height */
+  .ant-card.admin-cms-card,
+  .admin-cms-card.ant-card {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+  }
+  
+  .ant-card.admin-cms-card .ant-card-body,
+  .admin-cms-card.ant-card .ant-card-body {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  /* Show table with full height */
+  .admin-cms-card .ant-table-wrapper {
+    display: block !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow-x: auto !important;
+  }
+  
+  .admin-cms-card .ant-table {
+    min-width: 600px;
+    height: auto !important;
+  }
+  
+  .admin-cms-card .ant-table-container {
+    height: auto !important;
+    max-height: none !important;
+  }
+  
+  .admin-cms-card .ant-table-body {
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+  
+  .admin-cms-card .ant-table-tbody {
+    height: auto !important;
+  }
+  
+  .admin-cms-card .ant-table-tbody > tr {
+    display: table-row !important;
+    height: auto !important;
+  }
 }

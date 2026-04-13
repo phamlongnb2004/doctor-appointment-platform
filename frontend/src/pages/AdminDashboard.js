@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Card, Row, Col, Typography, Table, Tag, Button, Space, Modal, Form, Select, Input, message, Avatar, Dropdown, Badge, Progress, List, Typography as AntTypography, Drawer } from 'antd';
-import { DashboardOutlined, UserOutlined, TeamOutlined, CalendarOutlined, LogoutOutlined, SettingOutlined, MedicineBoxOutlined, EditOutlined, BellOutlined, PlusOutlined, SearchOutlined, FilterOutlined, ArrowUpOutlined, ArrowDownOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, WifiOutlined, MenuOutlined, CloseOutlined, MailOutlined, DeleteOutlined, ShoppingCartOutlined, BarChartOutlined } from '@ant-design/icons';
+import { DashboardOutlined, UserOutlined, TeamOutlined, CalendarOutlined, LogoutOutlined, SettingOutlined, MedicineBoxOutlined, EditOutlined, BellOutlined, PlusOutlined, SearchOutlined, FilterOutlined, ArrowUpOutlined, ArrowDownOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined, WifiOutlined, MenuOutlined, CloseOutlined, MailOutlined, DeleteOutlined, ShoppingCartOutlined, BarChartOutlined, StopOutlined, DownOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { userAPI, doctorAPI, appointmentAPI } from '../services/api';
 import webSocketService from '../services/websocket';
@@ -42,6 +42,13 @@ function AdminDashboard({ user, onLogout }) {
   const [editingUser, setEditingUser] = useState(null);
   const [userAvatar, setUserAvatar] = useState(null);
   const [editForm] = Form.useForm();
+  
+  // Search states
+  const [userSearchText, setUserSearchText] = useState('');
+  const [doctorSearchText, setDoctorSearchText] = useState('');
+  const [appointmentSearchText, setAppointmentSearchText] = useState('');
+  const [newsletterSearchText, setNewsletterSearchText] = useState('');
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -335,44 +342,82 @@ function AdminDashboard({ user, onLogout }) {
   };
 
   // Transform data for tables
-  const userTableData = users.map((u, index) => ({
-    key: index,
-    id: u.id,
-    firstName: u.firstName || '',
-    lastName: u.lastName || '',
-    name: `${u.firstName || ''} ${u.lastName || ''}`,
-    email: u.email || '',
-    phone: u.phone || '',
-    role: u.role || 'PATIENT',
-    status: u.active !== false ? 'Hoạt động' : 'Khóa',
-    onlineStatus: onlineUsers.has(u.id) ? 'online' : 'offline'
-  }));
+  const userTableData = users
+    .filter(u => {
+      if (!userSearchText) return true;
+      const searchLower = userSearchText.toLowerCase();
+      const fullName = `${u.firstName || ''} ${u.lastName || ''}`.toLowerCase();
+      return fullName.includes(searchLower) || 
+             (u.email || '').toLowerCase().includes(searchLower) ||
+             (u.phone || '').includes(searchLower);
+    })
+    .map((u, index) => ({
+      key: index,
+      id: u.id,
+      firstName: u.firstName || '',
+      lastName: u.lastName || '',
+      name: `${u.firstName || ''} ${u.lastName || ''}`,
+      email: u.email || '',
+      phone: u.phone || '',
+      role: u.role || 'PATIENT',
+      status: u.active !== false ? 'Hoạt động' : 'Khóa',
+      onlineStatus: onlineUsers.has(u.id) ? 'online' : 'offline'
+    }));
 
-  const doctorTableData = doctors.map((d, index) => ({
-    key: index,
-    id: d.id,
-    userId: d.userId,
-    name: `${d.firstName || ''} ${d.lastName || ''}`,
-    email: d.email || '',
-    specialization: d.specialization || '',
-    experienceYears: d.experienceYears || 0,
-    consultationFee: d.consultationFee || 0,
-    ratingScore: d.ratingScore || 0,
-    status: d.active !== false ? 'Hoạt động' : 'Khóa'
-  }));
+  const doctorTableData = doctors
+    .filter(d => {
+      if (!doctorSearchText) return true;
+      const searchLower = doctorSearchText.toLowerCase();
+      const fullName = `${d.firstName || ''} ${d.lastName || ''}`.toLowerCase();
+      return fullName.includes(searchLower) || 
+             (d.email || '').toLowerCase().includes(searchLower) ||
+             (d.specialization || '').toLowerCase().includes(searchLower);
+    })
+    .map((d, index) => ({
+      key: index,
+      id: d.id,
+      userId: d.userId,
+      name: `${d.firstName || ''} ${d.lastName || ''}`,
+      email: d.email || '',
+      specialization: d.specialization || '',
+      experienceYears: d.experienceYears || 0,
+      consultationFee: d.consultationFee || 0,
+      ratingScore: d.ratingScore || 0,
+      status: d.active !== false ? 'Hoạt động' : 'Khóa'
+    }));
 
-  const appointmentTableData = appointments.map((a, index) => ({
-    key: index,
-    id: a.id,
-    patient: `${a.patient?.firstName || ''} ${a.patient?.lastName || ''}`,
-    patientPhone: a.patient?.phone || '',
-    doctor: `${a.doctor?.firstName || ''} ${a.doctor?.lastName || ''}`,
-    specialization: a.doctor?.specialization || '',
-    date: a.appointmentDate || '',
-    time: a.timeSlot || '',
-    notes: a.notes || '',
-    status: a.status || 'PENDING'
-  }));
+  const appointmentTableData = appointments
+    .filter(a => {
+      if (!appointmentSearchText) return true;
+      const searchLower = appointmentSearchText.toLowerCase();
+      const patientName = `${a.patient?.firstName || ''} ${a.patient?.lastName || ''}`.toLowerCase();
+      const doctorFirstName = a.doctor?.user?.firstName || a.doctor?.firstName || '';
+      const doctorLastName = a.doctor?.user?.lastName || a.doctor?.lastName || '';
+      const doctorName = `${doctorFirstName} ${doctorLastName}`.toLowerCase();
+      return patientName.includes(searchLower) || 
+             doctorName.includes(searchLower) ||
+             (a.appointmentDate || '').includes(searchLower);
+    })
+    .map((a, index) => {
+      // Handle both possible data structures: a.doctor.firstName or a.doctor.user.firstName
+      const doctorFirstName = a.doctor?.user?.firstName || a.doctor?.firstName || '';
+      const doctorLastName = a.doctor?.user?.lastName || a.doctor?.lastName || '';
+      const doctorName = `${doctorFirstName} ${doctorLastName}`.trim();
+      
+      return {
+        key: index,
+        id: a.id,
+        patient: `${a.patient?.firstName || ''} ${a.patient?.lastName || ''}`,
+        patientPhone: a.patient?.phone || '',
+        doctor: doctorName || 'Chưa có thông tin',
+        specialization: a.doctor?.specialization || '',
+        date: a.appointmentDate || '',
+        time: a.timeSlot || '',
+        notes: a.notes || '',
+        status: a.status || 'PENDING',
+        fee: a.consultationFee || 0
+      };
+    });
 
   const userColumns = [
     {
@@ -410,7 +455,7 @@ function AdminDashboard({ user, onLogout }) {
             borderRadius: 20,
             padding: '2px 12px',
             border: 'none',
-            background: `${getRoleTagColor(role)}15`,
+            backgroundColor: `${getRoleTagColor(role)}15`,
             color: getRoleTagColor(role),
             fontWeight: 500
           }}
@@ -624,7 +669,7 @@ function AdminDashboard({ user, onLogout }) {
             borderRadius: 20,
             padding: '4px 12px',
             border: 'none',
-            background: `${getStatusColor(status)}15`,
+            backgroundColor: `${getStatusColor(status)}15`,
             color: getStatusColor(status),
             fontWeight: 500,
             display: 'inline-flex',
@@ -635,6 +680,17 @@ function AdminDashboard({ user, onLogout }) {
           {getStatusIcon(status)}
           {getStatusDisplay(status)}
         </Tag>
+      )
+    },
+    {
+      title: 'Phí khám',
+      dataIndex: 'fee',
+      key: 'fee',
+      width: 120,
+      render: (fee) => (
+        <Text strong style={{ color: '#667eea', fontSize: 14 }}>
+          {fee ? `${fee.toLocaleString()} VNĐ` : '-'}
+        </Text>
       )
     },
     {
@@ -705,25 +761,131 @@ function AdminDashboard({ user, onLogout }) {
                   placeholder="Tìm kiếm người dùng..."
                   prefix={<SearchOutlined style={{ color: '#999' }} />}
                   className="admin-search-input"
+                  value={userSearchText}
+                  onChange={(e) => setUserSearchText(e.target.value)}
+                  allowClear
                 />
-                <Button type="primary" icon={<PlusOutlined />} className="admin-btn-primary">
+                <Button 
+                  type="primary" 
+                  icon={<PlusOutlined />} 
+                  className="admin-btn-primary"
+                  onClick={() => message.info('Chức năng thêm người dùng đang được phát triển')}
+                >
                   Thêm người dùng
                 </Button>
               </div>
             </div>
             <Card className="admin-card" style={{ borderRadius: 24 }}>
-              <Table
-                dataSource={userTableData}
-                columns={userColumns}
-                pagination={{
-                  pageSize: 10,
-                  showSizeChanger: true,
-                  showTotal: (total) => `Tổng ${total} người dùng`
-                }}
-                rowKey="key"
-                className="admin-table"
-                scroll={{ x: 920 }}
-              />
+              {!isMobile ? (
+                <Table
+                  dataSource={userTableData}
+                  columns={userColumns}
+                  pagination={{
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showTotal: (total) => `Tổng ${total} người dùng`
+                  }}
+                  rowKey="key"
+                  className="admin-table"
+                  scroll={{ x: 920 }}
+                />
+              ) : (
+                <div>
+                  {userTableData.map((user) => (
+                    <div
+                      key={user.key}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* User Info */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                        <Avatar
+                          size={48}
+                          style={{
+                            backgroundColor: getRoleTagColor(user.role),
+                            fontWeight: 600
+                          }}
+                        >
+                          {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                        </Avatar>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>
+                            {user.name}
+                          </div>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            {user.email}
+                          </Text>
+                        </div>
+                      </div>
+
+                      {/* Status Tags */}
+                      <div style={{ marginBottom: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <Tag
+                          style={{
+                            borderRadius: 20,
+                            padding: '2px 12px',
+                            border: 'none',
+                            backgroundColor: `${getRoleTagColor(user.role)}15`,
+                            color: getRoleTagColor(user.role),
+                            fontWeight: 500
+                          }}
+                        >
+                          {getRoleDisplay(user.role)}
+                        </Tag>
+                        <Badge
+                          status={user.onlineStatus === 'online' ? 'success' : 'default'}
+                          text={user.onlineStatus === 'online' ? 'Đang hoạt động' : 'Offline'}
+                        />
+                        <Badge
+                          status={user.status === 'Hoạt động' ? 'success' : 'error'}
+                          text={user.status}
+                        />
+                      </div>
+
+                      {/* Phone */}
+                      {user.phone && (
+                        <div style={{ marginBottom: 12, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <UserOutlined style={{ color: '#8c8c8c' }} />
+                          <Text>{user.phone}</Text>
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <Button
+                          icon={<EditOutlined />}
+                          onClick={() => handleEditUser(user)}
+                          block={user.role !== 'PATIENT'}
+                          style={{ flex: user.role === 'PATIENT' ? 1 : 'auto' }}
+                        >
+                          Sửa
+                        </Button>
+                        {user.role === 'PATIENT' && (
+                          <>
+                            <Button
+                              onClick={() => handlePromoteToDoctor(user.id)}
+                              style={{ flex: 1 }}
+                            >
+                              Phong BS
+                            </Button>
+                            <Button
+                              onClick={() => handlePromoteToConsultant(user.id)}
+                              style={{ flex: 1 }}
+                            >
+                              Phong TV
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </Card>
           </div>
         );
@@ -740,25 +902,100 @@ function AdminDashboard({ user, onLogout }) {
                   placeholder="Tìm kiếm bác sĩ..."
                   prefix={<SearchOutlined style={{ color: '#999' }} />}
                   className="admin-search-input"
+                  value={doctorSearchText}
+                  onChange={(e) => setDoctorSearchText(e.target.value)}
+                  allowClear
                 />
-                <Button type="primary" icon={<PlusOutlined />} className="admin-btn-primary">
+                <Button 
+                  type="primary" 
+                  icon={<PlusOutlined />} 
+                  className="admin-btn-primary"
+                  onClick={() => message.info('Chức năng thêm bác sĩ đang được phát triển')}
+                >
                   Thêm bác sĩ
                 </Button>
               </div>
             </div>
             <Card className="admin-card" style={{ borderRadius: 24 }}>
-              <Table
-                dataSource={doctorTableData}
-                columns={doctorColumns}
-                pagination={{
-                  pageSize: 10,
-                  showSizeChanger: true,
-                  showTotal: (total) => `Tổng ${total} bác sĩ`
-                }}
-                rowKey="key"
-                className="admin-table"
-                scroll={{ x: 1030 }}
-              />
+              {!isMobile ? (
+                <Table
+                  dataSource={doctorTableData}
+                  columns={doctorColumns}
+                  pagination={{
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showTotal: (total) => `Tổng ${total} bác sĩ`
+                  }}
+                  rowKey="key"
+                  className="admin-table"
+                  scroll={{ x: 1030 }}
+                />
+              ) : (
+                <div>
+                  {doctorTableData.map((doctor) => (
+                    <div
+                      key={doctor.key}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* Doctor Info */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                        <Avatar
+                          size={48}
+                          style={{ backgroundColor: '#2f54eb' }}
+                        >
+                          {doctor.name.split(' ').map(n => n.charAt(0)).join('').slice(0, 2)}
+                        </Avatar>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>
+                            {doctor.name}
+                          </div>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            {doctor.email}
+                          </Text>
+                        </div>
+                      </div>
+
+                      {/* Specialization and Experience */}
+                      <div style={{ marginBottom: 12 }}>
+                        <Tag color="blue" style={{ marginBottom: 8 }}>
+                          {doctor.specialization}
+                        </Tag>
+                        <div style={{ fontSize: 13, color: '#595959' }}>
+                          Kinh nghiệm: {doctor.experienceYears} năm
+                        </div>
+                      </div>
+
+                      {/* Fee and Rating */}
+                      <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
+                        <div>
+                          <Text type="secondary" style={{ fontSize: 12 }}>Phí khám</Text>
+                          <div style={{ fontSize: 16, fontWeight: 600, color: '#667eea' }}>
+                            {doctor.consultationFee?.toLocaleString()} VNĐ
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <Text type="secondary" style={{ fontSize: 12 }}>Đánh giá</Text>
+                          <div style={{ fontSize: 16, fontWeight: 600, color: '#faad14' }}>
+                            ⭐ {doctor.ratingScore?.toFixed(1) || '0.0'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Status */}
+                      <Badge
+                        status={doctor.status === 'Hoạt động' ? 'success' : 'error'}
+                        text={doctor.status}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </Card>
           </div>
         );
@@ -775,25 +1012,101 @@ function AdminDashboard({ user, onLogout }) {
                   placeholder="Tìm kiếm lịch hẹn..."
                   prefix={<SearchOutlined style={{ color: '#999' }} />}
                   className="admin-search-input"
+                  value={appointmentSearchText}
+                  onChange={(e) => setAppointmentSearchText(e.target.value)}
+                  allowClear
                 />
-                <Button icon={<FilterOutlined />} className="admin-btn-secondary">
+                <Button 
+                  icon={<FilterOutlined />} 
+                  className="admin-btn-secondary"
+                  onClick={() => message.info('Chức năng lọc đang được phát triển')}
+                >
                   Lọc
                 </Button>
               </div>
             </div>
             <Card className="admin-card" style={{ borderRadius: 24 }}>
-              <Table
-                dataSource={appointmentTableData}
-                columns={appointmentColumns}
-                pagination={{
-                  pageSize: 10,
-                  showSizeChanger: true,
-                  showTotal: (total) => `Tổng ${total} lịch hẹn`
-                }}
-                rowKey="key"
-                className="admin-table"
-                scroll={{ x: 920 }}
-              />
+              {!isMobile ? (
+                <Table
+                  dataSource={appointmentTableData}
+                  columns={appointmentColumns}
+                  pagination={{
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showTotal: (total) => `Tổng ${total} lịch hẹn`
+                  }}
+                  rowKey="key"
+                  className="admin-table"
+                  scroll={{ x: 920 }}
+                />
+              ) : (
+                <div>
+                  {appointmentTableData.map((apt) => (
+                    <div
+                      key={apt.key}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* Status Tag */}
+                      <div style={{ marginBottom: 12 }}>
+                        <Tag color={
+                          apt.status === 'Đã xác nhận' ? 'success' :
+                          apt.status === 'Chờ xác nhận' ? 'warning' :
+                          apt.status === 'Đã hủy' ? 'error' : 'default'
+                        }>
+                          {apt.status}
+                        </Tag>
+                      </div>
+
+                      {/* Patient Info */}
+                      <div style={{ marginBottom: 12 }}>
+                        <Text type="secondary" style={{ fontSize: 12 }}>Bệnh nhân</Text>
+                        <div style={{ fontSize: 14, fontWeight: 500 }}>
+                          {apt.patient}
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          {apt.patientPhone}
+                        </Text>
+                      </div>
+
+                      {/* Doctor Info */}
+                      <div style={{ marginBottom: 12 }}>
+                        <Text type="secondary" style={{ fontSize: 12 }}>Bác sĩ</Text>
+                        <div style={{ fontSize: 14, fontWeight: 500 }}>
+                          {apt.doctor}
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          {apt.specialization}
+                        </Text>
+                      </div>
+
+                      {/* Date and Time */}
+                      <div style={{ marginBottom: 12, fontSize: 13, display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <CalendarOutlined style={{ color: '#1890ff' }} />
+                          <Text>{apt.date}</Text>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <ClockCircleOutlined style={{ color: '#52c41a' }} />
+                          <Text>{apt.time}</Text>
+                        </div>
+                      </div>
+
+                      {/* Fee */}
+                      {apt.fee && (
+                        <div style={{ fontSize: 16, fontWeight: 600, color: '#667eea' }}>
+                          {apt.fee.toLocaleString()} VNĐ
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </Card>
           </div>
         );
@@ -810,144 +1123,283 @@ function AdminDashboard({ user, onLogout }) {
                   placeholder="Tìm kiếm email..."
                   prefix={<SearchOutlined style={{ color: '#999' }} />}
                   className="admin-search-input"
+                  value={newsletterSearchText}
+                  onChange={(e) => setNewsletterSearchText(e.target.value)}
+                  allowClear
                 />
               </div>
             </div>
             <Card className="admin-card" style={{ borderRadius: 24 }}>
-              <Table
-                dataSource={newsletterSubscribers.map((sub, index) => ({
-                  key: index,
-                  id: sub.id,
-                  email: sub.email,
-                  name: sub.name || '-',
-                  phone: sub.phone || '-',
-                  isVerified: sub.isVerified,
-                  isActive: sub.isActive,
-                  createdAt: sub.createdAt ? new Date(sub.createdAt).toLocaleString('vi-VN') : '-',
-                  verifiedAt: sub.verifiedAt ? new Date(sub.verifiedAt).toLocaleString('vi-VN') : '-'
-                }))}
-                columns={[
-                  {
-                    title: 'Email',
-                    dataIndex: 'email',
-                    key: 'email',
-                    width: 220,
-                    render: (text) => <Text strong>{text}</Text>
-                  },
-                  {
-                    title: 'Tên',
-                    dataIndex: 'name',
-                    key: 'name',
-                    width: 150
-                  },
-                  {
-                    title: 'Số điện thoại',
-                    dataIndex: 'phone',
-                    key: 'phone',
-                    width: 130
-                  },
-                  {
-                    title: 'Xác nhận',
-                    dataIndex: 'isVerified',
-                    key: 'isVerified',
-                    width: 100,
-                    render: (verified) => (
-                      <Tag color={verified ? 'success' : 'warning'}>
-                        {verified ? 'Đã xác nhận' : 'Chưa xác nhận'}
-                      </Tag>
-                    )
-                  },
-                  {
-                    title: 'Trạng thái',
-                    dataIndex: 'isActive',
-                    key: 'isActive',
-                    width: 100,
-                    render: (active, record) => (
-                      <Button
-                        type="text"
-                        size="small"
-                        onClick={async () => {
-                          try {
-                            await fetch(`${API_BASE_URL}/newsletter/subscribers/${record.id}/toggle`, {
-                              method: 'PUT',
-                              headers: {
-                                'Authorization': `Bearer ${localStorage.getItem('token')}`
-                              }
-                            });
-                            message.success('Đã cập nhật trạng thái!');
-                            fetchDashboardData();
-                          } catch (error) {
-                            message.error('Có lỗi xảy ra!');
-                          }
-                        }}
-                      >
+              {!isMobile ? (
+                <Table
+                  dataSource={newsletterSubscribers
+                    .filter(sub => {
+                      if (!newsletterSearchText) return true;
+                      const searchLower = newsletterSearchText.toLowerCase();
+                      return (sub.email || '').toLowerCase().includes(searchLower) ||
+                             (sub.name || '').toLowerCase().includes(searchLower) ||
+                             (sub.phone || '').includes(searchLower);
+                    })
+                    .map((sub, index) => ({
+                      key: index,
+                      id: sub.id,
+                      email: sub.email,
+                      name: sub.name || '-',
+                      phone: sub.phone || '-',
+                      isVerified: sub.isVerified,
+                      isActive: sub.isActive,
+                      createdAt: sub.createdAt ? new Date(sub.createdAt).toLocaleString('vi-VN') : '-',
+                      verifiedAt: sub.verifiedAt ? new Date(sub.verifiedAt).toLocaleString('vi-VN') : '-'
+                    }))}
+                  columns={[
+                    {
+                      title: 'Email',
+                      dataIndex: 'email',
+                      key: 'email',
+                      width: 220,
+                      render: (text) => <Text strong>{text}</Text>
+                    },
+                    {
+                      title: 'Tên',
+                      dataIndex: 'name',
+                      key: 'name',
+                      width: 150
+                    },
+                    {
+                      title: 'Số điện thoại',
+                      dataIndex: 'phone',
+                      key: 'phone',
+                      width: 130
+                    },
+                    {
+                      title: 'Xác nhận',
+                      dataIndex: 'isVerified',
+                      key: 'isVerified',
+                      width: 100,
+                      render: (verified) => (
+                        <Tag color={verified ? 'success' : 'warning'}>
+                          {verified ? 'Đã xác nhận' : 'Chưa xác nhận'}
+                        </Tag>
+                      )
+                    },
+                    {
+                      title: 'Trạng thái',
+                      dataIndex: 'isActive',
+                      key: 'isActive',
+                      width: 120,
+                      render: (active) => (
                         <Tag color={active ? 'success' : 'default'}>
                           {active ? 'Hoạt động' : 'Tạm dừng'}
                         </Tag>
-                      </Button>
-                    )
-                  },
-                  {
-                    title: 'Ngày đăng ký',
-                    dataIndex: 'createdAt',
-                    key: 'createdAt',
-                    width: 160
-                  },
-                  {
-                    title: 'Ngày xác nhận',
-                    dataIndex: 'verifiedAt',
-                    key: 'verifiedAt',
-                    width: 160
-                  },
-                  {
-                    title: 'Thao tác',
-                    key: 'action',
-                    width: 100,
-                    fixed: 'right',
-                    render: (_, record) => (
-                      <Button
-                        type="text"
-                        danger
-                        icon={<DeleteOutlined />}
-                        size="small"
-                        onClick={async () => {
-                          Modal.confirm({
-                            title: 'Xác nhận xóa',
-                            content: `Bạn có chắc muốn xóa thành viên ${record.email}?`,
-                            okText: 'Xóa',
-                            cancelText: 'Hủy',
-                            okButtonProps: { danger: true },
-                            onOk: async () => {
-                              try {
-                                await fetch(`${API_BASE_URL}/newsletter/subscribers/${record.id}`, {
-                                  method: 'DELETE',
-                                  headers: {
-                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                      )
+                    },
+                    {
+                      title: 'Ngày đăng ký',
+                      dataIndex: 'createdAt',
+                      key: 'createdAt',
+                      width: 160
+                    },
+                    {
+                      title: 'Ngày xác nhận',
+                      dataIndex: 'verifiedAt',
+                      key: 'verifiedAt',
+                      width: 160
+                    },
+                    {
+                      title: 'Thao tác',
+                      key: 'action',
+                      width: 140,
+                      fixed: 'right',
+                      render: (_, record) => (
+                        <Dropdown
+                          menu={{
+                            items: [
+                              {
+                                key: 'toggle',
+                                label: record.isActive ? 'Tạm dừng' : 'Kích hoạt',
+                                icon: record.isActive ? <StopOutlined /> : <CheckCircleOutlined />,
+                                onClick: async () => {
+                                  try {
+                                    await fetch(`${API_BASE_URL}/newsletter/subscribers/${record.id}/toggle`, {
+                                      method: 'PUT',
+                                      headers: {
+                                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                      }
+                                    });
+                                    message.success('Đã cập nhật trạng thái!');
+                                    fetchDashboardData();
+                                  } catch (error) {
+                                    message.error('Có lỗi xảy ra!');
+                                  }
+                                }
+                              },
+                              {
+                                key: 'delete',
+                                label: 'Xóa',
+                                icon: <DeleteOutlined />,
+                                danger: true,
+                                onClick: () => {
+                                  Modal.confirm({
+                                    title: 'Xác nhận xóa',
+                                    content: `Bạn có chắc muốn xóa thành viên ${record.email}?`,
+                                    okText: 'Xóa',
+                                    cancelText: 'Hủy',
+                                    okButtonProps: { danger: true },
+                                    onOk: async () => {
+                                      try {
+                                        await fetch(`${API_BASE_URL}/newsletter/subscribers/${record.id}`, {
+                                          method: 'DELETE',
+                                          headers: {
+                                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                          }
+                                        });
+                                        message.success('Đã xóa thành viên!');
+                                        fetchDashboardData();
+                                      } catch (error) {
+                                        message.error('Có lỗi xảy ra!');
+                                      }
+                                    }
+                                  });
+                                }
+                              }
+                            ]
+                          }}
+                          trigger={['click']}
+                        >
+                          <Button>
+                            Chọn thao tác <DownOutlined />
+                          </Button>
+                        </Dropdown>
+                      )
+                    }
+                  ]}
+                  pagination={{
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showTotal: (total) => `Tổng ${total} thành viên`
+                  }}
+                  rowKey="key"
+                  className="admin-table"
+                  scroll={{ x: 1200 }}
+                />
+              ) : (
+                <div>
+                  {newsletterSubscribers
+                    .filter(sub => {
+                      if (!newsletterSearchText) return true;
+                      const searchLower = newsletterSearchText.toLowerCase();
+                      return (sub.email || '').toLowerCase().includes(searchLower) ||
+                             (sub.name || '').toLowerCase().includes(searchLower) ||
+                             (sub.phone || '').includes(searchLower);
+                    })
+                    .map((sub, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* Status Tags */}
+                      <div style={{ marginBottom: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <Tag color={sub.isVerified ? 'success' : 'warning'}>
+                          {sub.isVerified ? 'Đã xác nhận' : 'Chưa xác nhận'}
+                        </Tag>
+                        <Tag color={sub.isActive ? 'success' : 'default'}>
+                          {sub.isActive ? 'Hoạt động' : 'Tạm dừng'}
+                        </Tag>
+                      </div>
+
+                      {/* Email */}
+                      <div style={{ marginBottom: 12 }}>
+                        <Text strong style={{ fontSize: 14 }}>
+                          {sub.email}
+                        </Text>
+                      </div>
+
+                      {/* Name and Phone */}
+                      {(sub.name || sub.phone) && (
+                        <div style={{ marginBottom: 12, fontSize: 13, color: '#595959' }}>
+                          {sub.name && <div>👤 {sub.name}</div>}
+                          {sub.phone && <div>📱 {sub.phone}</div>}
+                        </div>
+                      )}
+
+                      {/* Dates */}
+                      <div style={{ marginBottom: 12, fontSize: 12, color: '#8c8c8c' }}>
+                        <div>Đăng ký: {sub.createdAt ? new Date(sub.createdAt).toLocaleString('vi-VN') : '-'}</div>
+                        {sub.verifiedAt && (
+                          <div>Xác nhận: {new Date(sub.verifiedAt).toLocaleString('vi-VN')}</div>
+                        )}
+                      </div>
+
+                      {/* Action Buttons */}
+                      <Dropdown
+                        menu={{
+                          items: [
+                            {
+                              key: 'toggle',
+                              label: sub.isActive ? 'Tạm dừng' : 'Kích hoạt',
+                              icon: sub.isActive ? <StopOutlined /> : <CheckCircleOutlined />,
+                              onClick: async () => {
+                                try {
+                                  await fetch(`${API_BASE_URL}/newsletter/subscribers/${sub.id}/toggle`, {
+                                    method: 'PUT',
+                                    headers: {
+                                      'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                    }
+                                  });
+                                  message.success('Đã cập nhật trạng thái!');
+                                  fetchDashboardData();
+                                } catch (error) {
+                                  message.error('Có lỗi xảy ra!');
+                                }
+                              }
+                            },
+                            {
+                              key: 'delete',
+                              label: 'Xóa',
+                              icon: <DeleteOutlined />,
+                              danger: true,
+                              onClick: () => {
+                                Modal.confirm({
+                                  title: 'Xác nhận xóa',
+                                  content: `Bạn có chắc muốn xóa thành viên ${sub.email}?`,
+                                  okText: 'Xóa',
+                                  cancelText: 'Hủy',
+                                  okButtonProps: { danger: true },
+                                  onOk: async () => {
+                                    try {
+                                      await fetch(`${API_BASE_URL}/newsletter/subscribers/${sub.id}`, {
+                                        method: 'DELETE',
+                                        headers: {
+                                          'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                        }
+                                      });
+                                      message.success('Đã xóa thành viên!');
+                                      fetchDashboardData();
+                                    } catch (error) {
+                                      message.error('Có lỗi xảy ra!');
+                                    }
                                   }
                                 });
-                                message.success('Đã xóa thành viên!');
-                                fetchDashboardData();
-                              } catch (error) {
-                                message.error('Có lỗi xảy ra!');
                               }
                             }
-                          });
+                          ]
                         }}
+                        trigger={['click']}
                       >
-                        Xóa
-                      </Button>
-                    )
-                  }
-                ]}
-                pagination={{
-                  pageSize: 10,
-                  showSizeChanger: true,
-                  showTotal: (total) => `Tổng ${total} thành viên`
-                }}
-                rowKey="key"
-                className="admin-table"
-                scroll={{ x: 1200 }}
-              />
+                        <Button block>
+                          Chọn thao tác <DownOutlined />
+                        </Button>
+                      </Dropdown>
+                    </div>
+                  ))}
+                </div>
+              )}
             </Card>
           </div>
         );
@@ -959,20 +1411,23 @@ function AdminDashboard({ user, onLogout }) {
                 <ShoppingCartOutlined />
                 <Title level={3}>Quản lý đơn hàng</Title>
               </div>
-              <div className="admin-section-actions">
-                <Input
-                  placeholder="Tìm kiếm đơn hàng..."
-                  prefix={<SearchOutlined style={{ color: '#999' }} />}
-                  className="admin-search-input"
-                />
-                <Button icon={<FilterOutlined />} className="admin-btn-secondary">
-                  Lọc
-                </Button>
-              </div>
+              {!isMobile && (
+                <div className="admin-section-actions">
+                  <Input
+                    placeholder="Tìm kiếm đơn hàng..."
+                    prefix={<SearchOutlined style={{ color: '#999' }} />}
+                    className="admin-search-input"
+                  />
+                  <Button icon={<FilterOutlined />} className="admin-btn-secondary">
+                    Lọc
+                  </Button>
+                </div>
+              )}
             </div>
-            <Card className="admin-card" style={{ borderRadius: 24 }}>
-              <Table
-                dataSource={orders.map((order, index) => ({
+            <Card className="admin-card" style={isMobile ? { scrollMarginTop: 80 } : { borderRadius: 24 }} styles={{ body: isMobile ? { paddingTop: 16 } : {} }}>
+              {!isMobile ? (
+                <Table
+                  dataSource={orders.map((order, index) => ({
                   key: index,
                   id: order.id,
                   orderNumber: order.orderNumber,
@@ -1063,7 +1518,7 @@ function AdminDashboard({ user, onLogout }) {
                             borderRadius: 20,
                             padding: '4px 12px',
                             border: 'none',
-                            background: `${config.color}15`,
+                            backgroundColor: `${config.color}15`,
                             color: config.color,
                             fontWeight: 500,
                             display: 'inline-flex',
@@ -1288,7 +1743,231 @@ function AdminDashboard({ user, onLogout }) {
                 rowKey="key"
                 className="admin-table"
                 scroll={{ x: 1400 }}
+                virtual={false}
               />
+              ) : (
+                <div className="admin-mobile-list">
+                  {orders.map((order, index) => {
+                    const statusConfig = {
+                      PENDING: { color: '#faad14', text: 'Chờ xử lý', icon: <ClockCircleOutlined /> },
+                      CONFIRMED: { color: '#13c2c2', text: 'Đã xác nhận', icon: <CheckCircleOutlined /> },
+                      PROCESSING: { color: '#1890ff', text: 'Đang xử lý', icon: <ClockCircleOutlined /> },
+                      COMPLETED: { color: '#52c41a', text: 'Hoàn thành', icon: <CheckCircleOutlined /> },
+                      CANCELLED: { color: '#ff4d4f', text: 'Đã hủy', icon: <CloseCircleOutlined /> }
+                    };
+                    const config = statusConfig[order.status] || statusConfig.PENDING;
+                    
+                    return (
+                      <div key={index} className="admin-mobile-card">
+                        <div style={{ marginBottom: 12 }}>
+                          <Tag
+                            style={{
+                              borderRadius: 20,
+                              padding: '4px 12px',
+                              border: 'none',
+                              backgroundColor: `${config.color}15`,
+                              color: config.color,
+                              fontWeight: 500,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 6
+                            }}
+                          >
+                            {config.icon}
+                            {config.text}
+                          </Tag>
+                        </div>
+                        <div style={{ marginBottom: 8 }}>
+                          <Text strong style={{ color: '#667eea', fontSize: 16 }}>{order.orderNumber}</Text>
+                        </div>
+                        <div style={{ marginBottom: 8 }}>
+                          <Text strong style={{ display: 'block', fontSize: 14 }}>{order.customerName}</Text>
+                          <Text type="secondary" style={{ fontSize: 13 }}>{order.customerPhone}</Text>
+                        </div>
+                        <div style={{ marginBottom: 8 }}>
+                          <Tag color="blue">{order.items?.length || 0} dịch vụ</Tag>
+                          <Tag color={order.paymentMethod === 'COD' ? 'orange' : 'green'}>
+                            {order.paymentMethod === 'COD' ? 'Tiền mặt' : 'Chuyển khoản'}
+                          </Tag>
+                          <Tag color={order.paymentStatus === 'PAID' ? 'success' : 'warning'}>
+                            {order.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                          </Tag>
+                        </div>
+                        <div style={{ marginBottom: 12 }}>
+                          <Text strong style={{ color: '#667eea', fontSize: 15 }}>
+                            {order.finalAmount?.toLocaleString()} VNĐ
+                          </Text>
+                        </div>
+                        <div style={{ marginBottom: 12 }}>
+                          <Text type="secondary" style={{ fontSize: 13 }}>
+                            {order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN') : '-'}
+                          </Text>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <Button
+                            block
+                            icon={<SearchOutlined />}
+                            onClick={() => {
+                              Modal.info({
+                                title: 'Chi tiết đơn hàng',
+                                width: '90%',
+                                content: (
+                                  <div style={{ marginTop: 20 }}>
+                                    <div style={{ 
+                                      background: '#f5f5f5', 
+                                      padding: '16px', 
+                                      borderRadius: '8px',
+                                      marginBottom: '16px'
+                                    }}>
+                                      <Text strong style={{ fontSize: 16, color: '#667eea' }}>
+                                        {order.orderNumber}
+                                      </Text>
+                                    </div>
+                                    
+                                    <div style={{ marginBottom: 16 }}>
+                                      <Text strong>Thông tin khách hàng:</Text>
+                                      <div style={{ marginTop: 8, paddingLeft: 16 }}>
+                                        <p style={{ margin: '4px 0' }}>• Họ tên: {order.customerName}</p>
+                                        <p style={{ margin: '4px 0' }}>• Email: {order.customerEmail}</p>
+                                        <p style={{ margin: '4px 0' }}>• Số điện thoại: {order.customerPhone}</p>
+                                      </div>
+                                    </div>
+
+                                    <div style={{ marginBottom: 16 }}>
+                                      <Text strong>Thông tin đơn hàng:</Text>
+                                      <div style={{ marginTop: 8, paddingLeft: 16 }}>
+                                        <p style={{ margin: '4px 0' }}>• Số dịch vụ: {order.items?.length || 0}</p>
+                                        <p style={{ margin: '4px 0' }}>• Tổng tiền: {order.finalAmount?.toLocaleString()} VNĐ</p>
+                                        <p style={{ margin: '4px 0' }}>• Phương thức: {order.paymentMethod === 'COD' ? 'Tiền mặt' : 'Chuyển khoản'}</p>
+                                        <p style={{ margin: '4px 0' }}>• Thanh toán: {order.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}</p>
+                                        <p style={{ margin: '4px 0' }}>• Trạng thái: {config.text}</p>
+                                        <p style={{ margin: '4px 0' }}>• Ngày đặt: {order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN') : '-'}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )
+                              });
+                            }}
+                          >
+                            Xem chi tiết
+                          </Button>
+                          {order.status === 'PENDING' && (
+                            <Button
+                              block
+                              type="primary"
+                              icon={<CheckCircleOutlined />}
+                              onClick={() => {
+                                Modal.confirm({
+                                  title: 'Xác nhận đơn hàng',
+                                  width: '90%',
+                                  content: (
+                                    <div style={{ marginTop: 20 }}>
+                                      <div style={{ 
+                                        background: '#f0f9ff', 
+                                        padding: '16px', 
+                                        borderRadius: '8px',
+                                        marginBottom: '16px',
+                                        border: '1px solid #bae7ff'
+                                      }}>
+                                        <Text strong style={{ fontSize: 16, color: '#1890ff' }}>
+                                          {order.orderNumber}
+                                        </Text>
+                                      </div>
+                                      <p><strong>Khách hàng:</strong> {order.customerName}</p>
+                                      <p><strong>Số điện thoại:</strong> {order.customerPhone}</p>
+                                      <p><strong>Tổng tiền:</strong> {order.finalAmount?.toLocaleString()} VNĐ</p>
+                                      <p style={{ marginTop: 16, color: '#52c41a' }}>
+                                        <CheckCircleOutlined /> Bạn có chắc chắn muốn xác nhận đơn hàng này?
+                                      </p>
+                                    </div>
+                                  ),
+                                  okText: 'Xác nhận',
+                                  cancelText: 'Hủy',
+                                  okButtonProps: { type: 'primary' },
+                                  onOk: async () => {
+                                    try {
+                                      await fetch(`${API_BASE_URL}/orders/${order.id}/status`, {
+                                        method: 'PUT',
+                                        headers: {
+                                          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                          'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({ status: 'CONFIRMED' })
+                                      });
+                                      message.success('Đã xác nhận đơn hàng thành công!');
+                                      fetchDashboardData();
+                                    } catch (error) {
+                                      message.error('Có lỗi xảy ra khi xác nhận đơn hàng!');
+                                    }
+                                  }
+                                });
+                              }}
+                            >
+                              Xác nhận
+                            </Button>
+                          )}
+                          {order.status !== 'CANCELLED' && order.status !== 'COMPLETED' && (
+                            <Button
+                              block
+                              danger
+                              icon={<CloseCircleOutlined />}
+                              onClick={() => {
+                                Modal.confirm({
+                                  title: 'Hủy đơn hàng',
+                                  width: '90%',
+                                  content: (
+                                    <div style={{ marginTop: 20 }}>
+                                      <div style={{ 
+                                        background: '#fff2e8', 
+                                        padding: '16px', 
+                                        borderRadius: '8px',
+                                        marginBottom: '16px',
+                                        border: '1px solid #ffbb96'
+                                      }}>
+                                        <Text strong style={{ fontSize: 16, color: '#ff4d4f' }}>
+                                          {order.orderNumber}
+                                        </Text>
+                                      </div>
+                                      <p><strong>Khách hàng:</strong> {order.customerName}</p>
+                                      <p><strong>Số điện thoại:</strong> {order.customerPhone}</p>
+                                      <p><strong>Tổng tiền:</strong> {order.finalAmount?.toLocaleString()} VNĐ</p>
+                                      <p><strong>Trạng thái hiện tại:</strong> {config.text}</p>
+                                      <p style={{ marginTop: 16, color: '#ff4d4f' }}>
+                                        <CloseCircleOutlined /> Bạn có chắc chắn muốn hủy đơn hàng này?
+                                      </p>
+                                    </div>
+                                  ),
+                                  okText: 'Hủy đơn hàng',
+                                  cancelText: 'Không',
+                                  okButtonProps: { danger: true },
+                                  onOk: async () => {
+                                    try {
+                                      await fetch(`${API_BASE_URL}/orders/${order.id}/status`, {
+                                        method: 'PUT',
+                                        headers: {
+                                          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                          'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({ status: 'CANCELLED' })
+                                      });
+                                      message.success('Đã hủy đơn hàng thành công!');
+                                      fetchDashboardData();
+                                    } catch (error) {
+                                      message.error('Có lỗi xảy ra khi hủy đơn hàng!');
+                                    }
+                                  }
+                                });
+                              }}
+                            >
+                              Hủy đơn
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </Card>
           </div>
         );
@@ -1448,47 +2127,143 @@ function AdminDashboard({ user, onLogout }) {
               <Col xs={24}>
                 <Card
                   className="admin-card admin-card--recent"
-                  style={{ borderRadius: 24 }}
+                  style={isMobile ? { scrollMarginTop: 80 } : { borderRadius: 24 }}
+                  styles={{ body: isMobile ? { paddingTop: 16 } : {} }}
                   title={
                     <div className="admin-card-header">
                       <TeamOutlined />
                       <Text strong style={{ fontSize: 16 }}>Người dùng gần đây</Text>
                     </div>
                   }
-                  extra={<Button type="link" onClick={() => { setSelectedKey('users'); localStorage.setItem('adminActiveTab', 'users'); }}>Xem tất cả</Button>}
+                  extra={!isMobile && <Button type="link" onClick={() => { setSelectedKey('users'); localStorage.setItem('adminActiveTab', 'users'); }}>Xem tất cả</Button>}
                 >
-                  <Table
-                    dataSource={userTableData.slice(0, 5)}
-                    columns={userColumns}
-                    pagination={false}
-                    size="middle"
-                    rowKey="key"
-                    className="admin-table admin-table--compact"
-                    scroll={{ x: 900 }}
-                  />
+                  {!isMobile ? (
+                    <Table
+                      dataSource={userTableData.slice(0, 5)}
+                      columns={userColumns}
+                      pagination={false}
+                      size="middle"
+                      rowKey="key"
+                      className="admin-table admin-table--compact"
+                      scroll={{ x: 900 }}
+                      virtual={false}
+                    />
+                  ) : (
+                    <div className="admin-mobile-list">
+                      {userTableData.slice(0, 5).map((user) => (
+                        <div key={user.key} className="admin-mobile-card">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                            <Avatar size={48} style={{ backgroundColor: '#667eea' }}>
+                              {user.name?.split(' ').map(n => n.charAt(0)).join('').slice(0, 2)}
+                            </Avatar>
+                            <div style={{ flex: 1 }}>
+                              <Text strong style={{ display: 'block', fontSize: 14 }}>{user.name}</Text>
+                              <Text type="secondary" style={{ fontSize: 13 }}>{user.email}</Text>
+                            </div>
+                          </div>
+                          <div style={{ marginBottom: 8 }}>
+                            <Tag color={user.role === 'ADMIN' ? 'red' : user.role === 'DOCTOR' ? 'blue' : 'default'}>
+                              {user.role === 'ADMIN' ? 'Quản trị viên' : user.role === 'DOCTOR' ? 'Bác sĩ' : 'Bệnh nhân'}
+                            </Tag>
+                            <Tag color={user.status === 'ACTIVE' ? 'success' : 'default'}>
+                              {user.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
+                            </Tag>
+                          </div>
+                          <div>
+                            <Text type="secondary" style={{ fontSize: 13 }}>{user.phone}</Text>
+                          </div>
+                        </div>
+                      ))}
+                      <Button
+                        block
+                        type="primary"
+                        onClick={() => { setSelectedKey('users'); localStorage.setItem('adminActiveTab', 'users'); }}
+                        style={{ marginTop: 12 }}
+                      >
+                        Xem tất cả
+                      </Button>
+                    </div>
+                  )}
                 </Card>
               </Col>
               <Col xs={24}>
                 <Card
                   className="admin-card admin-card--recent"
-                  style={{ borderRadius: 24 }}
+                  style={isMobile ? { scrollMarginTop: 80 } : { borderRadius: 24 }}
+                  styles={{ body: isMobile ? { paddingTop: 16 } : {} }}
                   title={
                     <div className="admin-card-header">
                       <CalendarOutlined />
                       <Text strong style={{ fontSize: 16 }}>Lịch hẹn gần đây</Text>
                     </div>
                   }
-                  extra={<Button type="link" onClick={() => { setSelectedKey('appointments'); localStorage.setItem('adminActiveTab', 'appointments'); }}>Xem tất cả</Button>}
+                  extra={!isMobile && <Button type="link" onClick={() => { setSelectedKey('appointments'); localStorage.setItem('adminActiveTab', 'appointments'); }}>Xem tất cả</Button>}
                 >
-                  <Table
-                    dataSource={appointmentTableData.slice(0, 5)}
-                    columns={appointmentColumns}
-                    pagination={false}
-                    size="middle"
-                    rowKey="key"
-                    className="admin-table admin-table--compact"
-                    scroll={{ x: 800 }}
-                  />
+                  {!isMobile ? (
+                    <Table
+                      dataSource={appointmentTableData.slice(0, 5)}
+                      columns={appointmentColumns}
+                      pagination={false}
+                      size="middle"
+                      rowKey="key"
+                      className="admin-table admin-table--compact"
+                      scroll={{ x: 800 }}
+                      virtual={false}
+                    />
+                  ) : (
+                    <div className="admin-mobile-list">
+                      {appointmentTableData.slice(0, 5).map((apt) => {
+                        const statusConfig = {
+                          PENDING: { color: '#faad14', text: 'Chờ xác nhận' },
+                          CONFIRMED: { color: '#13c2c2', text: 'Đã xác nhận' },
+                          COMPLETED: { color: '#52c41a', text: 'Hoàn thành' },
+                          CANCELLED: { color: '#ff4d4f', text: 'Đã hủy' }
+                        };
+                        const config = statusConfig[apt.status] || statusConfig.PENDING;
+                        
+                        return (
+                          <div key={apt.key} className="admin-mobile-card">
+                            <div style={{ marginBottom: 12 }}>
+                              <Tag
+                                style={{
+                                  borderRadius: 20,
+                                  padding: '4px 12px',
+                                  border: 'none',
+                                  backgroundColor: `${config.color}15`,
+                                  color: config.color,
+                                  fontWeight: 500
+                                }}
+                              >
+                                {config.text}
+                              </Tag>
+                            </div>
+                            <div style={{ marginBottom: 8 }}>
+                              <Text strong style={{ display: 'block', fontSize: 14 }}>Bệnh nhân: {apt.patientName}</Text>
+                              <Text type="secondary" style={{ fontSize: 13 }}>Bác sĩ: {apt.doctorName}</Text>
+                            </div>
+                            <div style={{ marginBottom: 8 }}>
+                              <Text style={{ fontSize: 13 }}>
+                                <CalendarOutlined /> {apt.date} - {apt.time}
+                              </Text>
+                            </div>
+                            <div>
+                              <Text strong style={{ color: '#667eea', fontSize: 14 }}>
+                                {apt.fee?.toLocaleString()} VNĐ
+                              </Text>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <Button
+                        block
+                        type="primary"
+                        onClick={() => { setSelectedKey('appointments'); localStorage.setItem('adminActiveTab', 'appointments'); }}
+                        style={{ marginTop: 12 }}
+                      >
+                        Xem tất cả
+                      </Button>
+                    </div>
+                  )}
                 </Card>
               </Col>
             </div>
@@ -1586,7 +2361,7 @@ function AdminDashboard({ user, onLogout }) {
                   <div className="admin-activity-list">
                     {appointments.slice(0, 5).map((apt, index) => (
                       <div key={index} className="admin-activity-item">
-                        <div className="admin-activity-icon" style={{ background: `${getStatusColor(apt.status)}20` }}>
+                        <div className="admin-activity-icon" style={{ backgroundColor: `${getStatusColor(apt.status)}20` }}>
                           {getStatusIcon(apt.status)}
                         </div>
                         <div className="admin-activity-content">

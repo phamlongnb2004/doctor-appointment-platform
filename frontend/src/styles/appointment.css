@@ -250,4 +250,117 @@
   .doctor-info-card {
     padding: 20px;
   }
+  
+  /* Mobile: Hide table, show card layout */
+  .ant-table-wrapper {
+    overflow-x: auto;
+  }
+  
+  .ant-table {
+    min-width: 800px;
+  }
+  
+  /* Statistics cards - 2 columns on mobile */
+  .ant-row > .ant-col-xs-12 {
+    padding: 0 8px !important;
+  }
+  
+  .stat-card {
+    padding: 16px !important;
+  }
+  
+  .stat-card > div:first-child {
+    font-size: 28px !important;
+  }
+  
+  .stat-card > div:last-child {
+    font-size: 12px !important;
+  }
+  
+  /* Filter section - stack vertically */
+  .ant-card {
+    border-radius: 12px !important;
+  }
+  
+  /* Header section */
+  .ant-card > .ant-card-body > div:first-child {
+    padding: 24px 16px !important;
+  }
+  
+  .ant-card > .ant-card-body > div:first-child h2 {
+    font-size: 22px !important;
+  }
+  
+  /* Buttons in table - keep text visible on mobile */
+  .ant-space {
+    gap: 4px !important;
+  }
+  
+  .ant-space-item button {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+    height: auto !important;
+    min-width: auto !important;
+  }
+  
+  .ant-space-item button .anticon {
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  /* Even smaller screens */
+  .stat-card {
+    padding: 12px !important;
+  }
+  
+  .stat-card > div:first-child {
+    font-size: 24px !important;
+  }
+  
+  .stat-card > div:last-child {
+    font-size: 11px !important;
+  }
+  
+  /* Header */
+  .ant-card > .ant-card-body > div:first-child {
+    padding: 20px 12px !important;
+  }
+  
+  .ant-card > .ant-card-body > div:first-child h2 {
+    font-size: 20px !important;
+  }
+  
+  .ant-card > .ant-card-body > div:first-child > div:first-child {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .ant-card > .ant-card-body > div:first-child > div:first-child > div:first-child {
+    width: 48px !important;
+    height: 48px !important;
+  }
+  
+  .ant-card > .ant-card-body > div:first-child > div:first-child > div:first-child .anticon {
+    font-size: 24px !important;
+  }
+  
+  /* Modal on mobile */
+  .ant-modal {
+    max-width: calc(100vw - 32px) !important;
+    margin: 16px auto !important;
+  }
+  
+  .ant-modal-body {
+    padding: 16px !important;
+  }
+  
+  /* Table pagination */
+  .ant-pagination {
+    text-align: center !important;
+  }
+  
+  .ant-pagination-options {
+    display: none !important;
+  }
 }

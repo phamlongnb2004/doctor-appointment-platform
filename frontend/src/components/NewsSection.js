@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from 'antd';
 import { ClockCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import '../styles/news-list.css';
 
 const NewsSection = ({ 
   title = 'TIN TỨC NỔI BẬT',
@@ -60,12 +61,7 @@ const NewsSection = ({
           </div>
 
           {/* Grid Layout: 4 Columns */}
-          <div style={{ 
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: 24,
-            marginBottom: showMoreButton ? 32 : 0
-          }}>
+          <div className="news-section-grid" style={{ marginBottom: showMoreButton ? 32 : 0 }}>
             {articles.slice(0, 4).map((article) => (
               <div 
                 key={article.id}
@@ -238,11 +234,7 @@ const NewsSection = ({
         </div>
 
         {/* News Layout: 1 Large + 4 Small */}
-        <div style={{ 
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 24
-        }}>
+        <div className="news-section-default">
           {/* Featured Article - Left Side */}
           <div 
             onClick={() => handleArticleClick(featuredArticle.slug)}
@@ -340,11 +332,7 @@ const NewsSection = ({
           </div>
 
           {/* Small Articles - Right Side */}
-          <div style={{ 
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 20
-          }}>
+          <div className="news-section-small-articles">
             {smallArticles.map((article, index) => (
               <div 
                 key={article.id || index}

@@ -2,12 +2,14 @@
 .chat-layout {
   height: calc(100vh - 120px);
   background: #f5f5f5;
+  display: flex !important;
 }
 
 .chat-sidebar {
   background: white;
   border-right: 1px solid #e8e8e8;
   height: 100%;
+  display: block !important;
 }
 
 .chat-content {
@@ -258,30 +260,266 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  /* Mobile: Completely different UI */
+  
+  /* Mobile Chat Container - List View */
+  .mobile-chat-container {
+    min-height: calc(100vh - 64px);
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .mobile-chat-header {
+    background: white;
+    padding: 16px;
+    border-bottom: 1px solid #e8e8e8;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  
+  .mobile-chat-header h4 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+  }
+  
+  .mobile-new-chat-section {
+    background: white;
+    padding: 16px;
+    border-bottom: 1px solid #e8e8e8;
+  }
+  
+  .mobile-new-chat-btn {
+    height: 48px;
+    border-radius: 24px;
+    font-size: 16px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+  }
+  
+  .mobile-chat-search {
+    background: white;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e8e8e8;
+  }
+  
+  .mobile-chat-search .search-input {
+    border-radius: 20px;
+    height: 40px;
+  }
+  
+  .mobile-chat-list {
+    flex: 1;
+    overflow-y: auto;
+    background: white;
+  }
+  
+  .mobile-chat-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .mobile-chat-item:active {
+    background-color: #f5f5f5;
+  }
+  
+  .mobile-room-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 4px;
+  }
+  
+  .mobile-room-title .ant-typography {
+    font-size: 15px;
+  }
+  
+  .mobile-room-time {
+    font-size: 12px;
+    white-space: nowrap;
+    margin-left: 8px;
+  }
+  
+  .mobile-room-last-message {
+    font-size: 13px;
+    color: #8c8c8c;
+  }
+  
+  /* Mobile Chat Messages View */
+  .mobile-chat-messages {
+    min-height: calc(100vh - 64px);
+    background: #fafafa;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .mobile-messages-header {
+    background: white;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e8e8e8;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  
+  .mobile-back-button {
+    font-size: 24px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .mobile-chat-info {
+    flex: 1;
+  }
+  
+  .mobile-chat-info h5 {
+    margin: 0;
+    font-size: 16px;
+  }
+  
+  .mobile-chat-info .ant-typography {
+    font-size: 13px;
+  }
+  
+  .mobile-messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: #fafafa;
+  }
+  
+  .mobile-input-container {
+    background: white;
+    padding: 12px 16px;
+    border-top: 1px solid #e8e8e8;
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+  }
+  
+  .mobile-message-input {
+    flex: 1;
+    border-radius: 20px;
+    resize: none;
+  }
+  
+  .mobile-message-input .ant-input {
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+  
+  .mobile-send-button {
+    border-radius: 20px;
+    height: 40px;
+    min-width: 70px;
+    color: #fff !important;
+  }
+  
+  /* Hide desktop layout on mobile */
   .chat-layout {
-    height: calc(100vh - 80px);
+    display: none !important;
   }
   
-  .chat-sidebar {
-    width: 100% !important;
-    max-width: 100% !important;
-    flex: none !important;
-  }
-  
-  .message-item {
+  /* Adjust message items for mobile */
+  .mobile-messages-container .message-item {
     max-width: 85%;
   }
   
-  .chat-input-container {
-    padding: 12px 16px;
+  .mobile-messages-container .message-bubble {
+    padding: 10px 14px;
+    font-size: 14px;
   }
   
-  .chat-messages-container {
-    padding: 12px 16px;
+  /* Empty state styling */
+  .mobile-chat-list .ant-empty {
+    padding: 40px 20px;
   }
   
-  .chat-messages-header {
-    padding: 12px 16px;
+  .mobile-chat-list .ant-empty-description {
+    font-size: 14px;
+    color: #8c8c8c;
+  }
+}
+
+@media (min-width: 769px) {
+  /* Desktop: Show 2-column layout */
+  .back-button {
+    display: none !important;
+  }
+  
+  .chat-sidebar {
+    display: block !important;
+  }
+  
+  .chat-content {
+    display: flex !important;
+  }
+  
+  /* Hide mobile-specific elements on desktop */
+  .mobile-chat-container,
+  .mobile-chat-messages {
+    display: none !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .mobile-chat-header h4 {
+    font-size: 16px;
+  }
+  
+  .mobile-messages-header h5 {
+    font-size: 15px;
+  }
+  
+  .mobile-new-chat-btn {
+    height: 44px;
+    font-size: 15px;
+  }
+  
+  .mobile-chat-item {
+    padding: 10px 12px;
+  }
+  
+  .mobile-room-title .ant-typography {
+    font-size: 14px;
+  }
+  
+  .mobile-room-last-message {
+    font-size: 12px;
+  }
+  
+  .mobile-messages-container .message-item {
+    max-width: 90%;
+  }
+  
+  .mobile-messages-container .message-bubble {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .mobile-input-container {
+    padding: 10px 12px;
+  }
+  
+  .mobile-message-input .ant-input {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+  
+  .mobile-send-button {
+    height: 36px;
+    min-width: 60px;
+    font-size: 13px;
   }
 }
 

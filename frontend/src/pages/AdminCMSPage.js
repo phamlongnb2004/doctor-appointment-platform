@@ -18,10 +18,12 @@ import {
   Layout,
   Menu,
   Avatar,
+  Spin,
   Divider,
   ConfigProvider,
   Drawer,
-  Typography
+  Typography,
+  Rate
 } from 'antd';
 import { 
   PlusOutlined, 
@@ -145,6 +147,66 @@ function AdminCMSPage() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Force remove Ant Design inline styles on mobile to fix table height issue
+  useEffect(() => {
+    if (isMobile) {
+      const removeInlineStyles = () => {
+        // Remove inline styles from table body that restrict height
+        const tableBodies = document.querySelectorAll('.admin-cms-card .ant-table-body');
+        tableBodies.forEach(body => {
+          body.style.overflow = 'visible';
+          body.style.height = 'auto';
+          body.style.maxHeight = 'none';
+          body.style.minHeight = 'auto';
+        });
+
+        // Remove inline styles from table containers
+        const tableContainers = document.querySelectorAll('.admin-cms-card .ant-table-container');
+        tableContainers.forEach(container => {
+          container.style.height = 'auto';
+          container.style.maxHeight = 'none';
+          container.style.minHeight = 'auto';
+        });
+
+        // Remove inline styles from spin containers
+        const spinContainers = document.querySelectorAll('.admin-cms-card .ant-spin-container');
+        spinContainers.forEach(container => {
+          container.style.height = 'auto';
+          container.style.maxHeight = 'none';
+          container.style.minHeight = 'auto';
+        });
+      };
+
+      // Run immediately
+      removeInlineStyles();
+
+      // Run after a short delay to catch dynamically added styles
+      const timer = setTimeout(removeInlineStyles, 100);
+      
+      // Run again after data loads
+      const timer2 = setTimeout(removeInlineStyles, 500);
+      const timer3 = setTimeout(removeInlineStyles, 1000);
+
+      // Set up MutationObserver to watch for style changes
+      const observer = new MutationObserver(removeInlineStyles);
+      const tables = document.querySelectorAll('.admin-cms-card .ant-table');
+      tables.forEach(table => {
+        observer.observe(table, { 
+          attributes: true, 
+          attributeFilter: ['style'],
+          subtree: true 
+        });
+      });
+
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+        observer.disconnect();
+      };
+    }
+  }, [isMobile, loading, currentTab]); // Re-run when these change
 
   const fetchUserAvatar = async () => {
     try {
@@ -2755,7 +2817,11 @@ function AdminCMSPage() {
               />
             </Form.Item>
             <Form.Item name="description" label="Mô tả ngắn">
-              <TextArea rows={3} placeholder="Mô tả ngắn về dịch vụ" />
+              <RichTextEditor 
+                value={form.getFieldValue('description')}
+                onChange={(value) => form.setFieldsValue({ description: value })}
+                placeholder="Nhập mô tả chi tiết về dịch vụ. Bạn có thể định dạng văn bản, chèn ảnh, tạo danh sách..."
+              />
             </Form.Item>
             
             <Divider orientation="left">Hình ảnh (Upload nhiều ảnh cùng lúc)</Divider>
@@ -3586,6 +3652,9 @@ function AdminCMSPage() {
           dataSource={aboutValues} 
           columns={columns}
           rowKey={(record, index) => index}
+          scroll={isMobile ? undefined : { x: 800 }}
+          pagination={isMobile ? false : { pageSize: 10 }}
+          virtual={false}
         />
         
         <Modal
@@ -3704,6 +3773,9 @@ function AdminCMSPage() {
           dataSource={aboutAchievements} 
           columns={columns}
           rowKey={(record, index) => index}
+          scroll={isMobile ? undefined : { x: 800 }}
+          pagination={isMobile ? false : { pageSize: 10 }}
+          virtual={false}
         />
         
         <Modal
@@ -3821,6 +3893,9 @@ function AdminCMSPage() {
           dataSource={aboutTimeline} 
           columns={columns}
           rowKey={(record, index) => index}
+          scroll={isMobile ? undefined : { x: 800 }}
+          pagination={isMobile ? false : { pageSize: 10 }}
+          virtual={false}
         />
         
         <Modal
@@ -3976,6 +4051,9 @@ function AdminCMSPage() {
           dataSource={aboutTeam} 
           columns={columns}
           rowKey={(record, index) => index}
+          scroll={isMobile ? undefined : { x: 800 }}
+          pagination={isMobile ? false : { pageSize: 10 }}
+          virtual={false}
         />
         
         <Modal
@@ -4308,11 +4386,18 @@ function AdminCMSPage() {
       )}
 
       <Layout style={{ marginLeft: isMobile ? 0 : 280 }}>
-        <Content style={{ padding: 24, background: '#f0f2f5', minHeight: '100vh', marginTop: 64 }}>
+        <Content style={{ 
+          padding: isMobile ? '24px 12px 12px 12px' : 24, 
+          background: '#f0f2f5', 
+          minHeight: '100vh', 
+          marginTop: 64
+        }}>
           {/* Banner Section */}
           {currentTab === 'banners' && (
             <Card 
               className="admin-cms-card"
+              style={isMobile ? { scrollMarginTop: 80 } : {}}
+              bodyStyle={isMobile ? { paddingTop: 16 } : {}}
               title={
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Banner Slider</div>
@@ -4322,18 +4407,142 @@ function AdminCMSPage() {
                 </div>
               }
               extra={
-                <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-                  Thêm banner
-                </Button>
+                !isMobile && (
+                  <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+                    Thêm banner
+                  </Button>
+                )
               }
             >
-              <Table
-                className="admin-cms-table"
-                columns={bannerColumns}
-                dataSource={banners}
-                rowKey="id"
-                loading={loading}
-              />
+              {/* Desktop View - Table */}
+              {!isMobile && (
+                <Table
+                  className="admin-cms-table"
+                  columns={bannerColumns}
+                  dataSource={banners}
+                  rowKey="id"
+                  loading={loading}
+                  scroll={{ x: 1200 }}
+                  pagination={{ pageSize: 10 }}
+                  virtual={false}
+                />
+              )}
+
+              {/* Mobile View - Simple List Layout */}
+              {isMobile && (
+                <div style={{ marginTop: 16, paddingTop: 0 }}>
+                  {loading ? (
+                    <div style={{ textAlign: 'center', padding: 40 }}>
+                      <Spin size="large" />
+                    </div>
+                  ) : banners.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: 40, color: '#8c8c8c' }}>
+                      Chưa có banner nào
+                    </div>
+                  ) : (
+                    banners.map((banner, index) => (
+                      <div
+                        key={banner.id}
+                        style={{
+                          background: '#fff',
+                          padding: 16,
+                          marginBottom: 12,
+                          borderRadius: 8,
+                          border: '1px solid #e8e8e8'
+                        }}
+                      >
+                        {/* Status Tag */}
+                        <div style={{ marginBottom: 8 }}>
+                          <Tag color={banner.isActive ? 'success' : 'default'}>
+                            {banner.isActive ? 'Hiển thị' : 'Ẩn'}
+                          </Tag>
+                        </div>
+
+                        {/* Header Row */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                          <Tag color={banner.page === 'home' ? 'blue' : banner.page === 'news' ? 'green' : 'purple'}>
+                            {banner.page === 'home' ? 'Trang chủ' : banner.page === 'news' ? 'Tin tức' : 'Bác sĩ'}
+                          </Tag>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            #{banner.displayOrder}
+                          </Text>
+                        </div>
+
+                        {/* Image Thumbnail */}
+                        {banner.imageUrl && (
+                          <div style={{ 
+                            width: '100%', 
+                            height: 120, 
+                            borderRadius: 6, 
+                            overflow: 'hidden',
+                            marginBottom: 12,
+                            background: '#f5f5f5'
+                          }}>
+                            <img 
+                              src={banner.imageUrl} 
+                              alt="banner" 
+                              style={{ 
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
+                              }} 
+                            />
+                          </div>
+                        )}
+
+                        {/* Link */}
+                        {banner.linkUrl && (
+                          <div style={{ 
+                            marginBottom: 12,
+                            fontSize: 12,
+                            color: '#1890ff',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }}>
+                            🔗 {banner.linkUrl}
+                          </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <Button
+                            icon={<EditOutlined />}
+                            onClick={() => handleEdit(banner)}
+                            block
+                          >
+                            Sửa
+                          </Button>
+                          <Popconfirm
+                            title="Xóa banner?"
+                            onConfirm={() => handleDelete(banner.id, 'banners')}
+                          >
+                            <Button 
+                              icon={<DeleteOutlined />} 
+                              danger
+                              block
+                            >
+                              Xóa
+                            </Button>
+                          </Popconfirm>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                  
+                  {/* Floating Add Button */}
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    block
+                    size="large"
+                    style={{ marginTop: 16 }}
+                  >
+                    Thêm banner
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
 
@@ -4341,6 +4550,8 @@ function AdminCMSPage() {
           {currentTab === 'services' && (
             <Card 
               className="admin-cms-card"
+              style={isMobile ? { scrollMarginTop: 80 } : {}}
+              bodyStyle={isMobile ? { paddingTop: 16 } : {}}
               title={
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Tiện ích cho khách hàng</div>
@@ -4350,18 +4561,143 @@ function AdminCMSPage() {
                 </div>
               }
               extra={
-                <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-                  Thêm dịch vụ
-                </Button>
+                !isMobile && (
+                  <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+                    Thêm dịch vụ
+                  </Button>
+                )
               }
             >
-              <Table
-                className="admin-cms-table"
-                columns={servicesColumns}
-                dataSource={services}
-                rowKey="id"
-                loading={loading}
-              />
+              {/* Desktop View - Table */}
+              {!isMobile && (
+                <Table
+                  className="admin-cms-table"
+                  columns={servicesColumns}
+                  dataSource={services}
+                  rowKey="id"
+                  loading={loading}
+                  scroll={{ x: 1200 }}
+                  pagination={{ pageSize: 10 }}
+                  virtual={false}
+                />
+              )}
+
+              {/* Mobile View - Simple List Layout */}
+              {isMobile && (
+                <div style={{ marginTop: 16, paddingTop: 0 }}>
+                  {loading ? (
+                    <div style={{ textAlign: 'center', padding: 40 }}>
+                      <Spin size="large" />
+                    </div>
+                  ) : services.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: 40, color: '#8c8c8c' }}>
+                      Chưa có dịch vụ nào
+                    </div>
+                  ) : (
+                    services.map((service) => (
+                      <div
+                        key={service.id}
+                        style={{
+                          background: '#fff',
+                          padding: 16,
+                          marginBottom: 12,
+                          borderRadius: 8,
+                          border: '1px solid #e8e8e8'
+                        }}
+                      >
+                        {/* Status Tag */}
+                        <div style={{ marginBottom: 8 }}>
+                          <Tag color={service.isActive ? 'success' : 'default'}>
+                            {service.isActive ? 'Hiển thị' : 'Ẩn'}
+                          </Tag>
+                        </div>
+
+                        {/* Title and Order */}
+                        <div style={{ marginBottom: 12 }}>
+                          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                            {service.title}
+                          </div>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            #{service.displayOrder}
+                          </Text>
+                        </div>
+
+                        {/* Icon */}
+                        {service.iconUrl && (
+                          <div style={{ 
+                            width: '100%', 
+                            height: 80, 
+                            borderRadius: 6, 
+                            overflow: 'hidden',
+                            marginBottom: 12,
+                            background: '#f5f5f5',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <img 
+                              src={service.iconUrl} 
+                              alt="icon" 
+                              style={{ 
+                                maxWidth: '60px',
+                                maxHeight: '60px',
+                                objectFit: 'contain'
+                              }} 
+                            />
+                          </div>
+                        )}
+
+                        {/* Description */}
+                        {service.description && (
+                          <div style={{ 
+                            marginBottom: 12,
+                            fontSize: 13,
+                            color: '#595959',
+                            lineHeight: 1.5
+                          }}>
+                            {service.description}
+                          </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <Button
+                            icon={<EditOutlined />}
+                            onClick={() => handleEdit(service)}
+                            block
+                          >
+                            Sửa
+                          </Button>
+                          <Popconfirm
+                            title="Xóa dịch vụ?"
+                            onConfirm={() => handleDelete(service.id, 'services')}
+                          >
+                            <Button 
+                              icon={<DeleteOutlined />} 
+                              danger
+                              block
+                            >
+                              Xóa
+                            </Button>
+                          </Popconfirm>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                  
+                  {/* Floating Add Button */}
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    block
+                    size="large"
+                    style={{ marginTop: 16 }}
+                  >
+                    Thêm dịch vụ
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
 
@@ -4369,6 +4705,8 @@ function AdminCMSPage() {
           {currentTab === 'features' && (
             <Card 
               className="admin-cms-card"
+              style={isMobile ? { scrollMarginTop: 80 } : {}}
+              bodyStyle={isMobile ? { paddingTop: 16 } : {}}
               title={
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Tại sao chọn KHAMNOW?</div>
@@ -4378,18 +4716,143 @@ function AdminCMSPage() {
                 </div>
               }
               extra={
-                <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-                  Thêm tính năng
-                </Button>
+                !isMobile && (
+                  <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+                    Thêm tính năng
+                  </Button>
+                )
               }
             >
-              <Table
-                className="admin-cms-table"
-                columns={featuresColumns}
-                dataSource={features}
-                rowKey="id"
-                loading={loading}
-              />
+              {/* Desktop View - Table */}
+              {!isMobile && (
+                <Table
+                  className="admin-cms-table"
+                  columns={featuresColumns}
+                  dataSource={features}
+                  rowKey="id"
+                  loading={loading}
+                  scroll={{ x: 1200 }}
+                  pagination={{ pageSize: 10 }}
+                  virtual={false}
+                />
+              )}
+
+              {/* Mobile View - Simple List Layout */}
+              {isMobile && (
+                <div style={{ marginTop: 16, paddingTop: 0 }}>
+                  {loading ? (
+                    <div style={{ textAlign: 'center', padding: 40 }}>
+                      <Spin size="large" />
+                    </div>
+                  ) : features.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: 40, color: '#8c8c8c' }}>
+                      Chưa có tính năng nào
+                    </div>
+                  ) : (
+                    features.map((feature) => (
+                      <div
+                        key={feature.id}
+                        style={{
+                          background: '#fff',
+                          padding: 16,
+                          marginBottom: 12,
+                          borderRadius: 8,
+                          border: '1px solid #e8e8e8'
+                        }}
+                      >
+                        {/* Status Tag */}
+                        <div style={{ marginBottom: 8 }}>
+                          <Tag color={feature.isActive ? 'success' : 'default'}>
+                            {feature.isActive ? 'Hiển thị' : 'Ẩn'}
+                          </Tag>
+                        </div>
+
+                        {/* Title and Order */}
+                        <div style={{ marginBottom: 12 }}>
+                          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                            {feature.title}
+                          </div>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            #{feature.displayOrder}
+                          </Text>
+                        </div>
+
+                        {/* Icon */}
+                        {feature.iconUrl && (
+                          <div style={{ 
+                            width: '100%', 
+                            height: 80, 
+                            borderRadius: 6, 
+                            overflow: 'hidden',
+                            marginBottom: 12,
+                            background: '#f5f5f5',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <img 
+                              src={feature.iconUrl} 
+                              alt="icon" 
+                              style={{ 
+                                maxWidth: '60px',
+                                maxHeight: '60px',
+                                objectFit: 'contain'
+                              }} 
+                            />
+                          </div>
+                        )}
+
+                        {/* Description */}
+                        {feature.description && (
+                          <div style={{ 
+                            marginBottom: 12,
+                            fontSize: 13,
+                            color: '#595959',
+                            lineHeight: 1.5
+                          }}>
+                            {feature.description}
+                          </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <Button
+                            icon={<EditOutlined />}
+                            onClick={() => handleEdit(feature)}
+                            block
+                          >
+                            Sửa
+                          </Button>
+                          <Popconfirm
+                            title="Xóa tính năng?"
+                            onConfirm={() => handleDelete(feature.id, 'features')}
+                          >
+                            <Button 
+                              icon={<DeleteOutlined />} 
+                              danger
+                              block
+                            >
+                              Xóa
+                            </Button>
+                          </Popconfirm>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                  
+                  {/* Floating Add Button */}
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    block
+                    size="large"
+                    style={{ marginTop: 16 }}
+                  >
+                    Thêm tính năng
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
 
@@ -4397,6 +4860,8 @@ function AdminCMSPage() {
           {currentTab === 'specialties' && (
             <Card 
               className="admin-cms-card"
+              style={isMobile ? { scrollMarginTop: 80 } : {}}
+              bodyStyle={isMobile ? { paddingTop: 16 } : {}}
               title={
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Các chuyên khoa y tế</div>
@@ -4405,19 +4870,128 @@ function AdminCMSPage() {
                   </div>
                 </div>
               }
-              extra={
+              extra={!isMobile && (
                 <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
                   Thêm chuyên khoa
                 </Button>
-              }
+              )}
             >
-              <Table
-                className="admin-cms-table"
-                columns={specialtiesColumns}
-                dataSource={specialties}
-                rowKey="id"
-                loading={loading}
-              />
+              {!isMobile ? (
+                <Table
+                  className="admin-cms-table"
+                  columns={specialtiesColumns}
+                  dataSource={specialties}
+                  rowKey="id"
+                  loading={loading}
+                  scroll={{ x: 1200 }}
+                  pagination={{ pageSize: 10 }}
+                  virtual={false}
+                />
+              ) : (
+                <div>
+                  {specialties.map((specialty) => (
+                    <div
+                      key={specialty.id}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* Status Tag */}
+                      <div style={{ marginBottom: 8 }}>
+                        <Tag color={specialty.isActive ? 'success' : 'default'}>
+                          {specialty.isActive ? 'Hiển thị' : 'Ẩn'}
+                        </Tag>
+                      </div>
+
+                      {/* Name and Order */}
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                          {specialty.name}
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          #{specialty.displayOrder}
+                        </Text>
+                      </div>
+
+                      {/* Icon */}
+                      {specialty.iconUrl && (
+                        <div style={{ 
+                          width: '100%', 
+                          height: 80, 
+                          borderRadius: 6, 
+                          overflow: 'hidden',
+                          marginBottom: 12,
+                          background: '#f5f5f5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <img 
+                            src={specialty.iconUrl} 
+                            alt="icon" 
+                            style={{ 
+                              maxWidth: '60px',
+                              maxHeight: '60px',
+                              objectFit: 'contain'
+                            }} 
+                          />
+                        </div>
+                      )}
+
+                      {/* Description */}
+                      {specialty.description && (
+                        <div style={{ 
+                          marginBottom: 12,
+                          fontSize: 13,
+                          color: '#595959',
+                          lineHeight: 1.5
+                        }}>
+                          {specialty.description}
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Button
+                          icon={<EditOutlined />}
+                          onClick={() => handleEdit(specialty)}
+                          block
+                        >
+                          Sửa
+                        </Button>
+                        <Popconfirm
+                          title="Xóa chuyên khoa?"
+                          onConfirm={() => handleDelete(specialty.id, 'specialties')}
+                        >
+                          <Button 
+                            icon={<DeleteOutlined />} 
+                            danger
+                            block
+                          >
+                            Xóa
+                          </Button>
+                        </Popconfirm>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Floating Add Button */}
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    block
+                    size="large"
+                    style={{ marginTop: 16 }}
+                  >
+                    Thêm chuyên khoa
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
 
@@ -4425,6 +4999,8 @@ function AdminCMSPage() {
           {currentTab === 'statistics' && (
             <Card 
               className="admin-cms-card"
+              style={isMobile ? { scrollMarginTop: 80 } : {}}
+              bodyStyle={isMobile ? { paddingTop: 16 } : {}}
               title={
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>KHAMNOW trong số liệu</div>
@@ -4433,19 +5009,119 @@ function AdminCMSPage() {
                   </div>
                 </div>
               }
-              extra={
+              extra={!isMobile && (
                 <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
                   Thêm thống kê
                 </Button>
-              }
+              )}
             >
-              <Table
-                className="admin-cms-table"
-                columns={statisticsColumns}
-                dataSource={statistics}
-                rowKey="id"
-                loading={loading}
-              />
+              {!isMobile ? (
+                <Table
+                  className="admin-cms-table"
+                  columns={statisticsColumns}
+                  dataSource={statistics}
+                  rowKey="id"
+                  loading={loading}
+                  scroll={{ x: 1200 }}
+                  pagination={{ pageSize: 10 }}
+                  virtual={false}
+                />
+              ) : (
+                <div>
+                  {statistics.map((stat) => (
+                    <div
+                      key={stat.id}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* Status Tag */}
+                      <div style={{ marginBottom: 8 }}>
+                        <Tag color={stat.isActive ? 'success' : 'default'}>
+                          {stat.isActive ? 'Hiển thị' : 'Ẩn'}
+                        </Tag>
+                      </div>
+
+                      {/* Number and Label */}
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 24, fontWeight: 600, color: '#1890ff', marginBottom: 4 }}>
+                          {stat.number}
+                        </div>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                          {stat.label}
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          #{stat.displayOrder}
+                        </Text>
+                      </div>
+
+                      {/* Icon */}
+                      {stat.iconUrl && (
+                        <div style={{ 
+                          width: '100%', 
+                          height: 80, 
+                          borderRadius: 6, 
+                          overflow: 'hidden',
+                          marginBottom: 12,
+                          background: '#f5f5f5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <img 
+                            src={stat.iconUrl} 
+                            alt="icon" 
+                            style={{ 
+                              maxWidth: '60px',
+                              maxHeight: '60px',
+                              objectFit: 'contain'
+                            }} 
+                          />
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Button
+                          icon={<EditOutlined />}
+                          onClick={() => handleEdit(stat)}
+                          block
+                        >
+                          Sửa
+                        </Button>
+                        <Popconfirm
+                          title="Xóa thống kê?"
+                          onConfirm={() => handleDelete(stat.id, 'statistics')}
+                        >
+                          <Button 
+                            icon={<DeleteOutlined />} 
+                            danger
+                            block
+                          >
+                            Xóa
+                          </Button>
+                        </Popconfirm>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Floating Add Button */}
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    block
+                    size="large"
+                    style={{ marginTop: 16 }}
+                  >
+                    Thêm thống kê
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
 
@@ -4453,6 +5129,8 @@ function AdminCMSPage() {
           {currentTab === 'certifications' && (
             <Card 
               className="admin-cms-card"
+              style={isMobile ? { scrollMarginTop: 80 } : {}}
+              bodyStyle={isMobile ? { paddingTop: 16 } : {}}
               title={
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Chứng chỉ và cơ sở vật chất</div>
@@ -4461,19 +5139,128 @@ function AdminCMSPage() {
                   </div>
                 </div>
               }
-              extra={
+              extra={!isMobile && (
                 <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
                   Thêm chứng nhận
                 </Button>
-              }
+              )}
             >
-              <Table
-                className="admin-cms-table"
-                columns={certificationsColumns}
-                dataSource={certifications}
-                rowKey="id"
-                loading={loading}
-              />
+              {!isMobile ? (
+                <Table
+                  className="admin-cms-table"
+                  columns={certificationsColumns}
+                  dataSource={certifications}
+                  rowKey="id"
+                  loading={loading}
+                  scroll={{ x: 1200 }}
+                  pagination={{ pageSize: 10 }}
+                  virtual={false}
+                />
+              ) : (
+                <div>
+                  {certifications.map((cert) => (
+                    <div
+                      key={cert.id}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* Status Tag */}
+                      <div style={{ marginBottom: 8 }}>
+                        <Tag color={cert.isActive ? 'success' : 'default'}>
+                          {cert.isActive ? 'Hiển thị' : 'Ẩn'}
+                        </Tag>
+                      </div>
+
+                      {/* Title and Order */}
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                          {cert.title}
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          #{cert.displayOrder}
+                        </Text>
+                      </div>
+
+                      {/* Image */}
+                      {cert.imageUrl && (
+                        <div style={{ 
+                          width: '100%', 
+                          height: 120, 
+                          borderRadius: 6, 
+                          overflow: 'hidden',
+                          marginBottom: 12,
+                          background: '#f5f5f5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <img 
+                            src={cert.imageUrl} 
+                            alt="certification" 
+                            style={{ 
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }} 
+                          />
+                        </div>
+                      )}
+
+                      {/* Description */}
+                      {cert.description && (
+                        <div style={{ 
+                          marginBottom: 12,
+                          fontSize: 13,
+                          color: '#595959',
+                          lineHeight: 1.5
+                        }}>
+                          {cert.description}
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Button
+                          icon={<EditOutlined />}
+                          onClick={() => handleEdit(cert)}
+                          block
+                        >
+                          Sửa
+                        </Button>
+                        <Popconfirm
+                          title="Xóa chứng nhận?"
+                          onConfirm={() => handleDelete(cert.id, 'certifications')}
+                        >
+                          <Button 
+                            icon={<DeleteOutlined />} 
+                            danger
+                            block
+                          >
+                            Xóa
+                          </Button>
+                        </Popconfirm>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Floating Add Button */}
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    block
+                    size="large"
+                    style={{ marginTop: 16 }}
+                  >
+                    Thêm chứng nhận
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
 
@@ -4481,6 +5268,8 @@ function AdminCMSPage() {
           {currentTab === 'testimonials' && (
             <Card 
               className="admin-cms-card"
+              style={isMobile ? { scrollMarginTop: 80 } : {}}
+              bodyStyle={isMobile ? { paddingTop: 16 } : {}}
               title={
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Khách hàng nói gì về chúng tôi</div>
@@ -4489,19 +5278,142 @@ function AdminCMSPage() {
                   </div>
                 </div>
               }
-              extra={
+              extra={!isMobile && (
                 <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
                   Thêm đánh giá
                 </Button>
-              }
+              )}
             >
-              <Table
-                className="admin-cms-table"
-                columns={testimonialsColumns}
-                dataSource={testimonials}
-                rowKey="id"
-                loading={loading}
-              />
+              {!isMobile ? (
+                <Table
+                  className="admin-cms-table"
+                  columns={testimonialsColumns}
+                  dataSource={testimonials}
+                  rowKey="id"
+                  loading={loading}
+                  scroll={{ x: 1200 }}
+                  pagination={{ pageSize: 10 }}
+                  virtual={false}
+                />
+              ) : (
+                <div>
+                  {testimonials.map((testimonial) => (
+                    <div
+                      key={testimonial.id}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* Status Tag */}
+                      <div style={{ marginBottom: 8 }}>
+                        <Tag color={testimonial.isActive ? 'success' : 'default'}>
+                          {testimonial.isActive ? 'Hiển thị' : 'Ẩn'}
+                        </Tag>
+                      </div>
+
+                      {/* Customer Info */}
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                          {testimonial.customerName}
+                        </div>
+                        {testimonial.customerTitle && (
+                          <div style={{ fontSize: 12, color: '#8c8c8c', marginBottom: 4 }}>
+                            {testimonial.customerTitle}
+                          </div>
+                        )}
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          #{testimonial.displayOrder}
+                        </Text>
+                      </div>
+
+                      {/* Avatar */}
+                      {testimonial.avatarUrl && (
+                        <div style={{ 
+                          width: '100%', 
+                          height: 80, 
+                          borderRadius: 6, 
+                          overflow: 'hidden',
+                          marginBottom: 12,
+                          background: '#f5f5f5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <img 
+                            src={testimonial.avatarUrl} 
+                            alt="avatar" 
+                            style={{ 
+                              width: '80px',
+                              height: '80px',
+                              objectFit: 'cover',
+                              borderRadius: '50%'
+                            }} 
+                          />
+                        </div>
+                      )}
+
+                      {/* Rating */}
+                      {testimonial.rating && (
+                        <div style={{ marginBottom: 12 }}>
+                          <Rate disabled value={testimonial.rating} style={{ fontSize: 16 }} />
+                        </div>
+                      )}
+
+                      {/* Content */}
+                      {testimonial.content && (
+                        <div style={{ 
+                          marginBottom: 12,
+                          fontSize: 13,
+                          color: '#595959',
+                          lineHeight: 1.5,
+                          fontStyle: 'italic'
+                        }}>
+                          "{testimonial.content}"
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Button
+                          icon={<EditOutlined />}
+                          onClick={() => handleEdit(testimonial)}
+                          block
+                        >
+                          Sửa
+                        </Button>
+                        <Popconfirm
+                          title="Xóa đánh giá?"
+                          onConfirm={() => handleDelete(testimonial.id, 'testimonials')}
+                        >
+                          <Button 
+                            icon={<DeleteOutlined />} 
+                            danger
+                            block
+                          >
+                            Xóa
+                          </Button>
+                        </Popconfirm>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Floating Add Button */}
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    block
+                    size="large"
+                    style={{ marginTop: 16 }}
+                  >
+                    Thêm đánh giá
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
 
@@ -4509,6 +5421,8 @@ function AdminCMSPage() {
           {currentTab === 'doctor-articles' && (
             <Card 
               className="admin-cms-card"
+              style={isMobile ? { scrollMarginTop: 80 } : {}}
+              bodyStyle={isMobile ? { paddingTop: 16 } : {}}
               title={
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Bài viết bác sĩ</div>
@@ -4518,14 +5432,97 @@ function AdminCMSPage() {
                 </div>
               }
             >
-              <Table
-                className="admin-cms-table"
-                columns={doctorArticlesColumns}
-                dataSource={doctorArticles}
-                rowKey="id"
-                loading={loading}
-                pagination={{ pageSize: 10 }}
-              />
+              {!isMobile ? (
+                <Table
+                  className="admin-cms-table"
+                  columns={doctorArticlesColumns}
+                  dataSource={doctorArticles}
+                  rowKey="id"
+                  loading={loading}
+                  scroll={{ x: 1200 }}
+                  pagination={{ pageSize: 10 }}
+                  virtual={false}
+                />
+              ) : (
+                <div>
+                  {doctorArticles.map((article) => (
+                    <div
+                      key={article.id}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* Status Tag */}
+                      <div style={{ marginBottom: 8 }}>
+                        <Tag color={article.status === 'PUBLISHED' ? 'success' : article.status === 'PENDING' ? 'warning' : 'default'}>
+                          {article.status === 'PUBLISHED' ? 'Đã xuất bản' : article.status === 'PENDING' ? 'Chờ duyệt' : 'Nháp'}
+                        </Tag>
+                      </div>
+
+                      {/* Title */}
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                          {article.title}
+                        </div>
+                        {article.doctorName && (
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            Bác sĩ: {article.doctorName}
+                          </Text>
+                        )}
+                      </div>
+
+                      {/* Thumbnail */}
+                      {article.thumbnailUrl && (
+                        <div style={{ 
+                          width: '100%', 
+                          height: 120, 
+                          borderRadius: 6, 
+                          overflow: 'hidden',
+                          marginBottom: 12,
+                          background: '#f5f5f5'
+                        }}>
+                          <img 
+                            src={article.thumbnailUrl} 
+                            alt="thumbnail" 
+                            style={{ 
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }} 
+                          />
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Button
+                          icon={<EditOutlined />}
+                          onClick={() => handleEdit(article)}
+                          block
+                        >
+                          Sửa
+                        </Button>
+                        <Popconfirm
+                          title="Xóa bài viết?"
+                          onConfirm={() => handleDelete(article.id, 'doctor-articles')}
+                        >
+                          <Button 
+                            icon={<DeleteOutlined />} 
+                            danger
+                            block
+                          >
+                            Xóa
+                          </Button>
+                        </Popconfirm>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </Card>
           )}
 
@@ -4533,6 +5530,8 @@ function AdminCMSPage() {
           {currentTab === 'news-banners' && (
             <Card 
               className="admin-cms-card"
+              style={isMobile ? { scrollMarginTop: 80 } : {}}
+              bodyStyle={isMobile ? { paddingTop: 16 } : {}}
               title={
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Banner Tin tức</div>
@@ -4541,7 +5540,7 @@ function AdminCMSPage() {
                   </div>
                 </div>
               }
-              extra={
+              extra={!isMobile && (
                 <Button 
                   type="primary" 
                   icon={<PlusOutlined />} 
@@ -4549,15 +5548,121 @@ function AdminCMSPage() {
                 >
                   Thêm banner
                 </Button>
-              }
+              )}
             >
-              <Table 
-                className="admin-cms-table"
-                columns={newsBannerColumns}
-                dataSource={newsBanners} 
-                rowKey="id"
-                loading={loading}
-              />
+              {!isMobile ? (
+                <Table 
+                  className="admin-cms-table"
+                  columns={newsBannerColumns}
+                  dataSource={newsBanners} 
+                  rowKey="id"
+                  loading={loading}
+                  scroll={{ x: 1200 }}
+                  pagination={{ pageSize: 10 }}
+                  virtual={false}
+                />
+              ) : (
+                <div>
+                  {newsBanners.map((banner) => (
+                    <div
+                      key={banner.id}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* Status Tag */}
+                      <div style={{ marginBottom: 8 }}>
+                        <Tag color={banner.isActive ? 'success' : 'default'}>
+                          {banner.isActive ? 'Hiển thị' : 'Ẩn'}
+                        </Tag>
+                      </div>
+
+                      {/* Title and Order */}
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                          {banner.title}
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          #{banner.displayOrder}
+                        </Text>
+                      </div>
+
+                      {/* Image */}
+                      {banner.imageUrl && (
+                        <div style={{ 
+                          width: '100%', 
+                          height: 120, 
+                          borderRadius: 6, 
+                          overflow: 'hidden',
+                          marginBottom: 12,
+                          background: '#f5f5f5'
+                        }}>
+                          <img 
+                            src={banner.imageUrl} 
+                            alt="banner" 
+                            style={{ 
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }} 
+                          />
+                        </div>
+                      )}
+
+                      {/* Link Preview */}
+                      {banner.link && (
+                        <div style={{ 
+                          marginBottom: 12,
+                          fontSize: 12,
+                          color: '#1890ff',
+                          wordBreak: 'break-all'
+                        }}>
+                          🔗 {banner.link}
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Button
+                          icon={<EditOutlined />}
+                          onClick={() => handleEdit(banner)}
+                          block
+                        >
+                          Sửa
+                        </Button>
+                        <Popconfirm
+                          title="Xóa banner?"
+                          onConfirm={() => handleDelete(banner.id, 'news-banners')}
+                        >
+                          <Button 
+                            icon={<DeleteOutlined />} 
+                            danger
+                            block
+                          >
+                            Xóa
+                          </Button>
+                        </Popconfirm>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Floating Add Button */}
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    block
+                    size="large"
+                    style={{ marginTop: 16 }}
+                  >
+                    Thêm banner
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
 
@@ -4565,6 +5670,8 @@ function AdminCMSPage() {
           {currentTab === 'news-categories' && (
             <Card 
               className="admin-cms-card"
+              style={isMobile ? { scrollMarginTop: 80 } : {}}
+              bodyStyle={isMobile ? { paddingTop: 16 } : {}}
               title={
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Quản lý danh mục tin tức</div>
@@ -4573,7 +5680,7 @@ function AdminCMSPage() {
                   </div>
                 </div>
               }
-              extra={
+              extra={!isMobile && (
                 <Button 
                   type="primary" 
                   icon={<PlusOutlined />} 
@@ -4581,15 +5688,99 @@ function AdminCMSPage() {
                 >
                   Thêm danh mục
                 </Button>
-              }
+              )}
             >
-              <Table 
-                className="admin-cms-table"
-                columns={newsCategoriesColumns} 
-                dataSource={newsCategories} 
-                rowKey="id"
-                loading={loading}
-              />
+              {!isMobile ? (
+                <Table 
+                  className="admin-cms-table"
+                  columns={newsCategoriesColumns} 
+                  dataSource={newsCategories} 
+                  rowKey="id"
+                  loading={loading}
+                  scroll={{ x: 1200 }}
+                  pagination={{ pageSize: 10 }}
+                  virtual={false}
+                />
+              ) : (
+                <div>
+                  {newsCategories.map((category) => (
+                    <div
+                      key={category.id}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* Status Tag */}
+                      <div style={{ marginBottom: 8 }}>
+                        <Tag color={category.isActive ? 'success' : 'default'}>
+                          {category.isActive ? 'Hiển thị' : 'Ẩn'}
+                        </Tag>
+                      </div>
+
+                      {/* Name and Slug */}
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                          {category.name}
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          Slug: {category.slug}
+                        </Text>
+                      </div>
+
+                      {/* Description */}
+                      {category.description && (
+                        <div style={{ 
+                          marginBottom: 12,
+                          fontSize: 13,
+                          color: '#595959',
+                          lineHeight: 1.5
+                        }}>
+                          {category.description}
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Button
+                          icon={<EditOutlined />}
+                          onClick={() => handleEdit(category)}
+                          block
+                        >
+                          Sửa
+                        </Button>
+                        <Popconfirm
+                          title="Xóa danh mục?"
+                          onConfirm={() => handleDelete(category.id, 'news-categories')}
+                        >
+                          <Button 
+                            icon={<DeleteOutlined />} 
+                            danger
+                            block
+                          >
+                            Xóa
+                          </Button>
+                        </Popconfirm>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Floating Add Button */}
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    block
+                    size="large"
+                    style={{ marginTop: 16 }}
+                  >
+                    Thêm danh mục
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
 
@@ -4597,6 +5788,8 @@ function AdminCMSPage() {
           {currentTab === 'membership-benefits' && (
             <Card 
               className="admin-cms-card"
+              style={isMobile ? { scrollMarginTop: 80 } : {}}
+              bodyStyle={isMobile ? { paddingTop: 16 } : {}}
               title={
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Ưu đãi thành viên</div>
@@ -4605,7 +5798,7 @@ function AdminCMSPage() {
                   </div>
                 </div>
               }
-              extra={
+              extra={!isMobile && (
                 <Button 
                   type="primary" 
                   icon={<PlusOutlined />} 
@@ -4613,15 +5806,124 @@ function AdminCMSPage() {
                 >
                   Thêm ưu đãi
                 </Button>
-              }
+              )}
             >
-              <Table 
-                className="admin-cms-table"
-                columns={membershipBenefitsColumns} 
-                dataSource={membershipBenefits} 
-                rowKey="id"
-                loading={loading}
-              />
+              {!isMobile ? (
+                <Table 
+                  className="admin-cms-table"
+                  columns={membershipBenefitsColumns} 
+                  dataSource={membershipBenefits} 
+                  rowKey="id"
+                  loading={loading}
+                  scroll={{ x: 1200 }}
+                  pagination={{ pageSize: 10 }}
+                  virtual={false}
+                />
+              ) : (
+                <div>
+                  {membershipBenefits.map((benefit) => (
+                    <div
+                      key={benefit.id}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* Status Tag */}
+                      <div style={{ marginBottom: 8 }}>
+                        <Tag color={benefit.isActive ? 'success' : 'default'}>
+                          {benefit.isActive ? 'Hiển thị' : 'Ẩn'}
+                        </Tag>
+                      </div>
+
+                      {/* Title and Order */}
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                          {benefit.title}
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          #{benefit.displayOrder}
+                        </Text>
+                      </div>
+
+                      {/* Image */}
+                      {benefit.image1 && (
+                        <div style={{ 
+                          width: '100%', 
+                          height: 120, 
+                          borderRadius: 6, 
+                          overflow: 'hidden',
+                          marginBottom: 12,
+                          background: '#f5f5f5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <img 
+                            src={benefit.image1} 
+                            alt="benefit" 
+                            style={{ 
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }} 
+                          />
+                        </div>
+                      )}
+
+                      {/* Description */}
+                      {benefit.description && (
+                        <div style={{ 
+                          marginBottom: 12,
+                          fontSize: 13,
+                          color: '#595959',
+                          lineHeight: 1.5
+                        }}>
+                          {benefit.description}
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Button
+                          icon={<EditOutlined />}
+                          onClick={() => handleEdit(benefit)}
+                          block
+                        >
+                          Sửa
+                        </Button>
+                        <Popconfirm
+                          title="Xóa ưu đãi?"
+                          onConfirm={() => handleDelete(benefit.id, 'membership-benefits')}
+                        >
+                          <Button 
+                            icon={<DeleteOutlined />} 
+                            danger
+                            block
+                          >
+                            Xóa
+                          </Button>
+                        </Popconfirm>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Floating Add Button */}
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    block
+                    size="large"
+                    style={{ marginTop: 16 }}
+                  >
+                    Thêm ưu đãi
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
 
@@ -4629,6 +5931,8 @@ function AdminCMSPage() {
           {currentTab === 'news-sections' && (
             <Card 
               className="admin-cms-card"
+              style={isMobile ? { scrollMarginTop: 80 } : {}}
+              bodyStyle={isMobile ? { paddingTop: 16 } : {}}
               title={
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Quản lý Sections Tin tức</div>
@@ -4637,7 +5941,7 @@ function AdminCMSPage() {
                   </div>
                 </div>
               }
-              extra={
+              extra={!isMobile && (
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}
@@ -4645,123 +5949,209 @@ function AdminCMSPage() {
                 >
                   Thêm Section mới
                 </Button>
-              }
+              )}
             >
-              <Table
-                className="admin-cms-table"
-                dataSource={newsSections}
-                rowKey="id"
-                loading={loading}
-                columns={[
-                  {
-                    title: 'Tên',
-                    dataIndex: 'name',
-                    key: 'name',
-                    render: (text) => <Tag color="blue">{text}</Tag>
-                  },
-                  {
-                    title: 'Tiêu đề',
-                    dataIndex: 'title',
-                    key: 'title',
-                  },
-                  {
-                    title: 'Danh mục lọc',
-                    dataIndex: 'categoryFilter',
-                    key: 'categoryFilter',
-                    width: 200,
-                    render: (categoryFilter) => {
-                      if (!categoryFilter) {
-                        return <Tag color="default">Tất cả</Tag>;
-                      }
-                      try {
-                        // Parse JSON array
-                        const categories = JSON.parse(categoryFilter);
-                        if (Array.isArray(categories) && categories.length > 0) {
-                          return (
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                              {categories.map((cat, idx) => (
-                                <Tag key={idx} color="green">{cat}</Tag>
-                              ))}
-                            </div>
-                          );
+              {!isMobile ? (
+                <Table
+                  className="admin-cms-table"
+                  dataSource={newsSections}
+                  rowKey="id"
+                  loading={loading}
+                  scroll={{ x: 1200 }}
+                  pagination={{ pageSize: 10 }}
+                  virtual={false}
+                  columns={[
+                    {
+                      title: 'Tên',
+                      dataIndex: 'name',
+                      key: 'name',
+                      render: (text) => <Tag color="blue">{text}</Tag>
+                    },
+                    {
+                      title: 'Tiêu đề',
+                      dataIndex: 'title',
+                      key: 'title',
+                    },
+                    {
+                      title: 'Danh mục lọc',
+                      dataIndex: 'categoryFilter',
+                      key: 'categoryFilter',
+                      width: 200,
+                      render: (categoryFilter) => {
+                        if (!categoryFilter) {
+                          return <Tag color="default">Tất cả</Tag>;
                         }
-                        return <Tag color="default">Tất cả</Tag>;
-                      } catch (e) {
-                        // If not JSON, treat as single category
-                        return <Tag color="green">{categoryFilter}</Tag>;
+                        try {
+                          // Parse JSON array
+                          const categories = JSON.parse(categoryFilter);
+                          if (Array.isArray(categories) && categories.length > 0) {
+                            return (
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                                {categories.map((cat, idx) => (
+                                  <Tag key={idx} color="green">{cat}</Tag>
+                                ))}
+                              </div>
+                            );
+                          }
+                          return <Tag color="default">Tất cả</Tag>;
+                        } catch (e) {
+                          // If not JSON, treat as single category
+                          return <Tag color="green">{categoryFilter}</Tag>;
+                        }
                       }
+                    },
+                    {
+                      title: 'Trang',
+                      dataIndex: 'page',
+                      key: 'page',
+                      width: 120,
+                      render: (page) => {
+                        const pageMap = {
+                          'home': { text: 'Trang chủ', color: 'blue' },
+                          'news': { text: 'Tin tức', color: 'green' },
+                          'both': { text: 'Cả hai', color: 'purple' }
+                        };
+                        const p = pageMap[page] || { text: page || 'Cả hai', color: 'default' };
+                        return <Tag color={p.color}>{p.text}</Tag>;
+                      }
+                    },
+                    {
+                      title: 'Thứ tự',
+                      dataIndex: 'displayOrder',
+                      key: 'displayOrder',
+                      sorter: (a, b) => a.displayOrder - b.displayOrder,
+                      width: 100
+                    },
+                    {
+                      title: 'Màu nền',
+                      dataIndex: 'backgroundColor',
+                      key: 'backgroundColor',
+                      width: 100,
+                      render: (color) => (
+                        <div style={{
+                          width: 40,
+                          height: 24,
+                          backgroundColor: color,
+                          border: '1px solid #d9d9d9',
+                          borderRadius: 4
+                        }} />
+                      )
+                    },
+                    {
+                      title: 'Trạng thái',
+                      dataIndex: 'isActive',
+                      key: 'isActive',
+                      width: 100,
+                      render: (isActive, record) => (
+                        <Switch 
+                          checked={isActive} 
+                          onChange={() => handleToggleStatus(record.id, isActive, 'news-sections')}
+                        />
+                      )
+                    },
+                    {
+                      title: 'Hành động',
+                      key: 'actions',
+                      width: 150,
+                      render: (_, record) => (
+                        <Space>
+                          <Button
+                            icon={<EditOutlined />}
+                            onClick={() => handleEdit(record)}
+                          />
+                          <Popconfirm
+                            title="Bạn có chắc muốn xóa?"
+                            onConfirm={() => handleDelete(record.id, 'news-sections')}
+                          >
+                            <Button icon={<DeleteOutlined />} danger />
+                          </Popconfirm>
+                        </Space>
+                      )
                     }
-                  },
-                  {
-                    title: 'Trang',
-                    dataIndex: 'page',
-                    key: 'page',
-                    width: 120,
-                    render: (page) => {
-                      const pageMap = {
-                        'home': { text: 'Trang chủ', color: 'blue' },
-                        'news': { text: 'Tin tức', color: 'green' },
-                        'both': { text: 'Cả hai', color: 'purple' }
-                      };
-                      const p = pageMap[page] || { text: page || 'Cả hai', color: 'default' };
-                      return <Tag color={p.color}>{p.text}</Tag>;
-                    }
-                  },
-                  {
-                    title: 'Thứ tự',
-                    dataIndex: 'displayOrder',
-                    key: 'displayOrder',
-                    sorter: (a, b) => a.displayOrder - b.displayOrder,
-                    width: 100
-                  },
-                  {
-                    title: 'Màu nền',
-                    dataIndex: 'backgroundColor',
-                    key: 'backgroundColor',
-                    width: 100,
-                    render: (color) => (
-                      <div style={{
-                        width: 40,
-                        height: 24,
-                        backgroundColor: color,
-                        border: '1px solid #d9d9d9',
-                        borderRadius: 4
-                      }} />
-                    )
-                  },
-                  {
-                    title: 'Trạng thái',
-                    dataIndex: 'isActive',
-                    key: 'isActive',
-                    width: 100,
-                    render: (isActive, record) => (
-                      <Switch 
-                        checked={isActive} 
-                        onChange={() => handleToggleStatus(record.id, isActive, 'news-sections')}
-                      />
-                    )
-                  },
-                  {
-                    title: 'Hành động',
-                    key: 'actions',
-                    width: 150,
-                    render: (_, record) => (
-                      <Space>
+                  ]}
+                />
+              ) : (
+                <div>
+                  {newsSections.map((section) => (
+                    <div
+                      key={section.id}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* Status Tag */}
+                      <div style={{ marginBottom: 8 }}>
+                        <Tag color={section.isActive ? 'success' : 'default'}>
+                          {section.isActive ? 'Hiển thị' : 'Ẩn'}
+                        </Tag>
+                        <Tag color="blue">{section.name}</Tag>
+                      </div>
+
+                      {/* Title and Order */}
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                          {section.title}
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          #{section.displayOrder}
+                        </Text>
+                      </div>
+
+                      {/* Background Color */}
+                      {section.backgroundColor && (
+                        <div style={{ marginBottom: 12 }}>
+                          <div style={{
+                            width: 60,
+                            height: 30,
+                            backgroundColor: section.backgroundColor,
+                            border: '1px solid #d9d9d9',
+                            borderRadius: 4
+                          }} />
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', gap: 8 }}>
                         <Button
                           icon={<EditOutlined />}
-                          onClick={() => handleEdit(record)}
-                        />
-                        <Popconfirm
-                          title="Bạn có chắc muốn xóa?"
-                          onConfirm={() => handleDelete(record.id, 'news-sections')}
+                          onClick={() => handleEdit(section)}
+                          block
                         >
-                          <Button icon={<DeleteOutlined />} danger />
+                          Sửa
+                        </Button>
+                        <Popconfirm
+                          title="Xóa section?"
+                          onConfirm={() => handleDelete(section.id, 'news-sections')}
+                        >
+                          <Button 
+                            icon={<DeleteOutlined />} 
+                            danger
+                            block
+                          >
+                            Xóa
+                          </Button>
                         </Popconfirm>
-                      </Space>
-                    )
-                  }
-                ]}
-              />
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Floating Add Button */}
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    block
+                    size="large"
+                    style={{ marginTop: 16 }}
+                  >
+                    Thêm Section mới
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
 
@@ -4769,6 +6159,8 @@ function AdminCMSPage() {
           {currentTab === 'news-sidebar-widgets' && (
             <Card 
               className="admin-cms-card"
+              style={isMobile ? { scrollMarginTop: 80 } : {}}
+              bodyStyle={isMobile ? { paddingTop: 16 } : {}}
               title={
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Quản lý Sidebar Tin tức</div>
@@ -4777,7 +6169,7 @@ function AdminCMSPage() {
                   </div>
                 </div>
               }
-              extra={
+              extra={!isMobile && (
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}
@@ -4785,91 +6177,188 @@ function AdminCMSPage() {
                 >
                   Thêm Widget
                 </Button>
-              }
+              )}
             >
-              <Table
-                className="admin-cms-table"
-                dataSource={newsSidebarWidgets}
-                rowKey="id"
-                loading={loading}
-                columns={[
-                  {
-                    title: 'Loại',
-                    dataIndex: 'widgetType',
-                    key: 'widgetType',
-                    width: 120,
-                    render: (type) => {
-                      const typeMap = {
-                        'hotline': { text: 'Hotline', color: 'blue' },
-                        'banner': { text: 'Banner', color: 'green' }
-                      };
-                      const t = typeMap[type] || { text: type, color: 'default' };
-                      return <Tag color={t.color}>{t.text}</Tag>;
+              {!isMobile ? (
+                <Table
+                  className="admin-cms-table"
+                  dataSource={newsSidebarWidgets}
+                  rowKey="id"
+                  loading={loading}
+                  scroll={{ x: 1200 }}
+                  pagination={{ pageSize: 10 }}
+                  virtual={false}
+                  columns={[
+                    {
+                      title: 'Loại',
+                      dataIndex: 'widgetType',
+                      key: 'widgetType',
+                      width: 120,
+                      render: (type) => {
+                        const typeMap = {
+                          'hotline': { text: 'Hotline', color: 'blue' },
+                          'banner': { text: 'Banner', color: 'green' }
+                        };
+                        const t = typeMap[type] || { text: type, color: 'default' };
+                        return <Tag color={t.color}>{t.text}</Tag>;
+                      }
+                    },
+                    {
+                      title: 'Tiêu đề',
+                      dataIndex: 'title',
+                      key: 'title',
+                    },
+                    {
+                      title: 'Hình ảnh',
+                      dataIndex: 'imageUrl',
+                      key: 'imageUrl',
+                      width: 150,
+                      render: (url) => url ? (
+                        <img 
+                          src={url} 
+                          alt="widget" 
+                          style={{ 
+                            width: 100,
+                            height: 60,
+                            objectFit: 'cover',
+                            borderRadius: 4
+                          }} 
+                        />
+                      ) : <Tag color="default">Không có</Tag>
+                    },
+                    {
+                      title: 'Thứ tự',
+                      dataIndex: 'displayOrder',
+                      key: 'displayOrder',
+                      sorter: (a, b) => a.displayOrder - b.displayOrder,
+                      width: 100
+                    },
+                    {
+                      title: 'Trạng thái',
+                      dataIndex: 'isActive',
+                      key: 'isActive',
+                      width: 100,
+                      render: (isActive, record) => (
+                        <Switch 
+                          checked={isActive} 
+                          onChange={() => handleToggleStatus(record.id, isActive, 'news-sidebar-widgets')}
+                        />
+                      )
+                    },
+                    {
+                      title: 'Hành động',
+                      key: 'actions',
+                      width: 150,
+                      render: (_, record) => (
+                        <Space>
+                          <Button
+                            icon={<EditOutlined />}
+                            onClick={() => handleEdit(record)}
+                          />
+                          <Popconfirm
+                            title="Bạn có chắc muốn xóa?"
+                            onConfirm={() => handleDelete(record.id, 'news-sidebar-widgets')}
+                          >
+                            <Button icon={<DeleteOutlined />} danger />
+                          </Popconfirm>
+                        </Space>
+                      )
                     }
-                  },
-                  {
-                    title: 'Tiêu đề',
-                    dataIndex: 'title',
-                    key: 'title',
-                  },
-                  {
-                    title: 'Hình ảnh',
-                    dataIndex: 'imageUrl',
-                    key: 'imageUrl',
-                    width: 150,
-                    render: (url) => url ? (
-                      <img 
-                        src={url} 
-                        alt="widget" 
-                        style={{ 
-                          width: 100,
-                          height: 60,
-                          objectFit: 'cover',
-                          borderRadius: 4
-                        }} 
-                      />
-                    ) : <Tag color="default">Không có</Tag>
-                  },
-                  {
-                    title: 'Thứ tự',
-                    dataIndex: 'displayOrder',
-                    key: 'displayOrder',
-                    sorter: (a, b) => a.displayOrder - b.displayOrder,
-                    width: 100
-                  },
-                  {
-                    title: 'Trạng thái',
-                    dataIndex: 'isActive',
-                    key: 'isActive',
-                    width: 100,
-                    render: (isActive, record) => (
-                      <Switch 
-                        checked={isActive} 
-                        onChange={() => handleToggleStatus(record.id, isActive, 'news-sidebar-widgets')}
-                      />
-                    )
-                  },
-                  {
-                    title: 'Hành động',
-                    key: 'actions',
-                    width: 150,
-                    render: (_, record) => (
-                      <Space>
+                  ]}
+                />
+              ) : (
+                <div>
+                  {newsSidebarWidgets.map((widget) => (
+                    <div
+                      key={widget.id}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* Status and Type Tags */}
+                      <div style={{ marginBottom: 8 }}>
+                        <Tag color={widget.isActive ? 'success' : 'default'}>
+                          {widget.isActive ? 'Hiển thị' : 'Ẩn'}
+                        </Tag>
+                        <Tag color={widget.widgetType === 'hotline' ? 'blue' : 'green'}>
+                          {widget.widgetType === 'hotline' ? 'Hotline' : 'Banner'}
+                        </Tag>
+                      </div>
+
+                      {/* Title and Order */}
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                          {widget.title}
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          #{widget.displayOrder}
+                        </Text>
+                      </div>
+
+                      {/* Image */}
+                      {widget.imageUrl && (
+                        <div style={{ 
+                          width: '100%', 
+                          height: 120, 
+                          borderRadius: 6, 
+                          overflow: 'hidden',
+                          marginBottom: 12,
+                          background: '#f5f5f5'
+                        }}>
+                          <img 
+                            src={widget.imageUrl} 
+                            alt="widget" 
+                            style={{ 
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }} 
+                          />
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', gap: 8 }}>
                         <Button
                           icon={<EditOutlined />}
-                          onClick={() => handleEdit(record)}
-                        />
-                        <Popconfirm
-                          title="Bạn có chắc muốn xóa?"
-                          onConfirm={() => handleDelete(record.id, 'news-sidebar-widgets')}
+                          onClick={() => handleEdit(widget)}
+                          block
                         >
-                          <Button icon={<DeleteOutlined />} danger />
+                          Sửa
+                        </Button>
+                        <Popconfirm
+                          title="Xóa widget?"
+                          onConfirm={() => handleDelete(widget.id, 'news-sidebar-widgets')}
+                        >
+                          <Button 
+                            icon={<DeleteOutlined />} 
+                            danger
+                            block
+                          >
+                            Xóa
+                          </Button>
                         </Popconfirm>
-                      </Space>
-                    )
-                  }
-                ]}
-              />
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Floating Add Button */}
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    block
+                    size="large"
+                    style={{ marginTop: 16 }}
+                  >
+                    Thêm Widget
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
 
@@ -5147,6 +6636,8 @@ function AdminCMSPage() {
           {currentTab === 'service-categories' && (
             <Card 
               className="admin-cms-card"
+              style={isMobile ? { scrollMarginTop: 80 } : {}}
+              bodyStyle={isMobile ? { paddingTop: 16 } : {}}
               title={
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Danh mục dịch vụ</div>
@@ -5155,20 +6646,128 @@ function AdminCMSPage() {
                   </div>
                 </div>
               }
-              extra={
+              extra={!isMobile && (
                 <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
                   Thêm danh mục
                 </Button>
-              }
+              )}
             >
-              <Table
-                className="admin-cms-table"
-                columns={serviceCategoryColumns}
-                dataSource={serviceCategories}
-                rowKey="id"
-                loading={loading}
-                pagination={{ pageSize: 10 }}
-              />
+              {!isMobile ? (
+                <Table
+                  className="admin-cms-table"
+                  columns={serviceCategoryColumns}
+                  dataSource={serviceCategories}
+                  rowKey="id"
+                  loading={loading}
+                  scroll={{ x: 1200 }}
+                  pagination={{ pageSize: 10 }}
+                  virtual={false}
+                />
+              ) : (
+                <div>
+                  {serviceCategories.map((category) => (
+                    <div
+                      key={category.id}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* Status Tag */}
+                      <div style={{ marginBottom: 8 }}>
+                        <Tag color={category.isActive ? 'success' : 'default'}>
+                          {category.isActive ? 'Hiển thị' : 'Ẩn'}
+                        </Tag>
+                      </div>
+
+                      {/* Name and Order */}
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                          {category.name}
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          #{category.displayOrder}
+                        </Text>
+                      </div>
+
+                      {/* Icon */}
+                      {category.iconUrl && (
+                        <div style={{ 
+                          width: '100%', 
+                          height: 80, 
+                          borderRadius: 6, 
+                          overflow: 'hidden',
+                          marginBottom: 12,
+                          background: '#f5f5f5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <img 
+                            src={category.iconUrl} 
+                            alt="icon" 
+                            style={{ 
+                              maxWidth: '60px',
+                              maxHeight: '60px',
+                              objectFit: 'contain'
+                            }} 
+                          />
+                        </div>
+                      )}
+
+                      {/* Description */}
+                      {category.description && (
+                        <div style={{ 
+                          marginBottom: 12,
+                          fontSize: 13,
+                          color: '#595959',
+                          lineHeight: 1.5
+                        }}>
+                          {category.description}
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Button
+                          icon={<EditOutlined />}
+                          onClick={() => handleEdit(category)}
+                          block
+                        >
+                          Sửa
+                        </Button>
+                        <Popconfirm
+                          title="Xóa danh mục?"
+                          onConfirm={() => handleDelete(category.id, 'service-categories')}
+                        >
+                          <Button 
+                            icon={<DeleteOutlined />} 
+                            danger
+                            block
+                          >
+                            Xóa
+                          </Button>
+                        </Popconfirm>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Floating Add Button */}
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    block
+                    size="large"
+                    style={{ marginTop: 16 }}
+                  >
+                    Thêm danh mục
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
 
@@ -5176,6 +6775,8 @@ function AdminCMSPage() {
           {currentTab === 'medical-services' && (
             <Card 
               className="admin-cms-card"
+              style={isMobile ? { scrollMarginTop: 80 } : {}}
+              bodyStyle={isMobile ? { paddingTop: 16 } : {}}
               title={
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>Dịch vụ y tế</div>
@@ -5184,21 +6785,130 @@ function AdminCMSPage() {
                   </div>
                 </div>
               }
-              extra={
+              extra={!isMobile && (
                 <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
                   Thêm dịch vụ
                 </Button>
-              }
+              )}
             >
-              <Table
-                className="admin-cms-table"
-                columns={medicalServiceColumns}
-                dataSource={medicalServices}
-                rowKey="id"
-                loading={loading}
-                pagination={{ pageSize: 10 }}
-                scroll={{ x: 1200 }}
-              />
+              {!isMobile ? (
+                <Table
+                  className="admin-cms-table"
+                  columns={medicalServiceColumns}
+                  dataSource={medicalServices}
+                  rowKey="id"
+                  loading={loading}
+                  pagination={{ pageSize: 10 }}
+                  scroll={{ x: 1200 }}
+                  virtual={false}
+                />
+              ) : (
+                <div>
+                  {medicalServices.map((service) => (
+                    <div
+                      key={service.id}
+                      style={{
+                        background: '#fff',
+                        padding: 16,
+                        marginBottom: 12,
+                        borderRadius: 8,
+                        border: '1px solid #e8e8e8'
+                      }}
+                    >
+                      {/* Status Tag */}
+                      <div style={{ marginBottom: 8 }}>
+                        <Tag color={service.isActive ? 'success' : 'default'}>
+                          {service.isActive ? 'Hiển thị' : 'Ẩn'}
+                        </Tag>
+                      </div>
+
+                      {/* Name and Price */}
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+                          {service.name}
+                        </div>
+                        {service.price && (
+                          <div style={{ fontSize: 16, fontWeight: 600, color: '#1890ff', marginBottom: 4 }}>
+                            {service.price.toLocaleString('vi-VN')} đ
+                          </div>
+                        )}
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          Danh mục: {service.categoryName || 'N/A'}
+                        </Text>
+                      </div>
+
+                      {/* Image */}
+                      {service.imageUrl && (
+                        <div style={{ 
+                          width: '100%', 
+                          height: 120, 
+                          borderRadius: 6, 
+                          overflow: 'hidden',
+                          marginBottom: 12,
+                          background: '#f5f5f5'
+                        }}>
+                          <img 
+                            src={service.imageUrl} 
+                            alt="service" 
+                            style={{ 
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }} 
+                          />
+                        </div>
+                      )}
+
+                      {/* Description */}
+                      {service.description && (
+                        <div style={{ 
+                          marginBottom: 12,
+                          fontSize: 13,
+                          color: '#595959',
+                          lineHeight: 1.5
+                        }}>
+                          {service.description}
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Button
+                          icon={<EditOutlined />}
+                          onClick={() => handleEdit(service)}
+                          block
+                        >
+                          Sửa
+                        </Button>
+                        <Popconfirm
+                          title="Xóa dịch vụ?"
+                          onConfirm={() => handleDelete(service.id, 'medical-services')}
+                        >
+                          <Button 
+                            icon={<DeleteOutlined />} 
+                            danger
+                            block
+                          >
+                            Xóa
+                          </Button>
+                        </Popconfirm>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Floating Add Button */}
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    block
+                    size="large"
+                    style={{ marginTop: 16 }}
+                  >
+                    Thêm dịch vụ
+                  </Button>
+                </div>
+              )}
             </Card>
           )}
 

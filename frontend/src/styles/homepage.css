@@ -1366,3 +1366,111 @@
     background-position: 0% 50%;
   }
 }
+
+
+/* ========================================
+   RESPONSIVE - MOBILE OPTIMIZATION
+   ======================================== */
+
+@media (max-width: 768px) {
+  /* News Section Mobile */
+  .news-section {
+    padding: 40px 16px 60px;
+  }
+
+  .news-container {
+    padding: 0;
+  }
+
+  .news-header {
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  .news-title {
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  .news-card {
+    margin-bottom: 20px;
+  }
+
+  .news-card-cover {
+    height: 180px;
+  }
+
+  .news-card-title {
+    font-size: 15px;
+    height: auto;
+    -webkit-line-clamp: 2;
+    margin-bottom: 8px;
+  }
+
+  .news-card-excerpt {
+    font-size: 13px;
+    height: auto;
+    -webkit-line-clamp: 3;
+    margin-bottom: 12px;
+  }
+
+  .news-card-link {
+    font-size: 13px;
+  }
+
+  .news-more-button-wrapper {
+    margin-top: 32px;
+  }
+
+  .news-more-button {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  /* Doctors Section Mobile */
+  .doctors-section {
+    padding: 60px 16px;
+  }
+
+  .doctors-header {
+    margin-bottom: 32px;
+  }
+
+  .doctors-title {
+    font-size: 24px;
+  }
+
+  .doctors-grid {
+    gap: 0;
+  }
+
+  .doctor-card {
+    width: 100%;
+    min-width: unset;
+    padding: 16px;
+    margin-bottom: 40px;
+  }
+}
+
+@media (max-width: 576px) {
+  /* Extra small devices */
+  .news-section {
+    padding: 32px 12px 48px;
+  }
+
+  .news-title {
+    font-size: 20px;
+  }
+
+  .news-card-cover {
+    height: 160px;
+  }
+
+  .doctors-section {
+    padding: 48px 12px;
+  }
+
+  .doctors-title {
+    font-size: 20px;
+  }
+}

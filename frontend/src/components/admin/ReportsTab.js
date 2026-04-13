@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Statistic, DatePicker, Button, Table, Spin, Typography, Space, Progress } from 'antd';
+import { Card, Row, Col, Statistic, DatePicker, Button, Table, Spin, Typography, Space, Progress, Tag } from 'antd';
 import { DollarOutlined, LineChartOutlined, UserOutlined, CalendarOutlined, ReloadOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -16,10 +16,19 @@ function ReportsTab() {
     dayjs()
   ]);
   const [reportData, setReportData] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
     fetchReportData();
   }, [dateRange]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchReportData = async () => {
     setLoading(true);
@@ -177,7 +186,7 @@ function ReportsTab() {
       {/* Appointment Status Breakdown */}
       <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
         <Col xs={24} lg={12}>
-          <Card title="Trạng thái lịch hẹn" className="admin-card" style={{ borderRadius: 16 }}>
+          <Card title="Trạng thái lịch hẹn" className="admin-card" style={isMobile ? { scrollMarginTop: 80 } : { borderRadius: 16 }} bodyStyle={isMobile ? { paddingTop: 16 } : {}}>
             {appointments?.byStatus && Object.entries(appointments.byStatus).map(([status, count]) => {
               const total = appointments.totalAppointments || 1;
               const percentage = ((count / total) * 100).toFixed(1);
@@ -212,34 +221,106 @@ function ReportsTab() {
         </Col>
 
         <Col xs={24} lg={12}>
-          <Card title="Top 5 bác sĩ" className="admin-card" style={{ borderRadius: 16 }}>
-            <div className="admin-table">
-              <Table
-                dataSource={doctors?.topDoctors?.slice(0, 5) || []}
-                columns={topDoctorsColumns}
-                pagination={false}
-                rowKey="doctorId"
-                size="small"
-              />
-            </div>
+          <Card title="Top 5 bác sĩ" className="admin-card" style={isMobile ? { scrollMarginTop: 80 } : { borderRadius: 16 }} bodyStyle={isMobile ? { paddingTop: 16 } : {}}>
+            {!isMobile ? (
+              <div className="admin-table">
+                <Table
+                  dataSource={doctors?.topDoctors?.slice(0, 5) || []}
+                  columns={topDoctorsColumns}
+                  pagination={false}
+                  rowKey="doctorId"
+                  size="small"
+                  virtual={false}
+                />
+              </div>
+            ) : (
+              <div className="admin-mobile-list">
+                {(doctors?.topDoctors?.slice(0, 5) || []).length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
+                    Không có dữ liệu bác sĩ
+                  </div>
+                ) : (
+                  (doctors?.topDoctors?.slice(0, 5) || []).map((doctor, index) => (
+                    <div key={doctor.doctorId} className="admin-mobile-card">
+                      <div style={{ fontSize: 15, fontWeight: 600, color: '#2c3e50', marginBottom: 4 }}>
+                        {index + 1}. {doctor.doctorName}
+                      </div>
+                      <div style={{ fontSize: 13, color: '#666', marginBottom: 12 }}>
+                        {doctor.specialization}
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <div>
+                          <span style={{ fontSize: 12, color: '#999' }}>Lịch hẹn: </span>
+                          <span style={{ fontSize: 16, fontWeight: 600, color: '#1890ff' }}>
+                            {doctor.appointmentCount}
+                          </span>
+                        </div>
+                        <div>
+                          <span style={{ fontSize: 12, color: '#999' }}>Doanh thu: </span>
+                          <span style={{ fontSize: 16, fontWeight: 600, color: '#52c41a' }}>
+                            {(doctor.revenue / 1000000).toFixed(1)}M
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </Card>
         </Col>
       </Row>
 
       {/* Full Top Doctors Table */}
-      <Card title="Thống kê chi tiết bác sĩ" className="admin-card" style={{ borderRadius: 16 }}>
-        <div className="admin-table">
-          <Table
-            dataSource={doctors?.topDoctors || []}
-            columns={topDoctorsColumns}
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total) => `Tổng ${total} bác sĩ`
-            }}
-            rowKey="doctorId"
-          />
-        </div>
+      <Card title="Thống kê chi tiết bác sĩ" className="admin-card" style={isMobile ? { scrollMarginTop: 80 } : { borderRadius: 16 }} bodyStyle={isMobile ? { paddingTop: 16 } : {}}>
+        {!isMobile ? (
+          <div className="admin-table">
+            <Table
+              dataSource={doctors?.topDoctors || []}
+              columns={topDoctorsColumns}
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                showTotal: (total) => `Tổng ${total} bác sĩ`
+              }}
+              rowKey="doctorId"
+              virtual={false}
+            />
+          </div>
+        ) : (
+          <div className="admin-mobile-list">
+            {(doctors?.topDoctors || []).length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
+                Không có dữ liệu bác sĩ
+              </div>
+            ) : (
+              (doctors?.topDoctors || []).map((doctor, index) => (
+                <div key={doctor.doctorId} className="admin-mobile-card">
+                  <div style={{ fontSize: 15, fontWeight: 600, color: '#2c3e50', marginBottom: 4 }}>
+                    {index + 1}. {doctor.doctorName}
+                  </div>
+                  <div style={{ fontSize: 13, color: '#666', marginBottom: 12 }}>
+                    {doctor.specialization}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div>
+                      <span style={{ fontSize: 12, color: '#999' }}>Lịch hẹn: </span>
+                      <span style={{ fontSize: 16, fontWeight: 600, color: '#1890ff' }}>
+                        {doctor.appointmentCount}
+                      </span>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: 12, color: '#999' }}>Doanh thu: </span>
+                      <span style={{ fontSize: 16, fontWeight: 600, color: '#52c41a' }}>
+                        {(doctor.revenue / 1000000).toFixed(1)}M
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </Card>
     </div>
   );

@@ -6,6 +6,7 @@ import cmsAPI from '../services/cmsApi';
 import BannerSlider from '../components/BannerSlider';
 import NewsSection from '../components/NewsSection';
 import NewsSidebar from '../components/NewsSidebar';
+import '../styles/news-list.css';
 
 const { Text } = Typography;
 
@@ -138,150 +139,62 @@ function NewsListPage() {
   const sectionArticles = isSectionDetailView ? newsSectionsData[selectedSection] || [] : [];
 
   return (
-    <div style={{ background: '#f5f5f5', minHeight: '100vh', paddingTop: '64px' }}>
+    <div className="news-list-page">
       {/* Banner Slider */}
       {banners.length > 0 && <BannerSlider banners={banners} />}
       
       {/* Main Content: 2 Column Layout */}
-      <div style={{ 
-        maxWidth: 1400, 
-        margin: '0 auto', 
-        padding: '40px 20px',
-        display: 'grid',
-        gridTemplateColumns: '1fr 350px',
-        gap: 32
-      }}>
+      <div className="news-list-container">
         {/* Left Column: News Sections */}
-        <div>
+        <div className="news-list-main">
           {/* Section Detail View - Vertical List */}
           {isSectionDetailView ? (
             <div>
               {/* Section Header - Medical Style */}
-              <div style={{ 
-                background: '#fff',
-                borderRadius: 12,
-                padding: '32px',
-                marginBottom: 24,
-                borderLeft: '6px solid #0ea5e9',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-              }}>
-                <h1 style={{ 
-                  fontSize: 32,
-                  fontWeight: 700,
-                  color: '#0f172a',
-                  margin: '0 0 8px 0',
-                  letterSpacing: '-0.5px'
-                }}>
-                  {sectionsToDisplay[0].title}
-                </h1>
-                <p style={{ 
-                  fontSize: 15,
-                  color: '#64748b',
-                  margin: 0
-                }}>
-                  {sectionArticles.length} bài viết
-                </p>
+              <div className="section-header">
+                <h1>{sectionsToDisplay[0].title}</h1>
+                <p>{sectionArticles.length} bài viết</p>
               </div>
 
               {/* Vertical Article List - Clean Medical Design */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div className="article-list">
                 {sectionArticles.slice(0, visibleCount).map((article, index) => (
                   <div 
                     key={article.id}
                     onClick={() => handleArticleClick(article.slug)}
-                    style={{ 
-                      display: 'flex',
-                      gap: 20,
-                      padding: 20,
-                      borderRadius: 8,
-                      border: '1px solid #e2e8f0',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      background: '#fff'
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.boxShadow = '0 4px 16px rgba(14,165,233,0.15)';
-                      e.currentTarget.style.borderColor = '#0ea5e9';
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.boxShadow = 'none';
-                      e.currentTarget.style.borderColor = '#e2e8f0';
-                    }}
+                    className="article-card"
                   >
                     {/* Article Image */}
                     {article.imageUrl && (
-                      <div style={{ 
-                        width: 240,
-                        height: 160,
-                        flexShrink: 0,
-                        borderRadius: 6,
-                        overflow: 'hidden',
-                        background: '#f1f5f9'
-                      }}>
+                      <div className="article-image">
                         <img
                           alt={article.title}
                           src={article.imageUrl}
-                          style={{ 
-                            width: '100%', 
-                            height: '100%', 
-                            objectFit: 'cover'
-                          }}
                         />
                       </div>
                     )}
 
                     {/* Article Content */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <div className="article-content">
                       {/* Category Tag */}
                       {article.category && (
-                        <div style={{
-                          display: 'inline-block',
-                          background: '#e0f2fe',
-                          color: '#0369a1',
-                          padding: '4px 10px',
-                          borderRadius: 4,
-                          fontSize: 12,
-                          fontWeight: 600,
-                          marginBottom: 10,
-                          width: 'fit-content'
-                        }}>
+                        <div className="article-category">
                           {article.category}
                         </div>
                       )}
                       
-                      <h3 style={{ 
-                        fontSize: 18,
-                        fontWeight: 600,
-                        color: '#0f172a',
-                        margin: '0 0 10px 0',
-                        lineHeight: 1.5
-                      }}>
+                      <h3 className="article-title">
                         {article.title}
                       </h3>
                       
                       {article.excerpt && (
-                        <p style={{ 
-                          fontSize: 14,
-                          color: '#64748b',
-                          margin: '0 0 12px 0',
-                          lineHeight: 1.6,
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden'
-                        }}>
+                        <p className="article-excerpt">
                           {article.excerpt}
                         </p>
                       )}
 
-                      <div style={{ 
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 16,
-                        fontSize: 13,
-                        color: '#94a3b8'
-                      }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div className="article-meta">
+                        <span className="article-meta-item">
                           <CalendarOutlined />
                           {new Date(article.publishedAt).toLocaleDateString('vi-VN', {
                             day: 'numeric',
@@ -292,7 +205,7 @@ function NewsListPage() {
                         {article.author && (
                           <>
                             <span style={{ color: '#cbd5e1' }}>•</span>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span className="article-meta-item">
                               <UserOutlined />
                               {article.author}
                             </span>
@@ -306,17 +219,11 @@ function NewsListPage() {
 
               {/* Load More Button */}
               {sectionArticles.length > visibleCount && (
-                <div style={{ textAlign: 'center', marginTop: 32 }}>
+                <div className="load-more-section">
                   <Button 
                     onClick={handleLoadMore}
                     loading={loadingMore}
-                    style={{ 
-                      fontSize: 16,
-                      fontWeight: 500,
-                      height: 44,
-                      padding: '0 40px',
-                      borderRadius: 8
-                    }}
+                    className="load-more-button"
                     type="primary"
                   >
                     Xem thêm ({sectionArticles.length - visibleCount} bài viết)
@@ -326,13 +233,7 @@ function NewsListPage() {
 
               {/* No more articles message */}
               {sectionArticles.length > 0 && sectionArticles.length <= visibleCount && (
-                <div style={{ 
-                  textAlign: 'center', 
-                  marginTop: 32,
-                  padding: 20,
-                  background: '#f8fafc',
-                  borderRadius: 8
-                }}>
+                <div className="empty-state">
                   <Text type="secondary">
                     Đã hiển thị tất cả {sectionArticles.length} bài viết
                   </Text>
@@ -341,12 +242,7 @@ function NewsListPage() {
 
               {/* Empty state */}
               {sectionArticles.length === 0 && (
-                <div style={{ 
-                  textAlign: 'center', 
-                  padding: '60px 24px',
-                  background: '#f8fafc',
-                  borderRadius: 8
-                }}>
+                <div className="empty-state">
                   <Text type="secondary" style={{ fontSize: 16 }}>
                     Chưa có bài viết nào trong mục này
                   </Text>
@@ -393,7 +289,7 @@ function NewsListPage() {
         </div>
 
         {/* Right Column: Sidebar */}
-        <div>
+        <div className="news-list-sidebar">
           <NewsSidebar />
         </div>
       </div>

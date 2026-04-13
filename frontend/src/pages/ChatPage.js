@@ -25,6 +25,7 @@ function ChatPage({ user }) {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [newRoomName, setNewRoomName] = useState('');
   const [roomType, setRoomType] = useState('PRIVATE');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -32,10 +33,20 @@ function ChatPage({ user }) {
   useEffect(() => {
     if (user) {
       initializeChat();
+    } else {
+      setLoading(false); // Set loading to false if no user
     }
+
+    // Handle window resize for mobile detection
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
 
     return () => {
       chatWebSocketService.disconnect();
+      window.removeEventListener('resize', handleResize);
     };
   }, [user]);
 
@@ -318,10 +329,256 @@ function ChatPage({ user }) {
     );
   }
 
+  // Mobile view - completely different UI
+  if (isMobile) {
+    // Show chat list
+    if (!selectedRoom) {
+      return (
+        <>
+          <div className="mobile-chat-container">
+            <div className="mobile-chat-header">
+              <Title level={4}>
+                <MessageOutlined /> Chat Tư Vấn
+              </Title>
+            </div>
+
+            <div className="mobile-new-chat-section">
+              <Button 
+                type="primary" 
+                icon={<PlusOutlined />} 
+                onClick={startNewChat}
+                className="mobile-new-chat-btn"
+                block
+                size="large"
+              >
+                Tạo cuộc chat mới
+              </Button>
+            </div>
+
+            <div className="mobile-chat-search">
+              <Input
+                placeholder="Tìm kiếm cuộc trò chuyện..."
+                prefix={<SearchOutlined />}
+                className="search-input"
+              />
+            </div>
+
+            <div className="mobile-chat-list">
+              <List
+                dataSource={chatRooms}
+                renderItem={(room) => (
+                  <List.Item
+                    className="mobile-chat-item"
+                    onClick={() => selectRoom(room)}
+                  >
+                    <List.Item.Meta
+                      avatar={
+                        <Badge count={room.unreadCount || 0} size="small">
+                          <Avatar 
+                            src={getRoomAvatar(room)} 
+                            icon={<UserOutlined />}
+                            size={50}
+                          />
+                        </Badge>
+                      }
+                      title={
+                        <div className="mobile-room-title">
+                          <Text strong>{getRoomDisplayName(room)}</Text>
+                          <Text type="secondary" className="mobile-room-time">
+                            {room.lastMessage && formatMessageTime(room.lastMessage.sentAt)}
+                          </Text>
+                        </div>
+                      }
+                      description={
+                        <Text ellipsis className="mobile-room-last-message">
+                          {room.lastMessage ? 
+                            `${room.lastMessage.sender.firstName}: ${room.lastMessage.content}` : 
+                            'Chưa có tin nhắn'
+                          }
+                        </Text>
+                      }
+                    />
+                  </List.Item>
+                )}
+                locale={{ 
+                  emptyText: (
+                    <Empty 
+                      description="Chưa có cuộc trò chuyện nào. Nhấn nút trên để tạo chat mới!"
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    />
+                  )
+                }}
+              />
+            </div>
+          </div>
+
+          {/* New Chat Modal for Mobile */}
+          <Modal
+            title="Tạo cuộc trò chuyện mới"
+            open={showNewChatModal}
+            onOk={createNewChat}
+            onCancel={() => setShowNewChatModal(false)}
+            okText="Tạo"
+            cancelText="Hủy"
+          >
+            <div className="new-chat-form">
+              <div className="form-item">
+                <Text strong>Loại chat:</Text>
+                <Select
+                  value={roomType}
+                  onChange={setRoomType}
+                  style={{ width: '100%', marginTop: 8 }}
+                >
+                  <Option value="PRIVATE">Chat riêng</Option>
+                  <Option value="GROUP">Nhóm chat</Option>
+                  <Option value="CONSULTATION">Tư vấn</Option>
+                </Select>
+              </div>
+
+              {roomType !== 'PRIVATE' && (
+                <div className="form-item">
+                  <Text strong>Tên nhóm:</Text>
+                  <Input
+                    value={newRoomName}
+                    onChange={(e) => setNewRoomName(e.target.value)}
+                    placeholder="Nhập tên nhóm..."
+                    style={{ marginTop: 8 }}
+                  />
+                </div>
+              )}
+
+              <div className="form-item">
+                <Text strong>Chọn người tham gia:</Text>
+                <Select
+                  mode="multiple"
+                  value={selectedUsers}
+                  onChange={setSelectedUsers}
+                  placeholder="Chọn người để chat..."
+                  style={{ width: '100%', marginTop: 8 }}
+                  showSearch
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  }
+                >
+                  {/* This will be populated with available users based on role permissions */}
+                  <Option value={1}>Bác sĩ Nguyễn Văn A</Option>
+                  <Option value={2}>Tư vấn viên Trần Thị B</Option>
+                </Select>
+              </div>
+            </div>
+          </Modal>
+        </>
+      );
+    }
+
+    // Show chat messages
+    return (
+      <div className="mobile-chat-messages">
+        {/* Chat Header */}
+        <div className="mobile-messages-header">
+          <Button
+            type="text"
+            icon={<span style={{ fontSize: '20px' }}>←</span>}
+            onClick={() => {
+              setSelectedRoom(null);
+              setMessages([]);
+              if (selectedRoom) {
+                chatWebSocketService.unsubscribeFromRoom(selectedRoom.roomId);
+              }
+            }}
+            className="mobile-back-button"
+          />
+          <Avatar 
+            src={getRoomAvatar(selectedRoom)} 
+            icon={<UserOutlined />}
+            size={40}
+          />
+          <div className="mobile-chat-info">
+            <Title level={5}>{getRoomDisplayName(selectedRoom)}</Title>
+            <Text type="secondary">
+              {selectedRoom.participantCount} thành viên
+              {typingUsers.size > 0 && (
+                <span className="typing-indicator">
+                  {' • '}
+                  <Text type="secondary" className="typing-text">
+                    đang nhập...
+                  </Text>
+                </span>
+              )}
+            </Text>
+          </div>
+        </div>
+
+        {/* Messages List */}
+        <div className="mobile-messages-container">
+          <List
+            className="messages-list"
+            dataSource={messages}
+            renderItem={(message) => (
+              <div 
+                className={`message-item ${message.sender.id === user.id ? 'own-message' : 'other-message'}`}
+              >
+                {message.sender.id !== user.id && (
+                  <Avatar 
+                    src={message.sender.profileImage} 
+                    icon={<UserOutlined />}
+                    size={32}
+                    className="message-avatar"
+                  />
+                )}
+                <div className="message-content">
+                  {message.sender.id !== user.id && (
+                    <Text className="message-sender">
+                      {message.sender.firstName} {message.sender.lastName}
+                    </Text>
+                  )}
+                  <div className="message-bubble">
+                    <Text>{message.content}</Text>
+                  </div>
+                  <Text type="secondary" className="message-time">
+                    {formatMessageTime(message.sentAt)}
+                  </Text>
+                </div>
+              </div>
+            )}
+            locale={{ emptyText: <Empty description="Chưa có tin nhắn" /> }}
+          />
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Message Input */}
+        <div className="mobile-input-container">
+          <TextArea
+            value={newMessage}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
+            placeholder="Nhập tin nhắn..."
+            autoSize={{ minRows: 1, maxRows: 4 }}
+            className="mobile-message-input"
+          />
+          <Button
+            type="primary"
+            icon={<SendOutlined />}
+            onClick={sendMessage}
+            loading={sendingMessage}
+            disabled={!newMessage.trim()}
+            className="mobile-send-button"
+          >
+            Gửi
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop view - original 2-column layout
   return (
     <Layout className="chat-layout">
       {/* Chat Room List */}
-      <Sider width={320} className="chat-sidebar">
+      <Sider 
+        width={320} 
+        className="chat-sidebar"
+      >
         <div className="chat-header">
           <Title level={4}>
             <MessageOutlined /> Chat
@@ -386,7 +643,9 @@ function ChatPage({ user }) {
       </Sider>
 
       {/* Chat Messages */}
-      <Content className="chat-content">
+      <Content 
+        className="chat-content"
+      >
         {selectedRoom ? (
           <>
             {/* Chat Header */}

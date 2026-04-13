@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Button, Space, Modal, Select, Input, message, Tabs, DatePicker } from 'antd';
+import { Table, Tag, Button, Space, Modal, Select, Input, message, Tabs, DatePicker, Typography } from 'antd';
 import { EyeOutlined, UserAddOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -7,6 +7,7 @@ import dayjs from 'dayjs';
 const { TextArea } = Input;
 const { Option } = Select;
 const { TabPane } = Tabs;
+const { Text } = Typography;
 
 function QuickBookingsTab({ isDoctorView = false }) {
   const [bookings, setBookings] = useState([]);
@@ -22,6 +23,7 @@ function QuickBookingsTab({ isDoctorView = false }) {
   const [activeTab, setActiveTab] = useState('ALL');
   const [confirmedDateTime, setConfirmedDateTime] = useState(null);
   const [availableDoctors, setAvailableDoctors] = useState([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
     fetchBookings();
@@ -29,6 +31,14 @@ function QuickBookingsTab({ isDoctorView = false }) {
       fetchDoctors();
     }
   }, [isDoctorView]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     // Khi mở modal phân công, load bác sĩ theo chuyên khoa
@@ -405,29 +415,115 @@ function QuickBookingsTab({ isDoctorView = false }) {
         <TabPane tab="Đã hủy" key="CANCELLED" />
       </Tabs>
 
-      <Table
-        columns={columns}
-        dataSource={filteredBookings}
-        rowKey="id"
-        loading={loading}
-        pagination={{ pageSize: 10 }}
-        scroll={{ x: 1500 }}
-        components={{
-          header: {
-            cell: (props) => (
-              <th
-                {...props}
-                style={{
-                  ...props.style,
-                  backgroundColor: 'rgb(0, 58, 112)',
-                  color: 'white',
-                  fontWeight: 'bold'
-                }}
-              />
-            )
-          }
-        }}
-      />
+      {!isMobile ? (
+        <Table
+          columns={columns}
+          dataSource={filteredBookings}
+          rowKey="id"
+          loading={loading}
+          pagination={{ pageSize: 10 }}
+          scroll={{ x: 1500 }}
+          virtual={false}
+          components={{
+            header: {
+              cell: (props) => (
+                <th
+                  {...props}
+                  style={{
+                    ...props.style,
+                    backgroundColor: 'rgb(0, 58, 112)',
+                    color: 'white',
+                    fontWeight: 'bold'
+                  }}
+                />
+              )
+            }
+          }}
+        />
+      ) : (
+        <div className="admin-mobile-list">
+          {filteredBookings.map((booking) => (
+            <div key={booking.id} className="admin-mobile-card">
+              <div style={{ marginBottom: 12 }}>
+                {getStatusTag(booking.status)}
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <Text strong style={{ display: 'block', fontSize: 14 }}>ID: #{booking.id}</Text>
+                <Text strong style={{ display: 'block', fontSize: 14 }}>{booking.patientName}</Text>
+                <Text type="secondary" style={{ fontSize: 13 }}>{booking.phoneNumber}</Text>
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <Text style={{ fontSize: 13, display: 'block' }}>Chuyên khoa: {booking.specialty}</Text>
+                <Text style={{ fontSize: 13, display: 'block' }}>
+                  Ngày mong muốn: {dayjs(booking.preferredDate).format('DD/MM/YYYY')}
+                </Text>
+                <Text style={{ fontSize: 13, display: 'block' }}>
+                  Khung giờ: {getTimeSlotText(booking.preferredTime)}
+                </Text>
+              </div>
+              {booking.confirmedDate && (
+                <div style={{ marginBottom: 8 }}>
+                  <Tag color="blue">{dayjs(booking.confirmedDate).format('DD/MM/YYYY HH:mm')}</Tag>
+                </div>
+              )}
+              {booking.assignedDoctorName && (
+                <div style={{ marginBottom: 8 }}>
+                  <Text style={{ fontSize: 13 }}>Bác sĩ: {booking.assignedDoctorName}</Text>
+                </div>
+              )}
+              <div style={{ marginBottom: 8 }}>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  Tạo: {dayjs(booking.createdAt).format('DD/MM/YYYY HH:mm')}
+                </Text>
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <Button
+                  block
+                  icon={<EyeOutlined />}
+                  onClick={() => handleViewDetail(booking)}
+                >
+                  Xem chi tiết
+                </Button>
+                {!isDoctorView && booking.status === 'PENDING' && (
+                  <>
+                    <Button
+                      block
+                      type="primary"
+                      icon={<UserAddOutlined />}
+                      onClick={() => handleAssignDoctor(booking)}
+                    >
+                      Phân công
+                    </Button>
+                    <Button
+                      block
+                      danger
+                      icon={<CloseOutlined />}
+                      onClick={() => handleCancelBooking(booking)}
+                    >
+                      Hủy
+                    </Button>
+                  </>
+                )}
+                {isDoctorView && booking.status === 'ASSIGNED' && (
+                  <Button
+                    block
+                    type="primary"
+                    icon={<CheckOutlined />}
+                    onClick={() => handleConfirmAndConvert(booking)}
+                  >
+                    Xác nhận
+                  </Button>
+                )}
+                {booking.status === 'CONVERTED' && booking.convertedAppointmentId && (
+                  <Tag color="success" style={{ width: '100%', textAlign: 'center' }}>
+                    Đã chuyển #{booking.convertedAppointmentId}
+                  </Tag>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Detail Modal */}
       <Modal
@@ -439,7 +535,7 @@ function QuickBookingsTab({ isDoctorView = false }) {
             Đóng
           </Button>
         ]}
-        width={600}
+        width={isMobile ? '90%' : 600}
       >
         {selectedBooking && (
           <div style={{ lineHeight: '2' }}>
@@ -488,7 +584,7 @@ function QuickBookingsTab({ isDoctorView = false }) {
         onCancel={() => setAssignModalVisible(false)}
         okText="Phân công"
         cancelText="Hủy"
-        width={600}
+        width={isMobile ? '90%' : 600}
       >
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
