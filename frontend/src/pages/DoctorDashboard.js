@@ -1,12 +1,14 @@
-import React from 'react';
-import { Card, Row, Col, Button } from 'antd';
+﻿import React from 'react';
+import { Card, Row, Col } from 'antd';
 import { Link } from 'react-router-dom';
 import {
   DollarOutlined,
   CalendarOutlined,
   UserOutlined,
   FileTextOutlined,
-  EditOutlined
+  EditOutlined,
+  ClockCircleOutlined,
+  MessageOutlined
 } from '@ant-design/icons';
 import '../styles/doctor-dashboard.css';
 
@@ -44,7 +46,19 @@ const DoctorDashboard = () => {
         </Col>
 
         <Col xs={24} sm={12} lg={8}>
-          <Link to="/doctor/profile-edit">
+          <Link to="/doctor/quick-bookings">
+            <Card hoverable className="dashboard-card">
+              <div className="card-icon" style={{ background: 'rgb(0, 58, 112)' }}>
+                <ClockCircleOutlined />
+              </div>
+              <h3>Đặt Lịch Nhanh</h3>
+              <p>Quản lý đặt lịch nhanh của bệnh nhân</p>
+            </Card>
+          </Link>
+        </Col>
+
+        <Col xs={24} sm={12} lg={8}>
+          <Link to="/doctor/profile/edit">
             <Card hoverable className="dashboard-card">
               <div className="card-icon" style={{ background: '#722ed1' }}>
                 <EditOutlined />
@@ -83,7 +97,7 @@ const DoctorDashboard = () => {
           <Link to="/chat">
             <Card hoverable className="dashboard-card">
               <div className="card-icon" style={{ background: '#eb2f96' }}>
-                <FileTextOutlined />
+                <MessageOutlined />
               </div>
               <h3>Tin Nhắn</h3>
               <p>Trò chuyện với bệnh nhân</p>

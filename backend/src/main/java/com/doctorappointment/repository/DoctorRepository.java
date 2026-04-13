@@ -15,6 +15,9 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 
     @Query("SELECT d FROM Doctor d JOIN FETCH d.user WHERE d.user.active = true")
     List<Doctor> findByUser_ActiveTrue();
+    
+    @Query("SELECT d FROM Doctor d JOIN FETCH d.user WHERE d.specialization LIKE %:specialization% AND d.user.active = true")
+    List<Doctor> findBySpecializationContainingIgnoreCaseAndUser_ActiveTrue(@Param("specialization") String specialization);
 
     Optional<Doctor> findByUserId(Long userId);
     

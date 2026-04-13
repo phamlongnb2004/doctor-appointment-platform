@@ -245,4 +245,21 @@ public class DoctorController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
+    
+    /**
+     * Get available doctors for a specific date and time slot
+     * Returns doctors who don't have appointments in the specified time range
+     */
+    @GetMapping("/available")
+    public ResponseEntity<List<DoctorResponse>> getAvailableDoctors(
+            @RequestParam String dateTime,
+            @RequestParam(required = false) String specialty) {
+        try {
+            List<DoctorResponse> availableDoctors = doctorService.getAvailableDoctors(dateTime, specialty);
+            return ResponseEntity.ok(availableDoctors);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(List.of());
+        }
+    }
 }

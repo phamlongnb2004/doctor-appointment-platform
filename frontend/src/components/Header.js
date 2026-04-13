@@ -189,14 +189,8 @@ function HeaderComponent({ user, onLogout }) {
     userMenuItems.push({
       key: 'doctor-dashboard',
       icon: <DashboardOutlined />,
-      label: 'Bảng điều khiển bác sĩ',
+      label: 'Bảng điều khiển',
       onClick: () => navigate('/doctor/dashboard'),
-    });
-    userMenuItems.push({
-      key: 'doctor-revenue',
-      icon: <DollarOutlined />,
-      label: 'Doanh thu của tôi',
-      onClick: () => navigate('/doctor/revenue'),
     });
     userMenuItems.push({
       key: 'doctor-profile-edit',
@@ -831,13 +825,22 @@ function HeaderComponent({ user, onLogout }) {
               )}
               
               {isDoctor && (
-                <div 
-                  onClick={() => { navigate('/doctor/verify-code'); setMobileMenuOpen(false); }}
-                  style={{ padding: '12px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
-                >
-                  <SettingOutlined />
-                  <span>Xác nhận mã dịch vụ</span>
-                </div>
+                <>
+                  <div 
+                    onClick={() => { navigate('/doctor/dashboard'); setMobileMenuOpen(false); }}
+                    style={{ padding: '12px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+                  >
+                    <DashboardOutlined />
+                    <span>Bảng điều khiển</span>
+                  </div>
+                  <div 
+                    onClick={() => { navigate('/doctor/verify-code'); setMobileMenuOpen(false); }}
+                    style={{ padding: '12px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+                  >
+                    <SettingOutlined />
+                    <span>Xác nhận mã dịch vụ</span>
+                  </div>
+                </>
               )}
               
               <div 

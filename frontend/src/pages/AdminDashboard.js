@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { userAPI, doctorAPI, appointmentAPI } from '../services/api';
 import webSocketService from '../services/websocket';
 import ReportsTab from '../components/admin/ReportsTab';
+import QuickBookingsTab from '../components/admin/QuickBookingsTab';
 import '../styles/admin.css';
 
 const { Header, Content, Sider } = Layout;
@@ -274,6 +275,7 @@ function AdminDashboard({ user, onLogout }) {
     { key: 'users', icon: <TeamOutlined />, label: 'Quản lý người dùng' },
     { key: 'doctors', icon: <MedicineBoxOutlined />, label: 'Quản lý bác sĩ' },
     { key: 'appointments', icon: <CalendarOutlined />, label: 'Lịch hẹn' },
+    { key: 'quickbookings', icon: <ClockCircleOutlined />, label: 'Đặt khám nhanh' },
     { key: 'orders', icon: <ShoppingCartOutlined />, label: 'Quản lý đơn hàng' },
     { key: 'newsletter', icon: <MailOutlined />, label: 'Thành viên Newsletter' },
     { key: 'cms', icon: <EditOutlined />, label: 'Quản lý nội dung' },
@@ -688,6 +690,8 @@ function AdminDashboard({ user, onLogout }) {
     switch (selectedKey) {
       case 'reports':
         return <ReportsTab />;
+      case 'quickbookings':
+        return <QuickBookingsTab />;
       case 'users':
         return (
           <div className="admin-section">

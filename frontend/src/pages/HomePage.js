@@ -8,6 +8,7 @@ import axios from 'axios';
 import BannerSlider from '../components/BannerSlider';
 import CertificationSlider from '../components/CertificationSlider';
 import NewsSection from '../components/NewsSection';
+import QuickBookingForm from '../components/QuickBookingForm';
 import '../styles/animations.css';
 import '../styles/homepage.css';
 
@@ -45,6 +46,9 @@ function HomePage() {
   const [verificationModalVisible, setVerificationModalVisible] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [subscribing, setSubscribing] = useState(false);
+  
+  // Quick booking state
+  const [quickBookingVisible, setQuickBookingVisible] = useState(false);
 
   useEffect(() => {
     fetchAllData();
@@ -294,69 +298,121 @@ function HomePage() {
               <Card
                 style={{
                   height: '100%',
+                  minHeight: 280,
                   borderRadius: 16,
                   border: 'none',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                  background: '#e6f7ff'
+                  background: 'linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%)'
                 }}
-                styles={{ body: { padding: '32px 24px' } }}
+                styles={{ body: { padding: '32px 24px', display: 'flex', flexDirection: 'column', height: '100%' } }}
               >
-                <Title level={4} style={{ color: '#13c2c2', marginBottom: 16, fontSize: 20 }}>
+                <div style={{ 
+                  width: 48, 
+                  height: 48,
+                  marginBottom: 16,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#13c2c2',
+                  borderRadius: 12
+                }}>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                
+                <Title level={4} style={{ 
+                  color: '#13c2c2', 
+                  marginTop: 0,
+                  marginBottom: 12, 
+                  fontSize: 18,
+                  fontWeight: 600,
+                  lineHeight: 1.4
+                }}>
                   Đặt lịch nhanh
                 </Title>
-                <Paragraph style={{ color: '#666', fontSize: 14, marginBottom: 24 }}>
-                  Quý khách hàng vui lòng điền đầy đủ thông tin vào bảng dưới đây để đặt lịch nhanh.
+                
+                <Paragraph style={{ 
+                  color: '#666', 
+                  fontSize: 14, 
+                  lineHeight: 1.7,
+                  marginBottom: 16
+                }}>
+                  Quý khách hàng vui lòng điền đầy đủ thông tin để đặt lịch nhanh. Chúng tôi sẽ liên hệ với bạn sớm nhất.
                 </Paragraph>
                 
-                <Form layout="vertical">
-                  {/* Row 1: Họ và tên + Số điện thoại */}
-                  <Row gutter={16}>
-                    <Col span={12}>
-                      <Form.Item 
-                        label={<span style={{ fontWeight: 600 }}>Họ và tên *</span>}
-                        style={{ marginBottom: 16 }}
-                      >
-                        <Input placeholder="Nhập họ và tên" size="large" />
-                      </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                      <Form.Item 
-                        label={<span style={{ fontWeight: 600 }}>Số điện thoại *</span>}
-                        style={{ marginBottom: 16 }}
-                      >
-                        <Input placeholder="Nhập số điện thoại" size="large" />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                  
-                  {/* Row 2: Dịch vụ */}
-                  <Form.Item 
-                    label={<span style={{ fontWeight: 600 }}>Dịch vụ *</span>}
-                    style={{ marginBottom: 16 }}
-                  >
-                    <Select placeholder="Chọn dịch vụ" size="large">
-                      <Select.Option value="kham-tong-quat">Khám tổng quát</Select.Option>
-                      <Select.Option value="xet-nghiem">Xét nghiệm</Select.Option>
-                      <Select.Option value="chan-doan-hinh-anh">Chẩn đoán hình ảnh</Select.Option>
-                    </Select>
-                  </Form.Item>
-                  
-                  {/* Row 3: Nội dung yêu cầu */}
-                  <Form.Item 
-                    label={<span style={{ fontWeight: 600 }}>Nội dung yêu cầu</span>}
-                    style={{ marginBottom: 20 }}
-                  >
-                    <Input.TextArea 
-                      rows={3} 
-                      placeholder="Tôi cảm thấy..." 
-                      style={{ resize: 'none' }}
-                    />
-                  </Form.Item>
-                  
-                  {/* Submit Button */}
+                {/* 4 lợi ích chính */}
+                <div style={{ 
+                  background: 'rgba(255, 255, 255, 0.6)',
+                  borderRadius: 8,
+                  padding: '12px 16px',
+                  marginBottom: 12
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 11L12 14L22 4M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="#13c2c2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <Text style={{ fontSize: 13, color: '#595959', fontWeight: 500 }}>
+                      Phản hồi trong 15 phút
+                    </Text>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 11L12 14L22 4M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="#13c2c2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <Text style={{ fontSize: 13, color: '#595959', fontWeight: 500 }}>
+                      Miễn phí tư vấn
+                    </Text>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 11L12 14L22 4M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="#13c2c2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <Text style={{ fontSize: 13, color: '#595959', fontWeight: 500 }}>
+                      Đội ngũ bác sĩ giàu kinh nghiệm
+                    </Text>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 11L12 14L22 4M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="#13c2c2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <Text style={{ fontSize: 13, color: '#595959', fontWeight: 500 }}>
+                      Hỗ trợ 24/7
+                    </Text>
+                  </div>
+                </div>
+                
+                {/* Quy trình đặt lịch */}
+                <div style={{ 
+                  background: 'rgba(255, 255, 255, 0.5)',
+                  borderRadius: 8,
+                  padding: '10px 16px',
+                  marginBottom: 12
+                }}>
+                  <Text style={{ fontSize: 12, color: '#8c8c8c', display: 'block', marginBottom: 6, fontWeight: 600 }}>
+                    Quy trình đặt lịch:
+                  </Text>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, marginBottom: 4 }}>
+                    <Text style={{ fontSize: 12, color: '#13c2c2', fontWeight: 700, minWidth: 16 }}>1.</Text>
+                    <Text style={{ fontSize: 12, color: '#595959', lineHeight: 1.5 }}>Điền thông tin</Text>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, marginBottom: 4 }}>
+                    <Text style={{ fontSize: 12, color: '#13c2c2', fontWeight: 700, minWidth: 16 }}>2.</Text>
+                    <Text style={{ fontSize: 12, color: '#595959', lineHeight: 1.5 }}>Nhận xác nhận</Text>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                    <Text style={{ fontSize: 12, color: '#13c2c2', fontWeight: 700, minWidth: 16 }}>3.</Text>
+                    <Text style={{ fontSize: 12, color: '#595959', lineHeight: 1.5 }}>Đến khám đúng giờ</Text>
+                  </div>
+                </div>
+                
+                <div style={{ 
+                  marginTop: 'auto'
+                }}>
                   <Button 
-                    size="large" 
+                    size="large"
                     block
+                    onClick={() => setQuickBookingVisible(true)}
                     style={{ 
                       background: '#13c2c2',
                       borderColor: '#13c2c2',
@@ -364,8 +420,7 @@ function HomePage() {
                       borderRadius: 8,
                       height: 48,
                       fontSize: 16,
-                      fontWeight: 600,
-                      marginBottom: 16
+                      fontWeight: 600
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = '#36cfc9';
@@ -376,19 +431,9 @@ function HomePage() {
                       e.currentTarget.style.borderColor = '#13c2c2';
                     }}
                   >
-                    Đăng ký ngay
+                    Đặt lịch ngay
                   </Button>
-                  
-                  {/* Footer Link */}
-                  <div style={{ textAlign: 'center' }}>
-                    <Text style={{ fontSize: 12, color: '#666' }}>
-                      Cần tư vấn trực tiếp?{' '}
-                      <a href="/doctors" style={{ color: '#13c2c2', fontWeight: 600 }}>
-                        Quy chế hoạt động
-                      </a>
-                    </Text>
-                  </div>
-                </Form>
+                </div>
               </Card>
             </Col>
             
@@ -1339,6 +1384,12 @@ function HomePage() {
           </Text>
         </div>
       </Modal>
+      
+      {/* Quick Booking Modal */}
+      <QuickBookingForm 
+        visible={quickBookingVisible}
+        onClose={() => setQuickBookingVisible(false)}
+      />
       </>
       )}
     </div>

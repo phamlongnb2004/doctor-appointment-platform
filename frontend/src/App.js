@@ -11,6 +11,8 @@ import AppointmentPage from './pages/AppointmentPage';
 import AppointmentsListPage from './pages/AppointmentsListPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminDashboard from './pages/AdminDashboard';
+import DoctorDashboard from './pages/DoctorDashboard';
+import DoctorQuickBookingsPage from './pages/DoctorQuickBookingsPage';
 import ChatPage from './pages/ChatPage';
 import AdminCMSPage from './pages/AdminCMSPage';
 import DoctorArticlesPage from './pages/DoctorArticlesPage';
@@ -31,7 +33,6 @@ import ServiceWalletPage from './pages/ServiceWalletPage';
 import DoctorVerifyCodePage from './pages/DoctorVerifyCodePage';
 import DoctorExaminationPage from './pages/DoctorExaminationPage';
 import DoctorRevenuePage from './pages/DoctorRevenuePage';
-import DoctorDashboard from './pages/DoctorDashboard';
 import PatientMedicalHistoryPage from './pages/PatientMedicalHistoryPage';
 import NotFoundPage from './pages/NotFoundPage';
 import Header from './components/Header';
@@ -157,6 +158,18 @@ function AppContent({ user, isAuthenticated, handleLogin, handleLogout, handleUs
             }
           />
           
+          {/* Doctor Quick Bookings Route - For doctors only */}
+          <Route
+            path="/doctor/quick-bookings"
+            element={
+              isAuthenticated && isDoctor ? (
+                <DoctorQuickBookingsPage />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          
           {/* Doctor Examination Route - For doctors only */}
           <Route
             path="/doctor/examination/:appointmentId"
@@ -214,6 +227,8 @@ function AppContent({ user, isAuthenticated, handleLogin, handleLogout, handleUs
               )
             }
           />
+          
+          {/* Doctor Only Routes */}
           <Route
             path="/admin/users"
             element={
