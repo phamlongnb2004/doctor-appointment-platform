@@ -28,6 +28,7 @@ function ChatPage({ user }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
@@ -242,7 +243,9 @@ function ChatPage({ user }) {
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   };
 
   const startNewChat = async () => {
@@ -510,7 +513,7 @@ function ChatPage({ user }) {
         </div>
 
         {/* Messages List */}
-        <div className="mobile-messages-container">
+        <div className="mobile-messages-container" ref={messagesContainerRef}>
           <List
             className="messages-list"
             dataSource={messages}
@@ -672,7 +675,7 @@ function ChatPage({ user }) {
             </div>
 
             {/* Messages List */}
-            <div className="chat-messages-container">
+            <div className="chat-messages-container" ref={messagesContainerRef}>
               <List
                 className="messages-list"
                 dataSource={messages}
