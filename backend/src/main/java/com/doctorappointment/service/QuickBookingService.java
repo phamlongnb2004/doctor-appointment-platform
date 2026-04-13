@@ -96,7 +96,16 @@ public class QuickBookingService {
         
         // Set giờ cụ thể admin đã chọn
         if (confirmedDateTime != null && !confirmedDateTime.isEmpty()) {
-            quickBooking.setConfirmedDate(LocalDateTime.parse(confirmedDateTime));
+            try {
+                // Parse ISO 8601 format with timezone (e.g., "2026-04-14T10:00:00.000Z")
+                quickBooking.setConfirmedDate(
+                    java.time.ZonedDateTime.parse(confirmedDateTime)
+                        .toLocalDateTime()
+                );
+            } catch (Exception e) {
+                // Fallback to LocalDateTime.parse if no timezone
+                quickBooking.setConfirmedDate(LocalDateTime.parse(confirmedDateTime));
+            }
         }
         
         quickBooking.setUpdatedAt(LocalDateTime.now());
