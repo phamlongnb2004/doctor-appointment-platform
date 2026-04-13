@@ -220,18 +220,6 @@ function ServiceDetailPage() {
                 )}
               </div>
 
-              {/* Description */}
-              <div style={{ 
-                padding: 16, 
-                background: '#f5f5f5', 
-                borderRadius: 8,
-                marginBottom: 24
-              }}>
-                <div style={{ margin: 0, fontSize: 15, lineHeight: 1.8, whiteSpace: 'pre-line' }}>
-                  {service.description}
-                </div>
-              </div>
-
               {/* Deal Info */}
               <div style={{ 
                 padding: 20, 
