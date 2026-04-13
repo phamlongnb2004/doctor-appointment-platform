@@ -98,10 +98,12 @@ public class QuickBookingService {
         if (confirmedDateTime != null && !confirmedDateTime.isEmpty()) {
             try {
                 // Parse ISO 8601 format with timezone (e.g., "2026-04-14T10:00:00.000Z")
-                quickBooking.setConfirmedDate(
-                    java.time.ZonedDateTime.parse(confirmedDateTime)
-                        .toLocalDateTime()
+                // Convert from UTC to Vietnam timezone (UTC+7)
+                java.time.ZonedDateTime utcTime = java.time.ZonedDateTime.parse(confirmedDateTime);
+                java.time.ZonedDateTime vietnamTime = utcTime.withZoneSameInstant(
+                    java.time.ZoneId.of("Asia/Ho_Chi_Minh")
                 );
+                quickBooking.setConfirmedDate(vietnamTime.toLocalDateTime());
             } catch (Exception e) {
                 // Fallback to LocalDateTime.parse if no timezone
                 quickBooking.setConfirmedDate(LocalDateTime.parse(confirmedDateTime));
