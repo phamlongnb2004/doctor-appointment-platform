@@ -70,7 +70,9 @@ function ProfilePage({ user, onUserUpdate }) {
       const response = await userAPI.uploadProfileImage(user.id, file);
       console.log('Upload response:', response.data);
       if (response.data && response.data.profileImage) {
-        setPreviewImage(response.data.profileImage);
+        // Add timestamp to force image reload
+        const imageUrl = response.data.profileImage + '?t=' + new Date().getTime();
+        setPreviewImage(imageUrl);
         message.success('Cập nhật ảnh đại diện thành công!');
         if (onUserUpdate) {
           onUserUpdate({ ...user, profileImage: response.data.profileImage });
@@ -95,7 +97,9 @@ function ProfilePage({ user, onUserUpdate }) {
       const response = await userAPI.uploadCoverImage(user.id, file);
       console.log('Upload response:', response.data);
       if (response.data && response.data.coverImage) {
-        setPreviewCover(response.data.coverImage);
+        // Add timestamp to force image reload
+        const imageUrl = response.data.coverImage + '?t=' + new Date().getTime();
+        setPreviewCover(imageUrl);
         message.success('Cập nhật ảnh bìa thành công!');
         if (onUserUpdate) {
           onUserUpdate({ ...user, coverImage: response.data.coverImage });
@@ -176,12 +180,15 @@ function ProfilePage({ user, onUserUpdate }) {
     <div ref={flowerContainerRef} className="profile-page" style={{ padding: '0 24px 50px 24px' }}>
       {/* Cover Image Section */}
       <div className="cover-section" style={{ position: 'relative', height: 280 }}>
-        <div style={{ 
-          position: 'absolute', 
-          inset: 0, 
-          background: previewCover ? `url(${previewCover}) center/cover no-repeat` : 'linear-gradient(135deg, #003a70 0%, #0066cc 100%)',
-          transition: 'all 0.3s ease'
-        }}></div>
+        <div 
+          key={previewCover} 
+          style={{ 
+            position: 'absolute', 
+            inset: 0, 
+            background: previewCover ? `url(${previewCover}) center/cover no-repeat` : 'linear-gradient(135deg, #003a70 0%, #0066cc 100%)',
+            transition: 'all 0.3s ease'
+          }}
+        ></div>
         <div style={{ 
           position: 'absolute', 
           inset: 0, 
