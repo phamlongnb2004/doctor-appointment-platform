@@ -44,6 +44,7 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final UserSessionService userSessionService;
+    private final com.doctorappointment.service.PasswordResetService passwordResetService;
 
     // Secret key for admin operations - change this to your own secret
     private static final String SECRET_KEY = "mySuperSecretAdminKey2026";
@@ -575,6 +576,102 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Đổi mật khẩu thất bại: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * Forgot password - Gửi mã reset password qua email
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            
+            if (email == null || email.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng nhập email"));
+            }
+            
+            // Kiểm tra email tồn tại
+            Optional<User> userOpt = userService.getUserByEmail(email);
+            if (userOpt.isEmpty()) {
+                // Không nên tiết lộ email không tồn tại (security best practice)
+                // Nhưng vẫn trả về success để không bị brute force attack
+                return ResponseEntity.ok(Map.of("message", "Nếu email tồn tại, mã xác nhận đã được gửi"));
+            }
+            
+            passwordResetService.sendPasswordResetToken(email);
+            
+            return ResponseEntity.ok(Map.of(
+                "message", "Mã xác nhận đã được gửi đến email của bạn",
+                "email", email
+            ));
+        } catch (Exception e) {
+            System.err.println("❌ Forgot password error: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Có lỗi xảy ra, vui lòng thử lại sau"));
+        }
+    }
+    
+    /**
+     * Verify reset token - Kiểm tra mã reset có hợp lệ không
+     */
+    @PostMapping("/verify-reset-token")
+    public ResponseEntity<?> verifyResetToken(@RequestBody Map<String, String> request) {
+        try {
+            String token = request.get("token");
+            
+            if (token == null || token.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng nhập mã xác nhận"));
+            }
+            
+            boolean isValid = passwordResetService.verifyResetToken(token);
+            
+            if (isValid) {
+                return ResponseEntity.ok(Map.of(
+                    "valid", true,
+                    "message", "Mã xác nhận hợp lệ"
+                ));
+            } else {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "valid", false,
+                    "error", "Mã xác nhận không hợp lệ hoặc đã hết hạn"
+                ));
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Verify reset token error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Có lỗi xảy ra, vui lòng thử lại sau"));
+        }
+    }
+    
+    /**
+     * Reset password - Đặt lại mật khẩu với mã xác nhận
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        try {
+            String token = request.get("token");
+            String newPassword = request.get("newPassword");
+            
+            if (token == null || token.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng nhập mã xác nhận"));
+            }
+            
+            if (newPassword == null || newPassword.length() < 6) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Mật khẩu phải có ít nhất 6 ký tự"));
+            }
+            
+            passwordResetService.resetPassword(token, newPassword);
+            
+            return ResponseEntity.ok(Map.of("message", "Đặt lại mật khẩu thành công"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            System.err.println("❌ Reset password error: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Có lỗi xảy ra, vui lòng thử lại sau"));
         }
     }
 }

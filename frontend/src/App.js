@@ -31,6 +31,7 @@ import SePayCheckoutPage from './pages/SePayCheckoutPage';
 import SePayTestPage from './pages/SePayTestPage';
 import ServiceWalletPage from './pages/ServiceWalletPage';
 import DoctorVerifyCodePage from './pages/DoctorVerifyCodePage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import DoctorExaminationPage from './pages/DoctorExaminationPage';
 import DoctorRevenuePage from './pages/DoctorRevenuePage';
 import PatientMedicalHistoryPage from './pages/PatientMedicalHistoryPage';
@@ -77,6 +78,7 @@ function AppContent({ user, isAuthenticated, handleLogin, handleLogout, handleUs
           <Route path="/sepay-test" element={<SePayTestPage />} />
           <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/doctors" element={<DoctorListPage />} />
           <Route path="/doctors/:id" element={<DoctorDetailPage />} />
           <Route path="/news" element={<NewsListPage />} />

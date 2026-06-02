@@ -111,7 +111,7 @@ function LoginPage({ onLogin }) {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
               <Checkbox>Ghi nhớ đăng nhập</Checkbox>
-              <Link>Quên mật khẩu?</Link>
+              <Link onClick={() => navigate('/forgot-password')}>Quên mật khẩu?</Link>
             </div>
 
             <Form.Item>

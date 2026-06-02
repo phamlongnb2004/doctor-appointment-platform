@@ -303,6 +303,121 @@ public class SendGridEmailService {
             """, name != null ? name : "bạn");
     }
     
+    public void sendPasswordResetEmail(String toEmail, String name, String resetToken) {
+        if (sendGridApiKey == null || sendGridApiKey.trim().isEmpty()) {
+            logPasswordResetEmailToConsole(toEmail, name, resetToken);
+            return;
+        }
+        
+        try {
+            Email from = new Email(fromEmail, fromName);
+            Email to = new Email(toEmail);
+            String subject = "Yêu cầu đặt lại mật khẩu - KHAMNOW";
+            Content content = new Content("text/html", buildPasswordResetEmailContent(name, resetToken));
+            
+            Mail mail = new Mail(from, subject, to, content);
+            
+            SendGrid sg = new SendGrid(sendGridApiKey);
+            Request request = new Request();
+            
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            
+            Response response = sg.api(request);
+            
+            if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
+                System.out.println("✅ SendGrid password reset email sent successfully to: " + toEmail);
+            } else {
+                System.err.println("❌ SendGrid failed with status " + response.getStatusCode() + ": " + response.getBody());
+                
+                if (response.getStatusCode() == 401 || response.getStatusCode() == 402) {
+                    System.err.println("⚠️  SendGrid credits exceeded or unauthorized. Falling back to console logging.");
+                    sendGridApiKey = "";
+                }
+                
+                logPasswordResetEmailToConsole(toEmail, name, resetToken);
+            }
+        } catch (IOException e) {
+            System.err.println("❌ Failed to send password reset email via SendGrid to: " + toEmail);
+            e.printStackTrace();
+            logPasswordResetEmailToConsole(toEmail, name, resetToken);
+        }
+    }
+    
+    private void logPasswordResetEmailToConsole(String toEmail, String name, String resetToken) {
+        System.out.println("=".repeat(70));
+        System.out.println("📧 SENDING PASSWORD RESET EMAIL (Console Mode)");
+        System.out.println("=".repeat(70));
+        System.out.println("To: " + toEmail);
+        System.out.println("Subject: Yêu cầu đặt lại mật khẩu - KHAMNOW");
+        System.out.println("");
+        System.out.println("Xin chào " + (name != null ? name : "bạn") + ",");
+        System.out.println("");
+        System.out.println("🔑 Mã đặt lại mật khẩu của bạn là: " + resetToken);
+        System.out.println("");
+        System.out.println("Vui lòng nhập mã này vào trang web để đặt lại mật khẩu.");
+        System.out.println("Mã có hiệu lực trong 15 phút.");
+        System.out.println("=".repeat(70));
+    }
+    
+    private String buildPasswordResetEmailContent(String name, String resetToken) {
+        return String.format("""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+                    .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+                    .header { background: linear-gradient(135deg, #0066cc 0%%, #004d99 100%%); color: white; padding: 40px 30px; text-align: center; }
+                    .header h1 { margin: 0 0 10px 0; font-size: 32px; font-weight: 700; letter-spacing: 1px; }
+                    .content { padding: 40px 30px; }
+                    .code-box { background: linear-gradient(135deg, #fff3cd 0%%, #ffe69c 100%%); border: 3px dashed #ffc107; padding: 30px; text-align: center; margin: 30px 0; border-radius: 12px; }
+                    .code { font-size: 42px; font-weight: 800; color: #d46b08; letter-spacing: 8px; font-family: 'Courier New', monospace; }
+                    .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 8px; color: #856404; }
+                    .footer { background: #f5f5f5; color: #666; padding: 30px; text-align: center; font-size: 13px; }
+                    .btn { display: inline-block; background: #0066cc; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; font-weight: 600; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>🔒 KHAMNOW</h1>
+                        <p>Đặt lại mật khẩu</p>
+                    </div>
+                    <div class="content">
+                        <p>Xin chào <strong>%s</strong>,</p>
+                        <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</p>
+                        <p>Để đặt lại mật khẩu, vui lòng sử dụng mã xác nhận sau:</p>
+                        <div class="code-box">
+                            <div class="code">%s</div>
+                        </div>
+                        <div class="warning">
+                            <strong>⏰ LƯU Ý QUAN TRỌNG:</strong><br>
+                            • Mã xác nhận có hiệu lực trong <strong>15 phút</strong>.<br>
+                            • Mã chỉ có thể sử dụng <strong>1 lần</strong>.<br>
+                            • Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.
+                        </div>
+                        <p>Nếu bạn gặp vấn đề, vui lòng liên hệ với chúng tôi qua:</p>
+                        <ul>
+                            <li>Email: support@khamnow.com</li>
+                            <li>Hotline: 1900 56 56 56</li>
+                        </ul>
+                    </div>
+                    <div class="footer">
+                        <p><strong>© 2026 KHAMNOW</strong> - Nền tảng đặt khám trực tuyến</p>
+                        <p style="margin-top: 15px; font-size: 11px; color: #999;">
+                            Email này được gửi tự động, vui lòng không trả lời.
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """, name != null ? name : "bạn", resetToken);
+    }
+    
     private String buildAccountCreationEmailContent(String name, String password, 
                                                      String specialty, String doctorName, String appointmentTime) {
         return String.format("""
