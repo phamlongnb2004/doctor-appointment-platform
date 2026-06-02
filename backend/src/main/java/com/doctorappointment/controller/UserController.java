@@ -591,22 +591,23 @@ public class UserController {
                 return ResponseEntity.badRequest().body(Map.of("error", "Vui lòng nhập email"));
             }
             
-            // Kiểm tra email tồn tại
-            Optional<User> userOpt = userService.getUserByEmail(email);
-            if (userOpt.isEmpty()) {
-                // Không nên tiết lộ email không tồn tại (security best practice)
-                // Nhưng vẫn trả về success để không bị brute force attack
-                return ResponseEntity.ok(Map.of("message", "Nếu email tồn tại, mã xác nhận đã được gửi"));
-            }
+            System.out.println("📧 Processing forgot password for email: " + email);
             
+            // Gọi service - sẽ throw exception nếu email không tồn tại
             passwordResetService.sendPasswordResetToken(email);
+            
+            System.out.println("✅ Password reset email sent successfully to: " + email);
             
             return ResponseEntity.ok(Map.of(
                 "message", "Mã xác nhận đã được gửi đến email của bạn",
                 "email", email
             ));
+        } catch (RuntimeException e) {
+            // Trả về lỗi cụ thể từ service (bao gồm "Email chưa được đăng ký")
+            System.err.println("❌ Forgot password RuntimeException: " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            System.err.println("❌ Forgot password error: " + e.getMessage());
+            System.err.println("❌ Forgot password unexpected error: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Có lỗi xảy ra, vui lòng thử lại sau"));
