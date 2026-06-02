@@ -98,7 +98,7 @@ function ForgotPasswordPage() {
                     <div className="back-button" onClick={() => navigate('/login')}>
                         ← Quay lại đăng nhập
                     </div>
-                    <h1>🔒 Quên mật khẩu</h1>
+                    <h1>Quên mật khẩu</h1>
                     <p className="subtitle">
                         {step === 1 && 'Nhập email để nhận mã xác nhận'}
                         {step === 2 && 'Nhập mã xác nhận đã gửi đến email'}
@@ -126,14 +126,12 @@ function ForgotPasswordPage() {
 
                 {error && (
                     <div className="alert alert-error">
-                        <span className="alert-icon">⚠️</span>
                         {error}
                     </div>
                 )}
 
                 {success && (
                     <div className="alert alert-success">
-                        <span className="alert-icon">✓</span>
                         {success}
                     </div>
                 )}
@@ -142,7 +140,7 @@ function ForgotPasswordPage() {
                 {step === 1 && (
                     <form onSubmit={handleSendEmail} className="forgot-password-form">
                         <div className="form-group">
-                            <label>📧 Email đăng ký</label>
+                            <label>Email đăng ký</label>
                             <input
                                 type="email"
                                 value={email}
@@ -168,7 +166,7 @@ function ForgotPasswordPage() {
                 {step === 2 && (
                     <form onSubmit={handleVerifyToken} className="forgot-password-form">
                         <div className="form-group">
-                            <label>🔑 Mã xác nhận</label>
+                            <label>Mã xác nhận</label>
                             <input
                                 type="text"
                                 value={token}
@@ -221,7 +219,7 @@ function ForgotPasswordPage() {
                 {step === 3 && (
                     <form onSubmit={handleResetPassword} className="forgot-password-form">
                         <div className="form-group">
-                            <label>🔐 Mật khẩu mới</label>
+                            <label>Mật khẩu mới</label>
                             <input
                                 type="password"
                                 value={newPassword}
@@ -235,7 +233,7 @@ function ForgotPasswordPage() {
                         </div>
 
                         <div className="form-group">
-                            <label>🔐 Xác nhận mật khẩu</label>
+                            <label>Xác nhận mật khẩu</label>
                             <input
                                 type="password"
                                 value={confirmPassword}
