@@ -34,7 +34,7 @@ public class PasswordResetService {
     public void sendPasswordResetToken(String email) {
         // Tìm user theo email
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với email: " + email));
+                .orElseThrow(() -> new RuntimeException("Email chưa được đăng ký trên hệ thống"));
         
         // Xóa tất cả token cũ của user này
         tokenRepository.deleteByUserId(user.getId());
