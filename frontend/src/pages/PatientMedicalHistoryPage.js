@@ -294,21 +294,21 @@ const MedicalRecordDetail = ({ record, onClose }) => {
 
   const StarRating = () => {
     return (
-      <div style={{ display: 'flex', gap: '5px', fontSize: '32px' }}>
+      <div className="star-rating-input">
         {[1, 2, 3, 4, 5].map((star) => (
-          <span
+          <button
             key={star}
+            type="button"
             onClick={() => setRating(star)}
             onMouseEnter={() => setHoverRating(star)}
             onMouseLeave={() => setHoverRating(0)}
-            style={{
-              cursor: 'pointer',
-              color: star <= (hoverRating || rating) ? '#ffc107' : '#ddd',
-              transition: 'color 0.2s'
-            }}
+            className={`star-button ${star <= (hoverRating || rating) ? 'active' : ''}`}
+            aria-label={`${star} sao`}
           >
-            ★
-          </span>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+          </button>
         ))}
       </div>
     );
@@ -456,67 +456,95 @@ const MedicalRecordDetail = ({ record, onClose }) => {
 
       {/* Rating Section - Only show if examination is completed and not reviewed yet */}
       {record.examinationEndTime && !hasReview && (
-        <div className="form-section" style={{ border: '2px solid #4CAF50', borderRadius: '8px', padding: '20px', background: '#f0f9ff' }}>
-          <h3 style={{ color: '#1976d2', marginBottom: '15px' }}>
-            ⭐ Đánh giá bác sĩ {record.doctorName}
-          </h3>
+        <div className="rating-section">
+          <div className="rating-header">
+            <div className="rating-title-group">
+              <svg className="rating-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+              </svg>
+              <div>
+                <h3>Đánh giá dịch vụ khám bệnh</h3>
+                <p>Chia sẻ trải nghiệm của bạn với BS. {record.doctorName}</p>
+              </div>
+            </div>
+          </div>
           
           {!showRatingForm ? (
             <button 
               onClick={() => setShowRatingForm(true)}
-              className="btn-primary"
-              style={{ width: '100%', padding: '12px', fontSize: '16px' }}
+              className="btn-write-review"
             >
-              Viết đánh giá ngay
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Viết đánh giá
             </button>
           ) : (
-            <div>
-              <div className="form-group">
-                <label style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                  Đánh giá của bạn <span style={{ color: 'red' }}>*</span>
+            <div className="rating-form">
+              <div className="rating-input-group">
+                <label className="rating-label">
+                  Chất lượng dịch vụ <span className="required">*</span>
                 </label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
+                <div className="star-rating-container">
                   <StarRating />
                   {rating > 0 && (
-                    <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#1976d2' }}>
-                      {rating} sao
-                    </span>
+                    <div className="rating-text">
+                      <span className="rating-value">{rating.toFixed(1)}</span>
+                      <span className="rating-description">
+                        {rating === 5 ? 'Xuất sắc' : 
+                         rating >= 4 ? 'Tốt' : 
+                         rating >= 3 ? 'Trung bình' : 
+                         rating >= 2 ? 'Cần cải thiện' : 'Không hài lòng'}
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
 
-              <div className="form-group">
-                <label style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                  Nhận xét (tùy chọn)
+              <div className="rating-input-group">
+                <label className="rating-label">
+                  Nhận xét của bạn <span className="optional">(không bắt buộc)</span>
                 </label>
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder="Chia sẻ trải nghiệm của bạn với bác sĩ..."
-                  rows="4"
-                  style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
+                  placeholder="Hãy chia sẻ chi tiết về trải nghiệm khám bệnh của bạn để giúp người khác..."
+                  rows="5"
+                  className="rating-textarea"
+                  maxLength="500"
                 />
+                <div className="char-count">{comment.length}/500 ký tự</div>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-                <button 
-                  onClick={handleSubmitReview}
-                  disabled={submitting || rating === 0}
-                  className="btn-primary"
-                  style={{ flex: 1, padding: '12px', fontSize: '16px' }}
-                >
-                  {submitting ? 'Đang gửi...' : 'Gửi đánh giá'}
-                </button>
+              <div className="rating-actions">
                 <button 
                   onClick={() => {
                     setShowRatingForm(false);
                     setRating(0);
                     setComment('');
                   }}
-                  className="btn-secondary"
-                  style={{ padding: '12px 24px' }}
+                  className="btn-cancel-review"
                 >
-                  Hủy
+                  Hủy bỏ
+                </button>
+                <button 
+                  onClick={handleSubmitReview}
+                  disabled={submitting || rating === 0}
+                  className="btn-submit-review"
+                >
+                  {submitting ? (
+                    <>
+                      <span className="spinner"></span>
+                      Đang gửi...
+                    </>
+                  ) : (
+                    <>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      Gửi đánh giá
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -525,10 +553,14 @@ const MedicalRecordDetail = ({ record, onClose }) => {
       )}
 
       {record.examinationEndTime && hasReview && (
-        <div className="form-section" style={{ background: '#e8f5e9', padding: '15px', borderRadius: '8px' }}>
-          <p style={{ margin: 0, color: '#2e7d32', fontWeight: 'bold' }}>
-            ✅ Bạn đã đánh giá bác sĩ này rồi. Cảm ơn bạn!
-          </p>
+        <div className="rating-completed">
+          <svg className="check-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          <div className="completed-text">
+            <h4>Cảm ơn bạn đã đánh giá!</h4>
+            <p>Đánh giá của bạn đã được ghi nhận và sẽ giúp cải thiện chất lượng dịch vụ.</p>
+          </div>
         </div>
       )}
     </div>
