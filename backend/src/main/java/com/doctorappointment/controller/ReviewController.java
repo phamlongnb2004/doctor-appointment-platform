@@ -60,6 +60,30 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getReviewsByPatientId(patientId));
     }
 
+    @GetMapping("/medical-record/{medicalRecordId}/exists")
+    public ResponseEntity<Map<String, Boolean>> checkReviewExists(@PathVariable Long medicalRecordId) {
+        boolean exists = reviewService.hasReviewForMedicalRecord(medicalRecordId);
+        return ResponseEntity.ok(Map.of("exists", exists));
+    }
+
+    @PostMapping("/medical-record/{medicalRecordId}")
+    public ResponseEntity<?> createReviewForMedicalRecord(
+            @PathVariable Long medicalRecordId,
+            @RequestBody Map<String, Object> request) {
+        try {
+            Double rating = ((Number) request.get("rating")).doubleValue();
+            String comment = (String) request.get("comment");
+            Long patientId = ((Number) request.get("patientId")).longValue();
+            
+            Review createdReview = reviewService.createReviewForMedicalRecord(
+                medicalRecordId, patientId, rating, comment
+            );
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdReview);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<?> updateReview(@PathVariable Long id, @RequestBody Review reviewDetails) {
         try {

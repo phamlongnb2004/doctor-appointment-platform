@@ -240,7 +240,79 @@ const PatientMedicalHistoryPage = () => {
 };
 
 const MedicalRecordDetail = ({ record, onClose }) => {
+  const [showRatingForm, setShowRatingForm] = useState(false);
+  const [hasReview, setHasReview] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [user, setUser] = useState(null);
+
   const vitalSigns = record.vitalSigns ? JSON.parse(record.vitalSigns) : {};
+
+  useEffect(() => {
+    loadUserAndCheckReview();
+  }, []);
+
+  const loadUserAndCheckReview = async () => {
+    try {
+      const userRes = await api.get('/users/me');
+      setUser(userRes.data);
+
+      // Check if already reviewed
+      const reviewRes = await api.get(`/reviews/medical-record/${record.id}/exists`);
+      setHasReview(reviewRes.data.exists);
+    } catch (error) {
+      console.error('Error checking review:', error);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (rating === 0) {
+      alert('Vui lòng chọn số sao đánh giá');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await api.post(`/reviews/medical-record/${record.id}`, {
+        patientId: user.id,
+        rating: rating,
+        comment: comment
+      });
+
+      alert('Đánh giá thành công! Cảm ơn bạn đã đánh giá.');
+      setHasReview(true);
+      setShowRatingForm(false);
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      alert('Có lỗi xảy ra khi gửi đánh giá: ' + (error.response?.data?.error || error.message));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const StarRating = () => {
+    return (
+      <div style={{ display: 'flex', gap: '5px', fontSize: '32px' }}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span
+            key={star}
+            onClick={() => setRating(star)}
+            onMouseEnter={() => setHoverRating(star)}
+            onMouseLeave={() => setHoverRating(0)}
+            style={{
+              cursor: 'pointer',
+              color: star <= (hoverRating || rating) ? '#ffc107' : '#ddd',
+              transition: 'color 0.2s'
+            }}
+          >
+            ★
+          </span>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="medical-record-form">
@@ -379,6 +451,84 @@ const MedicalRecordDetail = ({ record, onClose }) => {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Rating Section - Only show if examination is completed and not reviewed yet */}
+      {record.examinationEndTime && !hasReview && (
+        <div className="form-section" style={{ border: '2px solid #4CAF50', borderRadius: '8px', padding: '20px', background: '#f0f9ff' }}>
+          <h3 style={{ color: '#1976d2', marginBottom: '15px' }}>
+            ⭐ Đánh giá bác sĩ {record.doctorName}
+          </h3>
+          
+          {!showRatingForm ? (
+            <button 
+              onClick={() => setShowRatingForm(true)}
+              className="btn-primary"
+              style={{ width: '100%', padding: '12px', fontSize: '16px' }}
+            >
+              Viết đánh giá ngay
+            </button>
+          ) : (
+            <div>
+              <div className="form-group">
+                <label style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                  Đánh giá của bạn <span style={{ color: 'red' }}>*</span>
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
+                  <StarRating />
+                  {rating > 0 && (
+                    <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#1976d2' }}>
+                      {rating} sao
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                  Nhận xét (tùy chọn)
+                </label>
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Chia sẻ trải nghiệm của bạn với bác sĩ..."
+                  rows="4"
+                  style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+                <button 
+                  onClick={handleSubmitReview}
+                  disabled={submitting || rating === 0}
+                  className="btn-primary"
+                  style={{ flex: 1, padding: '12px', fontSize: '16px' }}
+                >
+                  {submitting ? 'Đang gửi...' : 'Gửi đánh giá'}
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowRatingForm(false);
+                    setRating(0);
+                    setComment('');
+                  }}
+                  className="btn-secondary"
+                  style={{ padding: '12px 24px' }}
+                >
+                  Hủy
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {record.examinationEndTime && hasReview && (
+        <div className="form-section" style={{ background: '#e8f5e9', padding: '15px', borderRadius: '8px' }}>
+          <p style={{ margin: 0, color: '#2e7d32', fontWeight: 'bold' }}>
+            ✅ Bạn đã đánh giá bác sĩ này rồi. Cảm ơn bạn!
+          </p>
         </div>
       )}
     </div>

@@ -18,6 +18,10 @@ public class Review {
     @JoinColumn(name = "patient_id", nullable = false)
     private User patient;
 
+    @ManyToOne
+    @JoinColumn(name = "medical_record_id")
+    private MedicalRecord medicalRecord;
+
     @Column(nullable = false)
     private Double rating;
 
@@ -36,6 +40,7 @@ public class Review {
     public Long getId() { return id; }
     public Doctor getDoctor() { return doctor; }
     public User getPatient() { return patient; }
+    public MedicalRecord getMedicalRecord() { return medicalRecord; }
     public Double getRating() { return rating; }
     public String getComment() { return comment; }
     public LocalDateTime getCreatedAt() { return createdAt; }
@@ -45,6 +50,7 @@ public class Review {
     public void setId(Long id) { this.id = id; }
     public void setDoctor(Doctor doctor) { this.doctor = doctor; }
     public void setPatient(User patient) { this.patient = patient; }
+    public void setMedicalRecord(MedicalRecord medicalRecord) { this.medicalRecord = medicalRecord; }
     public void setRating(Double rating) { this.rating = rating; }
     public void setComment(String comment) { this.comment = comment; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
@@ -57,6 +63,7 @@ public class Review {
         public ReviewBuilder id(Long id) { review.id = id; return this; }
         public ReviewBuilder doctor(Doctor doctor) { review.doctor = doctor; return this; }
         public ReviewBuilder patient(User patient) { review.patient = patient; return this; }
+        public ReviewBuilder medicalRecord(MedicalRecord medicalRecord) { review.medicalRecord = medicalRecord; return this; }
         public ReviewBuilder rating(Double rating) { review.rating = rating; return this; }
         public ReviewBuilder comment(String comment) { review.comment = comment; return this; }
         public ReviewBuilder createdAt(LocalDateTime createdAt) { review.createdAt = createdAt; return this; }

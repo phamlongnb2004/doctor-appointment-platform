@@ -9,4 +9,6 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByDoctor_Id(Long doctorId);
     List<Review> findByPatient_Id(Long patientId);
+    boolean existsByMedicalRecord_Id(Long medicalRecordId);
+    Review findByMedicalRecord_Id(Long medicalRecordId);
 }
